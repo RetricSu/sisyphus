@@ -4,6 +4,10 @@
 // are quite valuable.
 
 import { Brain } from "./brain";
+import { createTables } from "./memory/database";
+
+createTables();
 
 const brain = new Brain();
+brain.startLLMServer();
 brain.chat([]);
