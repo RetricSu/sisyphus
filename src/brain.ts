@@ -37,6 +37,7 @@ export class Brain {
 
   buildInitMessages() {
     const msgs = MessageView.listAllMessages();
+    console.log(msgs)
     return [this.initFirstMessage(), ...msgs];
   }
 
@@ -69,7 +70,7 @@ export class Brain {
       answer += words;
     }
     console.log("\n----");
-    const answerCMsg = new CMessage("system", answer);
+    const answerCMsg = new CMessage("assistant", answer);
     answerCMsg.save();
     const answerMessage: Message = answerCMsg.msg;
     messages.push(answerMessage);
