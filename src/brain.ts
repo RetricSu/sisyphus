@@ -37,7 +37,6 @@ export class Brain {
 
   buildInitMessages() {
     const msgs = MessageView.listAllMessages();
-    console.log(msgs)
     return [this.initFirstMessage(), ...msgs];
   }
 
