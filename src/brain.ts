@@ -6,10 +6,16 @@ import { initialPrompt } from "./prompt";
 import { exec } from "child_process";
 import { CMessage } from "./memory/c-message";
 import { MessageView } from "./memory/message-view";
+import {
+  buildToolCallResponseCMessage,
+  checkIfToolCall,
+  tools,
+} from "./tool";
 
 export class Brain {
   public apiUrl: string;
   public ollama: Ollama;
+  public model = "llama3.1";
 
   constructor(llmApiUrl = "http://127.0.0.1:11434") {
     this.apiUrl = llmApiUrl;
@@ -42,23 +48,29 @@ export class Brain {
 
   async chat(msgs: Message[]) {
     const messages = msgs.length === 0 ? this.buildInitMessages() : msgs;
-    const readline = Readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    const input = await readline.question(">>> You: ");
-    readline.close();
-    console.log("----");
 
-    const cmsg = new CMessage("user", input);
-    cmsg.save();
-    const userMessage: Message = cmsg.msg;
-    messages.push(userMessage);
+    const lastMsg = messages[messages.length - 1];
+    if (!lastMsg || lastMsg.role !== "tool") {
+      // if the last message is not a toolCall Response, let user input
+      const readline = Readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      const input = await readline.question(">>> You: ");
+      readline.close();
+      console.log("----");
+
+      const cmsg = new CMessage("user", input);
+      cmsg.save();
+      const userMessage: Message = cmsg.msg;
+      messages.push(userMessage);
+    }
 
     const response = await this.ollama.chat({
-      model: "llama3.1",
+      model: this.model,
       messages: messages,
       stream: true,
+      tools: Object.values(tools),
     });
 
     await stdOutWriteSync(">>> Sisyphus: ");
@@ -69,11 +81,19 @@ export class Brain {
       answer += words;
     }
     console.log("\n----");
+
+    if (checkIfToolCall(answer)) {
+      // Add function response to the conversation
+      const toolCmsg = buildToolCallResponseCMessage(answer);
+      toolCmsg.save();
+      messages.push(toolCmsg.msg);
+      await this.chat(messages);
+    }
+
     const answerCMsg = new CMessage("assistant", answer);
     answerCMsg.save();
     const answerMessage: Message = answerCMsg.msg;
     messages.push(answerMessage);
-
     await this.chat(messages);
   }
 }
