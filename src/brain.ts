@@ -3,14 +3,10 @@ import process from "process";
 import Readline from "readline/promises";
 import { stdOutWriteSync } from "./util";
 import { initialPrompt } from "./prompt";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import { CMessage } from "./memory/c-message";
 import { MessageView } from "./memory/message-view";
-import {
-  buildToolCallResponseCMessage,
-  checkIfToolCall,
-  tools,
-} from "./tool";
+import { buildToolCallResponseCMessage, checkIfToolCall, tools } from "./tool";
 
 export class Brain {
   public apiUrl: string;
@@ -23,14 +19,33 @@ export class Brain {
   }
 
   startLLMServer() {
-    exec(`OLLAMA_HOST=${this.apiUrl} ollama serve`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
+    return new Promise(
+      (resolve: (val: string) => any, reject: (error: string) => any) => {
+        const child = spawn("ollama", ["serve"], {
+          env: { ...process.env, OLLAMA_HOST: this.apiUrl },
+        });
+
+        // Listen to the stdout of the process
+        child.stdout.on("data", (data) => {
+          const output = data.toString();
+          resolve(output); // Resolve when any data is received
+        });
+
+        child.stderr.on("data", (data) => {
+	  resolve(data); // Resolve when any data is received
+        });
+
+        child.on("close", (code) => {
+          if (code !== 0) {
+            reject(`Process exited with code ${code}`);
+          }
+        });
+
+        child.on("error", (error) => {
+          reject(`Process error: ${error.message}`);
+        });
       }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
-    });
+    );
   }
 
   initFirstMessage() {
@@ -85,6 +100,7 @@ export class Brain {
     if (checkIfToolCall(answer)) {
       // Add function response to the conversation
       const toolCmsg = buildToolCallResponseCMessage(answer);
+      console.debug(toolCmsg)
       toolCmsg.save();
       messages.push(toolCmsg.msg);
       await this.chat(messages);

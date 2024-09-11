@@ -135,9 +135,11 @@ export function buildToolCallResponseCMessage(content: string) {
       break;
 
     case AvailableToolName.callTerminalSimulator:
-      functionResponse = toolExecutor.call_terminal_simulator(
+      functionResponse = `Exec ${
         toolCall.parameters.command
-      );
+      } returns: ${toolExecutor.call_terminal_simulator(
+        toolCall.parameters.command
+      )}`;
       break;
 
     default:
@@ -154,7 +156,11 @@ export function buildToolCallResponseCMessage(content: string) {
 
   // console.log("execute function result: ", functionResponse.toString());
   // Add function response to the conversation
-  const resp = { status: "success", result: `${functionResponse.toString()}` };
+  const resp = {
+    status: "success",
+    toolCall: toolCall.name,
+    result: `${functionResponse.toString()}`,
+  };
   const toolCmsg = new CMessage("tool", JSON.stringify(resp));
   return toolCmsg;
 }

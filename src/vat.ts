@@ -6,8 +6,14 @@
 import { Brain } from "./brain";
 import { createTables } from "./memory/database";
 
-createTables();
-
-const brain = new Brain();
-brain.startLLMServer();
-brain.chat([]);
+(async () => {
+  createTables();
+  const brain = new Brain();
+  try {
+    await brain.startLLMServer();
+    await brain.chat([]);
+  } catch (error) {
+    console.error("failed to start the server, ", error);
+    process.exit(1);
+  }
+})();
