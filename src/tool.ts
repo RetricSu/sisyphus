@@ -127,7 +127,7 @@ export const toolExecutor = {
 };
 
 export function buildToolCallResponseCMessage(content: string) {
-  const toolCall = parseToolCall(content);
+  const toolCall = parseToolCall(content)!;
   let functionResponse;
   switch (toolCall.name) {
     case AvailableToolName.getTimestampFromOs:
@@ -143,26 +143,58 @@ export function buildToolCallResponseCMessage(content: string) {
     default:
       break;
   }
-  if (functionResponse == null) throw new Error("function response is null");
+  if (functionResponse == null) {
+    const resp = {
+      status: "failed",
+      error: `there is no ${toolCall.name} such function`,
+    };
+    const toolCmsg = new CMessage("tool", JSON.stringify(resp));
+    return toolCmsg;
+  }
 
   // console.log("execute function result: ", functionResponse.toString());
   // Add function response to the conversation
-  const toolCmsg = new CMessage("tool", functionResponse.toString());
+  const resp = { status: "success", result: `${functionResponse.toString()}` };
+  const toolCmsg = new CMessage("tool", JSON.stringify(resp));
   return toolCmsg;
 }
 
 export function checkIfToolCall(content: string) {
   if (content.includes("name") && content.includes("parameters")) {
-    try {
-      JSON.parse(content);
-      return true;
-    } catch (error) {
-      return false;
+    // Define a regular expression to capture the JSON structure
+    const regex = /{"name":\s*".+?",\s*"parameters":\s*{.*?}}/g;
+
+    // Find the JSON string in the input
+    const match = content.match(regex);
+    if (match && match[0]) {
+      try {
+        JSON.parse(match[0]);
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
+    return false;
   }
   return false;
 }
 
-export function parseToolCall(content: string) {
-  return JSON.parse(content) as ToolCallRequest;
+export function parseToolCall(input: string) {
+  // Define a regular expression to capture the JSON structure
+  const regex = /{"name":\s*".+?",\s*"parameters":\s*{.*?}}/g;
+
+  // Find the JSON string in the input
+  const match = input.match(regex);
+
+  if (match && match[0]) {
+    try {
+      // Parse the JSON string
+      const parsedJson = JSON.parse(match[0]);
+      return parsedJson as ToolCallRequest;
+    } catch (error) {
+      console.error("Failed to parse JSON:", error);
+    }
+  }
+
+  return null;
 }
