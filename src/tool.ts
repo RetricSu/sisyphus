@@ -121,7 +121,7 @@ export const toolExecutor = {
       const result = execSync(command);
       return result.toString("utf-8");
     } catch (error: any) {
-      return `exec command failed, err: ${error.message}, command: ${command}`;
+      return `${JSON.stringify(error.message)}`;
     }
   },
 };
@@ -135,11 +135,9 @@ export function buildToolCallResponseCMessage(content: string) {
       break;
 
     case AvailableToolName.callTerminalSimulator:
-      functionResponse = `Exec ${
+      functionResponse = toolExecutor.call_terminal_simulator(
         toolCall.parameters.command
-      } returns: ${toolExecutor.call_terminal_simulator(
-        toolCall.parameters.command
-      )}`;
+      );
       break;
 
     default:
@@ -159,8 +157,12 @@ export function buildToolCallResponseCMessage(content: string) {
   const resp = {
     status: "success",
     toolCall: toolCall.name,
+    terminalCommand: "null",
     result: `${functionResponse.toString()}`,
   };
+  if (toolCall.name === AvailableToolName.callTerminalSimulator) {
+    resp["terminalCommand"] = toolCall.parameters.command;
+  }
   const toolCmsg = new CMessage("tool", JSON.stringify(resp));
   return toolCmsg;
 }
