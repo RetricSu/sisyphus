@@ -6,7 +6,8 @@ import { initialPrompt } from "./prompt";
 import { spawn } from "child_process";
 import { CMessage } from "./memory/c-message";
 import { MessageView } from "./memory/message-view";
-import { buildToolCallResponseCMessage, checkIfToolCall, tools } from "./tool";
+import { buildToolCallResponseCMessage, tools } from "./tools";
+import { checkIfToolCall } from "./tools/util";
 
 export class Brain {
   public apiUrl: string;
@@ -99,8 +100,7 @@ export class Brain {
 
     if (checkIfToolCall(answer)) {
       // Add function response to the conversation
-      const toolCmsg = buildToolCallResponseCMessage(answer);
-      console.debug(toolCmsg)
+      const toolCmsg = await buildToolCallResponseCMessage(answer);
       toolCmsg.save();
       messages.push(toolCmsg.msg);
       await this.chat(messages);

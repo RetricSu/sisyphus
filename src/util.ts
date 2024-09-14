@@ -11,4 +11,3 @@ export async function stdOutWriteSync(buffer: Uint8Array | string) {
   });
   return await promise;
 }
-
