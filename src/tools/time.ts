@@ -1,5 +1,5 @@
-import { Tool } from "ollama";
-import { AvailableToolName } from "./type";
+import { Tool } from 'ollama';
+import { AvailableToolName } from './type';
 
 export function getTimestampFromOs(): number {
   const date = new Date();
@@ -7,12 +7,12 @@ export function getTimestampFromOs(): number {
 }
 
 export const getTimestampFromOsTool: Tool = {
-  type: "function",
+  type: 'function',
   function: {
     name: AvailableToolName.getTimestampFromOs,
-    description: "Get the timestamp seconds number from operating system",
+    description: 'Get the timestamp seconds number from operating system',
     parameters: {
-      type: "object",
+      type: 'object',
       properties: {},
       required: [],
     },

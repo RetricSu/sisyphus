@@ -1,7 +1,7 @@
-import { ToolCallRequest } from "./type";
+import { ToolCallRequest } from './type';
 
 export function checkIfToolCall(content: string) {
-  if (content.includes("name") && content.includes("parameters")) {
+  if (content.includes('name') && content.includes('parameters')) {
     // Define a regular expression to capture the JSON structure
     const regex = /{"name":\s*".+?",\s*"parameters":\s*{.*?}}/g;
 
@@ -33,7 +33,7 @@ export function parseToolCall(input: string) {
       const parsedJson = JSON.parse(match[0]);
       return parsedJson as ToolCallRequest;
     } catch (error) {
-      console.error("Failed to parse JSON:", error);
+      console.error('Failed to parse JSON:', error);
     }
   }
 

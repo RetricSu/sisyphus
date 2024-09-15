@@ -1,57 +1,55 @@
-import { Message, Ollama } from "ollama";
-import process from "process";
-import Readline from "readline/promises";
-import { stdOutWriteSync } from "./util";
-import { initialPrompt } from "./prompt";
-import { spawn } from "child_process";
-import { CMessage } from "./memory/c-message";
-import { MessageView } from "./memory/message-view";
-import { buildToolCallResponseCMessage, tools } from "./tools";
-import { checkIfToolCall } from "./tools/util";
+import { Message, Ollama } from 'ollama';
+import process from 'process';
+import Readline from 'readline/promises';
+import { stdOutWriteSync } from './util';
+import { initialPrompt } from './prompt';
+import { spawn } from 'child_process';
+import { CMessage } from './memory/c-message';
+import { MessageView } from './memory/message-view';
+import { buildToolCallResponseCMessage, tools } from './tools';
+import { checkIfToolCall } from './tools/util';
 
 export class Brain {
   public apiUrl: string;
   public ollama: Ollama;
-  public model = "llama3.1";
+  public model = 'llama3.1';
 
-  constructor(llmApiUrl = "http://127.0.0.1:11434") {
+  constructor(llmApiUrl = 'http://127.0.0.1:11434') {
     this.apiUrl = llmApiUrl;
     this.ollama = new Ollama({ host: this.apiUrl });
   }
 
   startLLMServer() {
-    return new Promise(
-      (resolve: (val: string) => any, reject: (error: string) => any) => {
-        const child = spawn("ollama", ["serve"], {
-          env: { ...process.env, OLLAMA_HOST: this.apiUrl },
-        });
+    return new Promise((resolve: (val: string) => void, reject: (error: string) => void) => {
+      const child = spawn('ollama', ['serve'], {
+        env: { ...process.env, OLLAMA_HOST: this.apiUrl },
+      });
 
-        // Listen to the stdout of the process
-        child.stdout.on("data", (data) => {
-          const output = data.toString();
-          resolve(output); // Resolve when any data is received
-        });
+      // Listen to the stdout of the process
+      child.stdout.on('data', (data) => {
+        const output = data.toString();
+        resolve(output); // Resolve when any data is received
+      });
 
-        child.stderr.on("data", (data) => {
-	  resolve(data); // Resolve when any data is received
-        });
+      child.stderr.on('data', (data) => {
+        resolve(data); // Resolve when any data is received
+      });
 
-        child.on("close", (code) => {
-          if (code !== 0) {
-            reject(`Process exited with code ${code}`);
-          }
-        });
+      child.on('close', (code) => {
+        if (code !== 0) {
+          reject(`Process exited with code ${code}`);
+        }
+      });
 
-        child.on("error", (error) => {
-          reject(`Process error: ${error.message}`);
-        });
-      }
-    );
+      child.on('error', (error) => {
+        reject(`Process error: ${error.message}`);
+      });
+    });
   }
 
   initFirstMessage() {
     const message: Message = {
-      role: "system",
+      role: 'system',
       content: initialPrompt,
     };
     return message;
@@ -66,17 +64,17 @@ export class Brain {
     const messages = msgs.length === 0 ? this.buildInitMessages() : msgs;
 
     const lastMsg = messages[messages.length - 1];
-    if (!lastMsg || lastMsg.role !== "tool") {
+    if (!lastMsg || lastMsg.role !== 'tool') {
       // if the last message is not a toolCall Response, let user input
       const readline = Readline.createInterface({
         input: process.stdin,
         output: process.stdout,
       });
-      const input = await readline.question(">>> You: ");
+      const input = await readline.question('>>> You: ');
       readline.close();
-      console.log("----");
+      console.log('----');
 
-      const cmsg = new CMessage("user", input);
+      const cmsg = new CMessage('user', input);
       cmsg.save();
       const userMessage: Message = cmsg.msg;
       messages.push(userMessage);
@@ -89,14 +87,14 @@ export class Brain {
       tools: Object.values(tools),
     });
 
-    await stdOutWriteSync(">>> Sisyphus: ");
-    let answer: string = "";
+    await stdOutWriteSync('>>> Sisyphus: ');
+    let answer: string = '';
     for await (const part of response) {
       const words = part.message.content;
       await stdOutWriteSync(words);
       answer += words;
     }
-    console.log("\n----");
+    console.log('\n----');
 
     if (checkIfToolCall(answer)) {
       // Add function response to the conversation
@@ -106,7 +104,7 @@ export class Brain {
       await this.chat(messages);
     }
 
-    const answerCMsg = new CMessage("assistant", answer);
+    const answerCMsg = new CMessage('assistant', answer);
     answerCMsg.save();
     const answerMessage: Message = answerCMsg.msg;
     messages.push(answerMessage);
