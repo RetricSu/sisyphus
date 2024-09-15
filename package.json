@@ -1,10 +1,14 @@
 {
-  "name": "sisyphus",
-  "version": "0.1.0",
+  "name": "@sisyphus-ai/cli",
+  "version": "0.1.0-rc2",
   "description": "Sisyphus is a project that explores the idea of digital life for LLM. It is ported as a CLI tool that can be run in the terminal.",
   "main": "dist/index.js",
   "bin": {
     "sisyphus": "dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/retricsu/sisyphus.git"
   },
   "files": [
     "dist"

@@ -57,6 +57,9 @@ Some basic tools that are embed from the source code of Sisyphus:
 
 ## How to Run
 
+> [!WARNING]
+> Please Note that running Sisyphus on your computer might cause unexpected behavior(think like LLM agent can delete your files)
+
 ### 1. Install ollama
 
 Sisyphus is based on [ollama](https://ollama.com/). Make sure you have download and install it first:
@@ -71,10 +74,13 @@ make sure you have pull the llama3.1 8b model to your computer
 ollama pull llama3.1
 ```
 
-### 3. Clone this project and run
+### 3. Install Sisyphus CLI tool
 
 ```sh
-git clone https://github.com/RetricSu/sisyphus.git
-cd sisyphus
-pnpm i && pnpm build && pnpm start chat
+npm install -g @sisyphus-ai/cli
+```
+
+```sh
+sisyphus --version
+sisyphus chat
 ```
