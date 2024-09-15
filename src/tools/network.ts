@@ -1,23 +1,23 @@
-import { launch, Page } from "puppeteer";
-import { JSDOM } from "jsdom";
-import createDOMPurify from "dompurify";
-import { Tool } from "ollama";
-import { AvailableToolName } from "./type";
+import { launch, Page } from 'puppeteer';
+import { JSDOM } from 'jsdom';
+import createDOMPurify from 'dompurify';
+import { Tool } from 'ollama';
+import { AvailableToolName } from './type';
 
 export const readWebPageTool: Tool = {
-  type: "function",
+  type: 'function',
   function: {
     name: AvailableToolName.readWebpageContent,
-    description: "use puppeteer to get the content of a web page from a url",
+    description: 'use puppeteer to get the content of a web page from a url',
     parameters: {
-      type: "object",
+      type: 'object',
       properties: {
         url: {
-          type: "string",
-          description: "the url of the web page requesting to read",
+          type: 'string',
+          description: 'the url of the web page requesting to read',
         },
       },
-      required: ["url"],
+      required: ['url'],
     },
   },
 };
@@ -44,13 +44,12 @@ const waitTillHTMLRendered = async (page: Page, timeout = 30000) => {
   const minStableSizeIterations = 3;
 
   while (checkCounts++ <= maxChecks) {
-    let html = await page.content();
-    let currentHTMLSize = html.length;
+    const html = await page.content();
+    const currentHTMLSize = html.length;
 
     await page.evaluate(() => document.body.innerHTML.length);
 
-    if (lastHTMLSize != 0 && currentHTMLSize == lastHTMLSize)
-      countStableSizeIterations++;
+    if (lastHTMLSize != 0 && currentHTMLSize == lastHTMLSize) countStableSizeIterations++;
     else countStableSizeIterations = 0; //reset the counter
 
     if (countStableSizeIterations >= minStableSizeIterations) {
@@ -64,7 +63,7 @@ const waitTillHTMLRendered = async (page: Page, timeout = 30000) => {
 };
 
 function cleanWebPageToText(input: string): string {
-  const window = new JSDOM("").window;
+  const window = new JSDOM('').window;
   const DOMPurify = createDOMPurify(window);
   return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });
 }

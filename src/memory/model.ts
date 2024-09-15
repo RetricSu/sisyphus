@@ -2,7 +2,7 @@ export interface DBMessage {
   id: number; // 数据库自增 ID
   role: string;
   content: string;
-  created_at: number // timestamp number in seconds
+  created_at: number; // timestamp number in seconds
 }
 
 export interface DBToolCall {

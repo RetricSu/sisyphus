@@ -1,26 +1,19 @@
-import { Message, ToolCall } from "ollama";
-import { db } from "./database";
-import { DBImage, DBMessage } from "./model";
+import { Message, ToolCall } from 'ollama';
+import { db } from './database';
+import { DBImage, DBMessage } from './model';
 
 export class MessageView {
   // 从数据库加载完整的 Message
   static loadMsgById(messageId: number): Message | null {
-    const messageStmt = db.prepare(
-      "SELECT id, role, content FROM messages WHERE id = ?"
-    );
-    const messageRow = messageStmt.get(messageId) as
-      | DBMessage
-      | null
-      | undefined;
+    const messageStmt = db.prepare('SELECT id, role, content FROM messages WHERE id = ?');
+    const messageRow = messageStmt.get(messageId) as DBMessage | null | undefined;
 
     if (!messageRow) {
       return null; // 如果找不到 message，返回 null
     }
 
     // 加载关联的 images 和 tool_calls
-    const images = this.loadImagesByMessageId(messageId) as
-      | (Uint8Array[] | string[])
-      | undefined;
+    const images = this.loadImagesByMessageId(messageId) as (Uint8Array[] | string[]) | undefined;
     const toolCalls = this.loadToolCallsByMessageId(messageId);
 
     const message: Message = {
@@ -33,19 +26,12 @@ export class MessageView {
   }
 
   // 加载 Images
-  private static loadImagesByMessageId(
-    messageId: number
-  ): Uint8Array[] | string[] | undefined {
-    const imageStmt = db.prepare(
-      "SELECT image, image_url FROM images WHERE message_id = ?"
-    );
-    const imageRows = imageStmt.all(messageId) as Pick<
-      DBImage,
-      "image" | "image_url"
-    >[];
+  private static loadImagesByMessageId(messageId: number): Uint8Array[] | string[] | undefined {
+    const imageStmt = db.prepare('SELECT image, image_url FROM images WHERE message_id = ?');
+    const imageRows = imageStmt.all(messageId) as Pick<DBImage, 'image' | 'image_url'>[];
 
     const value = imageRows.map((row: unknown) => {
-      let data = row as DBImage;
+      const data = row as DBImage;
       if (data.image) {
         return data.image; // 返回 Uint8Array (BLOB)
       }
@@ -56,9 +42,7 @@ export class MessageView {
 
   // 加载 ToolCalls 和 Arguments
   private static loadToolCallsByMessageId(messageId: number): ToolCall[] {
-    const toolCallStmt = db.prepare(
-      "SELECT id, function_name FROM tool_calls WHERE message_id = ?"
-    );
+    const toolCallStmt = db.prepare('SELECT id, function_name FROM tool_calls WHERE message_id = ?');
     const toolCallRows = toolCallStmt.all(messageId);
 
     return toolCallRows.map((row: unknown) => {
@@ -75,14 +59,12 @@ export class MessageView {
 
   // 加载 ToolCall 的 Arguments
   private static loadToolCallArgumentsByToolCallId(toolCallId: number): {
-    [key: string]: any;
+    [key: string]: string;
   } {
-    const argStmt = db.prepare(
-      "SELECT argument_key, argument_value FROM tool_call_arguments WHERE tool_call_id = ?"
-    );
+    const argStmt = db.prepare('SELECT argument_key, argument_value FROM tool_call_arguments WHERE tool_call_id = ?');
     const argRows = argStmt.all(toolCallId);
 
-    const argumentsObj: { [key: string]: any } = {};
+    const argumentsObj: { [key: string]: string } = {};
     argRows.forEach((row) => {
       const data = row as {
         id: number;
@@ -97,8 +79,8 @@ export class MessageView {
 
   // 列出所有消息
   static listAllMessages(): Message[] {
-    const stmt = db.prepare("SELECT id FROM messages");
-    const rows = stmt.all() as Pick<DBMessage, "id">[];
+    const stmt = db.prepare('SELECT id FROM messages');
+    const rows = stmt.all() as Pick<DBMessage, 'id'>[];
 
     const messages: Message[] = [];
     rows.forEach((row) => {

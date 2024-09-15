@@ -1,23 +1,23 @@
 #!/usr/bin/env node
-import { Command } from "commander";
-import { Vat } from "./vat";
+import { Command } from 'commander';
+import { Vat } from './vat';
 
-const version = require("../package.json").version;
-const description = require("../package.json").description;
+const version = require('../package.json').version;
+const description = require('../package.json').description;
 
 const program = new Command();
-program.name("sisyphus").description(description).version(version);
+program.name('sisyphus').description(description).version(version);
 
 program
-  .command("run")
-  .description("Wake up Sisyphus to start the digital life")
+  .command('run')
+  .description('Wake up Sisyphus to start the digital life')
   .action(async () => {
-    console.log("not implemented yet!");
+    console.log('not implemented yet!');
   });
 
 program
-  .command("chat")
-  .description("Chat with user through the command line")
+  .command('chat')
+  .description('Chat with user through the command line')
   .action(async () => {
     const vat = new Vat();
     vat.start();

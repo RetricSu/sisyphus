@@ -1,5 +1,5 @@
-import { Message, ToolCall } from "ollama";
-import { db } from "./database";
+import { Message, ToolCall } from 'ollama';
+import { db } from './database';
 
 export class CMessage {
   public dbId: number | undefined;
@@ -9,7 +9,7 @@ export class CMessage {
     role: string,
     content: string,
     images: Uint8Array[] | string[] | undefined = [],
-    toolCalls: ToolCall[] = []
+    toolCalls: ToolCall[] = [],
   ) {
     this.msg = {
       role,
@@ -21,9 +21,7 @@ export class CMessage {
 
   // 保存 Message 到数据库
   save(): number {
-    const stmt = db.prepare(
-      "INSERT INTO messages (role, content) VALUES (?, ?)"
-    );
+    const stmt = db.prepare('INSERT INTO messages (role, content) VALUES (?, ?)');
     const result = stmt.run(this.msg.role, this.msg.content);
     this.dbId = result.lastInsertRowid as number;
 
@@ -36,12 +34,10 @@ export class CMessage {
 
   // 保存 Images
   private saveImages(images: typeof this.msg.images): void {
-    if (!this.dbId) throw new Error("Message must be saved first.");
+    if (!this.dbId) throw new Error('Message must be saved first.');
     if (!images || images.length === 0) return;
 
-    const stmt = db.prepare(
-      "INSERT INTO images (message_id, image, image_url) VALUES (?, ?, ?)"
-    );
+    const stmt = db.prepare('INSERT INTO images (message_id, image, image_url) VALUES (?, ?, ?)');
     images.forEach((image) => {
       if (image instanceof Uint8Array) {
         stmt.run(this.dbId, image, null); // 存储 BLOB
@@ -53,14 +49,12 @@ export class CMessage {
 
   // 保存 ToolCalls 和 Arguments
   private saveToolCalls(toolCalls: typeof this.msg.tool_calls): void {
-    if (!this.dbId) throw new Error("Message must be saved first.");
+    if (!this.dbId) throw new Error('Message must be saved first.');
     if (!toolCalls || toolCalls.length === 0) return;
 
-    const toolCallStmt = db.prepare(
-      "INSERT INTO tool_calls (message_id, function_name) VALUES (?, ?)"
-    );
+    const toolCallStmt = db.prepare('INSERT INTO tool_calls (message_id, function_name) VALUES (?, ?)');
     const argStmt = db.prepare(
-      "INSERT INTO tool_call_arguments (tool_call_id, argument_key, argument_value) VALUES (?, ?, ?)"
+      'INSERT INTO tool_call_arguments (tool_call_id, argument_key, argument_value) VALUES (?, ?, ?)',
     );
 
     toolCalls.forEach((toolCall) => {
