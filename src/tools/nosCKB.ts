@@ -1,11 +1,11 @@
 import { AvailableToolName, ToolBox } from './type';
 import { NosCKB, TransferOption } from '../sdk';
-import { readEnvNetwork } from '../offckb/offckb.config';
 import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
+import { readSettings } from '../config/setting';
 
 export function buildNosCKBToolBox(nostrPrivkey: string) {
-  const network = readEnvNetwork();
+  const network = readSettings().ckbNetwork;
   const nosCKB = new NosCKB({ network, nostrPrivkey });
 
   const ckbBalanceToolBox: CKBBalanceToolBoxType = {

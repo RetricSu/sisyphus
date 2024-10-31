@@ -38,6 +38,11 @@ export interface Settings {
     chatPromptNames: string[];
     selfRunPromptNames: string[];
   };
+  ckbNetwork: 'devnet' | 'testnet' | 'mainnet';
+  llm: {
+    apiUrl: string;
+    model: string;
+  };
 }
 
 export const defaultSettings: Settings = {
@@ -52,6 +57,11 @@ export const defaultSettings: Settings = {
     rootFolder: path.resolve(dataPath, 'prompt'),
     chatPromptNames: [defaultPromptName],
     selfRunPromptNames: [defaultPromptName],
+  },
+  ckbNetwork: 'testnet',
+  llm: {
+    apiUrl: 'http://127.0.0.1:11434',
+    model: 'llama3.1',
   },
 };
 

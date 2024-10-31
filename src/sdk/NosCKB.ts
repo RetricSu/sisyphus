@@ -9,6 +9,7 @@ import { TransferOption } from './type';
 
 // Nostr and CKB
 export class NosCKB {
+  public network: Network;
   private relayList: string[];
   private nostrKeys: Keys;
   private nostrSigner: NostrSigner;
@@ -17,6 +18,7 @@ export class NosCKB {
   private cccNostrSigner: Nip07.Signer;
 
   constructor({ nostrPrivkey, network, relays = [] }: { nostrPrivkey: string; network: Network; relays?: string[] }) {
+    this.network = network;
     this.cccClient = buildCccClient(network);
 
     loadWasmSync();

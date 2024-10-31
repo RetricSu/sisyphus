@@ -11,6 +11,8 @@ import { readSettings } from '../config/setting';
 import { Privkey } from '../privkey';
 import { ToolBox } from '../tools';
 
+const settings = readSettings();
+
 export class Brain {
   apiUrl: string;
   ollama: Ollama;
@@ -20,8 +22,8 @@ export class Brain {
   promptNames: string[];
 
   constructor({
-    llmApiUrl = 'http://127.0.0.1:11434',
-    model = 'llama3.1',
+    llmApiUrl = settings.llm.apiUrl,
+    model = settings.llm.model,
     saveMemory = true,
     promptNames: promptName = readSettings().prompt.chatPromptNames,
   }: {

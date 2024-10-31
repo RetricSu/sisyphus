@@ -1,5 +1,6 @@
-import { configPath, readSettings } from '../config/setting';
+import { configPath, readSettings, writeSettings } from '../config/setting';
 import fs from 'fs';
+import { Network } from '../offckb/offckb.config';
 
 export enum ConfigAction {
   list = 'list',
@@ -10,9 +11,10 @@ export enum ConfigAction {
 
 export enum ConfigItem {
   prompt = 'prompt',
+  ckbNetwork = 'ckb-network',
 }
 
-export async function Config(action: ConfigAction, item: ConfigItem, _value?: string) {
+export async function Config(action: ConfigAction, item: ConfigItem, value?: string) {
   if (action === ConfigAction.list) {
     console.log('config file: ', configPath);
     return console.log(readSettings());
@@ -32,6 +34,12 @@ export async function Config(action: ConfigAction, item: ConfigItem, _value?: st
         return;
       }
 
+      case ConfigItem.ckbNetwork: {
+        const settings = readSettings();
+        console.log(settings.ckbNetwork);
+        return;
+      }
+
       default:
         break;
     }
@@ -43,12 +51,23 @@ export async function Config(action: ConfigAction, item: ConfigItem, _value?: st
         return console.log('not impl');
       }
 
+      case ConfigItem.ckbNetwork: {
+        if (!value || !['devnet', 'testnet', 'mainnet'].includes(value)) {
+          throw new Error(`not a valid network value ${value}`);
+        }
+        const settings = readSettings();
+        settings.ckbNetwork = value as Network;
+        writeSettings(settings);
+        return;
+      }
+
       default:
         break;
     }
   }
 
   if (action === ConfigAction.rm) {
+    console.log('not impl');
     switch (item) {
       default:
         break;
