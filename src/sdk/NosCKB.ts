@@ -1,9 +1,9 @@
-import { ccc, Client, NostrEvent } from '@ckb-ccc/core';
+import { ccc, Client, Hex, NostrEvent } from '@ckb-ccc/core';
 import { Network } from '../offckb/offckb.config';
 import { Nip07 } from '@ckb-ccc/nip07';
 import { NostrProvider } from './NostrProvider';
 import { defaultRelays } from './defaultRelays';
-import { NostrSigner, Keys, loadWasmSync, Client as NostrClient, Filter } from '@rust-nostr/nostr-sdk';
+import { NostrSigner, Keys, loadWasmSync, Client as NostrClient, Filter, Tag, Metadata } from '@rust-nostr/nostr-sdk';
 import { buildCccClient } from './cccClient';
 import { TransferOption } from './type';
 
@@ -46,6 +46,38 @@ export class NosCKB {
     await this.nostrClient.connect();
     const events = await this.nostrClient.getEventsFrom(this.relayList, filters);
     return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
+  }
+
+  async readMentionNotesWithMe() {
+    const filter = Filter.fromJson(
+      JSON.stringify({
+        kinds: [1],
+        '#p': [(await this.cccNostrSigner.getNostrPublicKey()).slice(2)],
+      }),
+    );
+    await this.nostrClient.connect();
+    const events = await this.nostrClient.getEventsFrom(this.relayList, [filter]);
+    return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
+  }
+
+  async publishReplyNotesToEvent(text: string, eventId: Hex) {
+    await this.nostrClient.connect();
+    const tag = Tag.parse(['e', eventId.slice(2)]);
+    const res = await this.nostrClient.publishTextNote(text, [tag]);
+    return { eventId: res.id.toBech32() };
+  }
+
+  async publishProfileEvent(
+    name: string,
+    about: string,
+    avatarPictureUrl: string = 'https://image.nostr.build/13ee4c26a7b40da80fd7078cd12621ca072ce09cbd5f1ac081e3300c1639bbfb.jpg',
+  ) {
+    await this.nostrClient.connect();
+
+    const metadata = new Metadata().name(name).about(about).picture(avatarPictureUrl);
+
+    const res = await this.nostrClient.setMetadata(metadata);
+    return { eventId: res.id.toBech32() };
   }
 
   async transfer({ toAddress, amountInCKB, feeRate = 1000 }: TransferOption) {
