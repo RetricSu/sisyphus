@@ -19,8 +19,8 @@ const program = new Command();
 program.name('sisyphus').description(description).version(version);
 
 program
-  .command('run')
-  .description('Wake up Sisyphus to start the digital life')
+  .command('task')
+  .description('Wake up Sisyphus to do a routine task')
   .action(async () => {
     console.log('not implemented yet!');
   });
