@@ -1,7 +1,9 @@
 import { Message, ToolCall } from 'ollama';
 import { db } from './database';
+import { MemoId } from './type';
 
 export class CMessage {
+  public memoId: string = MemoId.chat;
   public dbId: number | undefined;
   public msg: Message;
 
@@ -19,20 +21,20 @@ export class CMessage {
     };
   }
 
-  // 保存 Message 到数据库
+  // save Message to database
   save(): number {
-    const stmt = db.prepare('INSERT INTO messages (role, content) VALUES (?, ?)');
-    const result = stmt.run(this.msg.role, this.msg.content);
+    const stmt = db.prepare('INSERT INTO messages (role, content, memo_id) VALUES (?, ?, ?)');
+    const result = stmt.run(this.msg.role, this.msg.content, this.memoId);
     this.dbId = result.lastInsertRowid as number;
 
-    // 保存关联的 images 和 tool_calls
+    // save related images and tool_calls
     this.saveImages(this.msg.images);
     this.saveToolCalls(this.msg.tool_calls);
 
     return this.dbId;
   }
 
-  // 保存 Images
+  // save Images
   private saveImages(images: typeof this.msg.images): void {
     if (!this.dbId) throw new Error('Message must be saved first.');
     if (!images || images.length === 0) return;
@@ -47,7 +49,7 @@ export class CMessage {
     });
   }
 
-  // 保存 ToolCalls 和 Arguments
+  // save ToolCalls and Arguments
   private saveToolCalls(toolCalls: typeof this.msg.tool_calls): void {
     if (!this.dbId) throw new Error('Message must be saved first.');
     if (!toolCalls || toolCalls.length === 0) return;

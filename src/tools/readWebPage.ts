@@ -1,41 +1,40 @@
 import { launch, Page } from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
-import { Tool } from 'ollama';
-import { AvailableToolName } from './type';
+import { AvailableToolName, ToolBox } from './type';
 
-export const readWebPageTool: Tool = {
-  type: 'function',
-  function: {
-    name: AvailableToolName.readWebpageContent,
-    description: 'use puppeteer to get the content of a web page from a url',
-    parameters: {
-      type: 'object',
-      properties: {
-        url: {
-          type: 'string',
-          description: 'the url of the web page requesting to read',
+export type ReadWebPageToolBoxType = ToolBox<[string], Promise<string>>;
+
+export const readWebPageToolBox: ReadWebPageToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: AvailableToolName.readWebpageContent,
+      description: 'use puppeteer to get the content of a web page from a url',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'the url of the web page requesting to read',
+          },
         },
+        required: ['url'],
       },
-      required: ['url'],
     },
+  },
+  exec: async (url: string) => {
+    const browser = await launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+    await waitTillHTMLRendered(page);
+    const content = await page.content();
+    await browser.close();
+    return cleanWebPageToText(content);
   },
 };
 
-export async function readWebPage(url: string) {
-  const browser = await launch();
-  const page = await browser.newPage();
-  await page.goto(url);
-  await waitTillHTMLRendered(page);
-  const content = await page.content();
-  await browser.close();
-  return (
-    `the web page full content of ${url}(you need to ignore some nonsense and rubbish in the html code since this is scrap and parse result of the webpage, just focus on the readable text): ` +
-    cleanWebPageToText(content)
-  );
-}
-
-const waitTillHTMLRendered = async (page: Page, timeout = 30000) => {
+async function waitTillHTMLRendered(page: Page, timeout = 30000) {
   const checkDurationMsecs = 1000;
   const maxChecks = timeout / checkDurationMsecs;
   let lastHTMLSize = 0;
@@ -60,7 +59,7 @@ const waitTillHTMLRendered = async (page: Page, timeout = 30000) => {
     lastHTMLSize = currentHTMLSize;
     await sleep(checkDurationMsecs);
   }
-};
+}
 
 function cleanWebPageToText(input: string): string {
   const window = new JSDOM('').window;
@@ -68,6 +67,6 @@ function cleanWebPageToText(input: string): string {
   return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });
 }
 
-export function sleep(ms: number) {
+function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }

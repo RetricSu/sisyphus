@@ -1,12 +1,12 @@
 import { Message, ToolCall } from 'ollama';
 import { db } from './database';
 import { DBImage, DBMessage } from './model';
+import { MemoId } from './type';
 
 export class MessageView {
-  // 从数据库加载完整的 Message
-  static loadMsgById(messageId: number): Message | null {
-    const messageStmt = db.prepare('SELECT id, role, content FROM messages WHERE id = ?');
-    const messageRow = messageStmt.get(messageId) as DBMessage | null | undefined;
+  static loadMsgById(messageId: number, memoId = MemoId.chat): Message | null {
+    const messageStmt = db.prepare('SELECT id, role, content FROM messages WHERE id = ? AND memo_id = ?');
+    const messageRow = messageStmt.get(messageId, memoId) as DBMessage | null | undefined;
 
     if (!messageRow) {
       return null; // 如果找不到 message，返回 null
@@ -77,10 +77,9 @@ export class MessageView {
     return argumentsObj;
   }
 
-  // 列出所有消息
-  static listAllMessages(): Message[] {
-    const stmt = db.prepare('SELECT id FROM messages');
-    const rows = stmt.all() as Pick<DBMessage, 'id'>[];
+  static listAllMessages(memoId = MemoId.chat): Message[] {
+    const stmt = db.prepare('SELECT id FROM messages WHERE memo_id = ?');
+    const rows = stmt.all(memoId) as Pick<DBMessage, 'id'>[];
 
     const messages: Message[] = [];
     rows.forEach((row) => {

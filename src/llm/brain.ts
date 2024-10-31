@@ -2,21 +2,50 @@ import { Message, Ollama } from 'ollama';
 import process from 'process';
 import Readline from 'readline/promises';
 import { stdOutWriteSync } from './util';
-import { initialPrompt } from './prompt';
+import { Prompt } from '../prompt';
 import { spawn } from 'child_process';
-import { CMessage } from './memory/c-message';
-import { MessageView } from './memory/message-view';
-import { buildToolCallResponseCMessage, tools } from './tools';
-import { checkIfToolCall } from './tools/util';
+import { CMessage } from '../memory/c-message';
+import { MessageView } from '../memory/message-view';
+import { checkIfToolCall } from '../tools/util';
+import { readSettings } from '../config/setting';
+import { Privkey } from '../privkey';
+import { ToolBox } from '../tools';
 
 export class Brain {
-  public apiUrl: string;
-  public ollama: Ollama;
-  public model = 'llama3.1';
+  apiUrl: string;
+  ollama: Ollama;
+  model: string;
+  toolBox: ToolBox;
+  saveMemory: boolean;
+  promptNames: string[];
 
-  constructor(llmApiUrl = 'http://127.0.0.1:11434') {
+  constructor({
+    llmApiUrl = 'http://127.0.0.1:11434',
+    model = 'llama3.1',
+    saveMemory = true,
+    promptNames: promptName = readSettings().prompt.chatPromptNames,
+  }: {
+    llmApiUrl?: string;
+    model?: string;
+    saveMemory?: boolean;
+    promptNames?: string[];
+  }) {
     this.apiUrl = llmApiUrl;
+    this.model = model;
+    this.saveMemory = saveMemory;
+    this.promptNames = promptName;
     this.ollama = new Ollama({ host: this.apiUrl });
+    this.toolBox = new ToolBox(Privkey.load());
+  }
+
+  isLLMServerRunning(): Promise<boolean> {
+    // make a http get request to this.apiUrl to check if it response with "Ollama is running"
+    return fetch(`${this.apiUrl}`)
+      .then((response) => response.text())
+      .then((data) => data === 'Ollama is running')
+      .catch(() => {
+        return false;
+      });
   }
 
   startLLMServer() {
@@ -48,16 +77,22 @@ export class Brain {
   }
 
   initFirstMessage() {
-    const message: Message = {
-      role: 'system',
-      content: initialPrompt,
-    };
-    return message;
+    const messages: Message[] = [];
+    for (const promptName of this.promptNames) {
+      const promptFile = Prompt.Reader.parseFrom(promptName);
+      const msg: Message = {
+        role: promptFile.role,
+        content: promptFile.content,
+      };
+      messages.push(msg);
+    }
+
+    return messages;
   }
 
   buildInitMessages() {
-    const msgs = MessageView.listAllMessages();
-    return [this.initFirstMessage(), ...msgs];
+    const msgs = this.saveMemory ? MessageView.listAllMessages() : [];
+    return [...this.initFirstMessage(), ...msgs];
   }
 
   async chat(msgs: Message[]) {
@@ -75,7 +110,9 @@ export class Brain {
       console.log('----');
 
       const cmsg = new CMessage('user', input);
-      cmsg.save();
+      if (this.saveMemory) {
+        cmsg.save();
+      }
       const userMessage: Message = cmsg.msg;
       messages.push(userMessage);
     }
@@ -84,7 +121,7 @@ export class Brain {
       model: this.model,
       messages: messages,
       stream: true,
-      tools: Object.values(tools),
+      tools: Object.values(this.toolBox.availableSet).map((tool) => tool.fi),
     });
 
     await stdOutWriteSync('>>> Sisyphus: ');
@@ -98,14 +135,19 @@ export class Brain {
 
     if (checkIfToolCall(answer)) {
       // Add function response to the conversation
-      const toolCmsg = await buildToolCallResponseCMessage(answer);
-      toolCmsg.save();
+      const toolCmsg = await this.toolBox.buildToolCallResponseCMessage(answer);
+      console.debug(toolCmsg);
+      if (this.saveMemory) {
+        toolCmsg.save();
+      }
       messages.push(toolCmsg.msg);
       await this.chat(messages);
     }
 
     const answerCMsg = new CMessage('assistant', answer);
-    answerCMsg.save();
+    if (this.saveMemory) {
+      answerCMsg.save();
+    }
     const answerMessage: Message = answerCMsg.msg;
     messages.push(answerMessage);
     await this.chat(messages);

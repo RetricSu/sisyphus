@@ -2,9 +2,9 @@
   "name": "@sisyphus-ai/cli",
   "version": "0.1.0-rc3",
   "description": "Sisyphus is a project that explores the idea of digital life for LLM. It is ported as a CLI tool that can be run in the terminal.",
-  "main": "dist/index.js",
+  "main": "dist/cli.js",
   "bin": {
-    "sisyphus": "dist/index.js"
+    "sisyphus": "dist/cli.js"
   },
   "repository": {
     "type": "git",
@@ -18,8 +18,8 @@
     "access": "public"
   },
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts",
     "build": "tsc && copyfiles -u 1 src/memory/create-table.sql dist/",
     "lint": "eslint \"src/**/*.ts\" --ignore-pattern 'node_modules/'",
     "lint:fix": "eslint \"src/**/*.ts\" --ignore-pattern 'node_modules/' --fix",
@@ -43,6 +43,10 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@ckb-ccc/core": "0.1.0-alpha.5",
+    "@ckb-ccc/nip07": "0.0.16-alpha.5",
+    "@iarna/toml": "^2.2.5",
+    "@rust-nostr/nostr-sdk": "latest",
     "better-sqlite3": "^11.2.1",
     "commander": "^12.1.0",
     "dompurify": "^3.1.6",

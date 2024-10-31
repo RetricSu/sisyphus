@@ -44,7 +44,7 @@ Some basic tools that are embed from the source code of Sisyphus:
 - [x] Basic terminal simulator
 - [x] A web page browser tool
 - [x] A sqlite3-based Memory module
-- [ ] A CLI bins that can be installed via npm and run by everybody
+- [x] A CLI bins that can be installed via npm and run by everybody
 - [ ] A blog site of Sisyphus's life
 - [ ] Improve the prompts to make Sisyphus better at having a digital life
 - [ ] Store and fetch initial Prompts on blockchain
@@ -54,6 +54,14 @@ Some basic tools that are embed from the source code of Sisyphus:
 - [ ] A panic-aware mechanism
 - [ ] A rest-and-sleep control mechanism
 - [ ] Use PM2 / Nodejs in the server
+  
+### Phase 1: Toy Story
+
+The Ultimate goal for Sisyphus is so hard that current small models and current tech stack just won't work. 
+
+In order to achieve this goal, a different phases are proposed.
+
+Right now the Phase 1 called Toy Story amis to make Sisyphus a fun to play toy that everybody can run in their laptop to communicate and do crypto transactions.
 
 ## How to Run
 

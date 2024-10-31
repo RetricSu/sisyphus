@@ -1,0 +1,36 @@
+{
+  "devnet": {
+    "nostr-binding": {
+      "codeHash": "0x2e393f3d1ea99d5dbc339fcf09118cab747adb81c41c7d4a49938b3633a4b623",
+      "hashType": "type",
+      "cellDeps": [
+        {
+          "cellDep": {
+            "outPoint": {
+              "txHash": "0xce609943442f59118c78aa6184da80034273ba073a315e56b7b7a3689aeb5c0d",
+              "index": 0
+            },
+            "depType": "code"
+          }
+        }
+      ]
+    },
+    "nostr-lock": {
+      "codeHash": "0x35880e57ca540cf954489e997efe50311ec16d65cae74316292459a5a0f2110c",
+      "hashType": "type",
+      "cellDeps": [
+        {
+          "cellDep": {
+            "outPoint": {
+              "txHash": "0x38bb07245723f73bd0adcbead4202b7898f2c619c156f52cab062b0deaf6f2e6",
+              "index": 0
+            },
+            "depType": "code"
+          }
+        }
+      ]
+    }
+  },
+  "testnet": {},
+  "mainnet": {}
+}
