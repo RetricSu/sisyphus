@@ -1,10 +1,15 @@
 import DatabaseConstructor, { type Database } from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
+import { readSettings } from '../config/setting';
 
-export const db: Database = new DatabaseConstructor('my-database.db');
+const settings = readSettings();
+if (!fs.existsSync(path.dirname(settings.database.filePath))) {
+  fs.mkdirSync(path.dirname(settings.database.filePath), { recursive: true });
+}
 
-// 创建表结构
+export const db: Database = new DatabaseConstructor(settings.database.filePath);
+
 export const createTables = () => {
   // Check if the table exists before executing the SQL
   const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").get();

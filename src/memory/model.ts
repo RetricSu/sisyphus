@@ -3,6 +3,7 @@ export interface DBMessage {
   role: string;
   content: string;
   created_at: number; // timestamp number in seconds
+  memo_id: string;
 }
 
 export interface DBToolCall {
