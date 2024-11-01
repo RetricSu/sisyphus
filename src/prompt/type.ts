@@ -1,4 +1,4 @@
-import { MemoId } from "../memory/type";
+import { MemoId } from '../memory/type';
 
 // in the future the prompt should be share as a Nostr event across the network
 export interface PromptFile {
