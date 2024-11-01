@@ -1,11 +1,29 @@
 import { AvailableToolName, ToolBox } from './type';
 import { NosCKB, TransferOption } from '../sdk';
-import { readEnvNetwork } from '../offckb/offckb.config';
 import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
+import { readSettings } from '../config/setting';
+
+export type CKBBalanceToolBoxType = ToolBox<Parameters<NosCKB['getBalance']>, ReturnType<NosCKB['getBalance']>>;
+export type PublishNoteToolBoxType = ToolBox<[string], ReturnType<NosCKB['publishNote']>>;
+export type TransferCKBToolBoxType = ToolBox<[TransferOption], Promise<{ txHash: Hex }>>;
+export type AccountInfoToolBoxType = ToolBox<
+  Parameters<NosCKB['getMyAccountInfo']>,
+  ReturnType<NosCKB['getMyAccountInfo']>
+>;
+export type ReadNostrEventsToolBoxType = ToolBox<[string], ReturnType<NosCKB['readNostrEvents']>>;
+export type ReadNostrMentionNotesWithMeToolBoxType = ToolBox<[], ReturnType<NosCKB['readMentionNotesWithMe']>>;
+export type PublishNostrReplyNotesToEventToolBoxType = ToolBox<
+  Parameters<NosCKB['publishReplyNotesToEvent']>,
+  ReturnType<NosCKB['publishReplyNotesToEvent']>
+>;
+export type PublishNostrProfileEventToolBoxType = ToolBox<
+  Parameters<NosCKB['publishProfileEvent']>,
+  ReturnType<NosCKB['publishProfileEvent']>
+>;
 
 export function buildNosCKBToolBox(nostrPrivkey: string) {
-  const network = readEnvNetwork();
+  const network = readSettings().ckbNetwork;
   const nosCKB = new NosCKB({ network, nostrPrivkey });
 
   const ckbBalanceToolBox: CKBBalanceToolBoxType = {
@@ -126,20 +144,90 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
     },
   };
 
+  const readMentionNotesWithMe: ReadNostrMentionNotesWithMeToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: AvailableToolName.readMentionNotesWithMe,
+        description: 'get notification message (mention-me or reply-to-me notes) from nostr network',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+    },
+    exec: async () => {
+      return await nosCKB.readMentionNotesWithMe();
+    },
+  };
+
+  const publishReplyNotesToEvent: PublishNostrReplyNotesToEventToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: AvailableToolName.publishReplyNotesToEvent,
+        description: 'publish a reply notes to a specific note in nostr network',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'the reply content text',
+            },
+            eventId: {
+              type: 'string',
+              description: 'the id of the event to reply, a hex string prefix with 0x',
+            },
+          },
+          required: ['text', 'eventId'],
+        },
+      },
+    },
+    exec: async (text: string, eventId: Hex) => {
+      return await nosCKB.publishReplyNotesToEvent(text, eventId);
+    },
+  };
+
+  const publishProfileEvent: PublishNostrProfileEventToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: AvailableToolName.publishProfileEvent,
+        description: 'publish a profile metadata event in nostr network',
+        parameters: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'the name of your nostr account profile',
+            },
+            about: {
+              type: 'string',
+              description: 'the introduction/about me/description of yourself in the nostr account profile',
+            },
+            avatarPictureUrl: {
+              type: 'string',
+              description: 'the avatar picture url of your nostr profile',
+            },
+          },
+          required: ['name', 'about'],
+        },
+      },
+    },
+    exec: async (name: string, about: string, avatarPictureUrl?: string) => {
+      return await nosCKB.publishProfileEvent(name, about, avatarPictureUrl);
+    },
+  };
+
   return {
     ckbBalanceToolBox,
     accountInfoToolBox,
     transferCKBToolBox,
     publishNoteToolBox,
     readNostrEvents,
+    readMentionNotesWithMe,
+    publishReplyNotesToEvent,
+    publishProfileEvent,
   };
 }
-
-export type CKBBalanceToolBoxType = ToolBox<Parameters<NosCKB['getBalance']>, ReturnType<NosCKB['getBalance']>>;
-export type PublishNoteToolBoxType = ToolBox<[string], ReturnType<NosCKB['publishNote']>>;
-export type TransferCKBToolBoxType = ToolBox<[TransferOption], Promise<{ txHash: Hex }>>;
-export type AccountInfoToolBoxType = ToolBox<
-  Parameters<NosCKB['getMyAccountInfo']>,
-  ReturnType<NosCKB['getMyAccountInfo']>
->;
-export type ReadNostrEventsToolBoxType = ToolBox<[string], ReturnType<NosCKB['readNostrEvents']>>;

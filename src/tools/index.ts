@@ -4,20 +4,32 @@ import {
   AccountInfoToolBoxType,
   buildNosCKBToolBox,
   CKBBalanceToolBoxType,
+  PublishNostrProfileEventToolBoxType,
+  PublishNostrReplyNotesToEventToolBoxType,
   PublishNoteToolBoxType,
   ReadNostrEventsToolBoxType,
+  ReadNostrMentionNotesWithMeToolBoxType,
   TransferCKBToolBoxType,
 } from './nosCKB';
 import { terminalToolBox, TerminalToolBoxType } from './terminal';
 import { timeToolBox, TimeToolBoxType } from './time';
 import { AvailableToolName, ToolBoxSet, ToolCallResponse } from './type';
 import { parseToolCall } from './util';
+import { Hex } from '@ckb-ccc/core';
 
 export class ToolBox {
   availableSet: ToolBoxSet;
   constructor(privkey: string) {
-    const { ckbBalanceToolBox, accountInfoToolBox, transferCKBToolBox, publishNoteToolBox, readNostrEvents } =
-      buildNosCKBToolBox(privkey);
+    const {
+      ckbBalanceToolBox,
+      accountInfoToolBox,
+      transferCKBToolBox,
+      publishNoteToolBox,
+      readNostrEvents,
+      readMentionNotesWithMe,
+      publishProfileEvent,
+      publishReplyNotesToEvent,
+    } = buildNosCKBToolBox(privkey);
     this.availableSet = {
       get_timestamp_from_os: timeToolBox,
       call_terminal_simulator: terminalToolBox,
@@ -27,6 +39,9 @@ export class ToolBox {
       transfer_ckb: transferCKBToolBox,
       get_my_account_info: accountInfoToolBox,
       read_nostr_events: readNostrEvents,
+      read_mention_notes_with_me: readMentionNotesWithMe,
+      publish_profile_event: publishProfileEvent,
+      publish_replay_notes_to_event: publishReplyNotesToEvent,
     };
   }
 
@@ -82,6 +97,25 @@ export class ToolBox {
 
         case AvailableToolName.readNostrEvents:
           functionResponse = await (executor as ReadNostrEventsToolBoxType['exec'])(toolCall.parameters.kind);
+          break;
+
+        case AvailableToolName.readMentionNotesWithMe:
+          functionResponse = await (executor as ReadNostrMentionNotesWithMeToolBoxType['exec'])();
+          break;
+
+        case AvailableToolName.publishProfileEvent:
+          functionResponse = await (executor as PublishNostrProfileEventToolBoxType['exec'])(
+            toolCall.parameters.name,
+            toolCall.parameters.about,
+            toolCall.parameters.avatarPictureUrl,
+          );
+          break;
+
+        case AvailableToolName.publishReplyNotesToEvent:
+          functionResponse = await (executor as PublishNostrReplyNotesToEventToolBoxType['exec'])(
+            toolCall.parameters.text,
+            toolCall.parameters.eventId as Hex,
+          );
           break;
 
         default: {

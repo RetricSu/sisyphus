@@ -9,6 +9,9 @@ export enum AvailableToolName {
   transferCKB = 'transfer_ckb',
   getMyAccountInfo = 'get_my_account_info',
   readNostrEvents = 'read_nostr_events',
+  readMentionNotesWithMe = 'read_mention_notes_with_me',
+  publishReplyNotesToEvent = 'publish_replay_notes_to_event',
+  publishProfileEvent = 'publish_profile_event',
 }
 
 export interface ToolBox<T extends any[] = any[], R = any> {
