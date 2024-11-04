@@ -20,7 +20,7 @@
   "scripts": {
     "start": "node dist/cli.js",
     "dev": "ts-node src/cli.ts",
-    "build": "tsc && copyfiles -u 1 src/memory/create-table.sql dist/ && copyfiles -u 1 src/offckb/my-scripts.json dist/ && copyfiles -u 1 src/offckb/system-scripts.json dist/",
+    "build": "tsc && copyfiles -u 1 src/memory/create-table.sql dist/ && copyfiles -u 1 src/prompt/base.toml dist/ && copyfiles -u 1 src/offckb/my-scripts.json dist/ && copyfiles -u 1 src/offckb/system-scripts.json dist/",
     "lint": "eslint \"src/**/*.ts\" --ignore-pattern 'node_modules/'",
     "lint:fix": "eslint \"src/**/*.ts\" --ignore-pattern 'node_modules/' --fix",
     "fmt": "prettier --write 'src/**/*.{js,jsx,ts,tsx,md,json}'",

@@ -6,6 +6,7 @@ import { Privkey } from './privkey';
 import { Prompt } from './prompt';
 import { chat } from './cmd/chat';
 import { Config, ConfigItem } from './cmd/config';
+import { customTask } from './cmd/task';
 
 loadWasmSync();
 createTables();
@@ -22,7 +23,7 @@ program
   .command('task')
   .description('Wake up Sisyphus to do a routine task')
   .action(async () => {
-    console.log('not implemented yet!');
+    await customTask();
   });
 
 program

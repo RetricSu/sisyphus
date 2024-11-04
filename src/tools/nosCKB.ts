@@ -1,5 +1,5 @@
 import { AvailableToolName, ToolBox } from './type';
-import { NosCKB, TransferOption } from '../sdk';
+import { HexNoPrefix, NosCKB, TransferOption } from '../sdk';
 import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
 import { readSettings } from '../config/setting';
@@ -177,14 +177,14 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
             },
             eventId: {
               type: 'string',
-              description: 'the id of the event to reply, a hex string prefix with 0x',
+              description: 'the id of the event to reply, hex string',
             },
           },
           required: ['text', 'eventId'],
         },
       },
     },
-    exec: async (text: string, eventId: Hex) => {
+    exec: async (text: string, eventId: HexNoPrefix) => {
       return await nosCKB.publishReplyNotesToEvent(text, eventId);
     },
   };

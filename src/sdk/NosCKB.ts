@@ -1,11 +1,11 @@
-import { ccc, Client, Hex, NostrEvent } from '@ckb-ccc/core';
+import { ccc, Client, NostrEvent } from '@ckb-ccc/core';
 import { Network } from '../offckb/offckb.config';
 import { Nip07 } from '@ckb-ccc/nip07';
 import { NostrProvider } from './NostrProvider';
 import { defaultRelays } from './defaultRelays';
 import { NostrSigner, Keys, loadWasmSync, Client as NostrClient, Filter, Tag, Metadata } from '@rust-nostr/nostr-sdk';
 import { buildCccClient } from './cccClient';
-import { TransferOption } from './type';
+import { HexNoPrefix, TransferOption } from './type';
 
 // Nostr and CKB
 export class NosCKB {
@@ -60,9 +60,9 @@ export class NosCKB {
     return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
   }
 
-  async publishReplyNotesToEvent(text: string, eventId: Hex) {
+  async publishReplyNotesToEvent(text: string, eventId: HexNoPrefix) {
     await this.nostrClient.connect();
-    const tag = Tag.parse(['e', eventId.slice(2)]);
+    const tag = Tag.parse(['e', eventId]);
     const res = await this.nostrClient.publishTextNote(text, [tag]);
     return { eventId: res.id.toBech32() };
   }
