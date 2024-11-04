@@ -2,17 +2,19 @@ import { Message, ToolCall } from 'ollama';
 import { db } from './database';
 import { MemoId } from './type';
 
-export class CMessage {
-  public memoId: string = MemoId.chat;
+export class AMessage {
+  public memoId: MemoId;
   public dbId: number | undefined;
   public msg: Message;
 
   constructor(
+    memoId: string,
     role: string,
     content: string,
     images: Uint8Array[] | string[] | undefined = [],
     toolCalls: ToolCall[] = [],
   ) {
+    this.memoId = memoId;
     this.msg = {
       role,
       content,

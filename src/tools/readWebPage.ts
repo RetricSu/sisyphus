@@ -28,9 +28,9 @@ export const readWebPageToolBox: ReadWebPageToolBoxType = {
     const page = await browser.newPage();
     await page.goto(url);
     await waitTillHTMLRendered(page);
-    const content = await page.content();
+    const textContent = await page.evaluate(() => document.body.innerText); // 提取文本内容
     await browser.close();
-    return cleanWebPageToText(content);
+    return textContent;
   },
 };
 
@@ -61,7 +61,7 @@ async function waitTillHTMLRendered(page: Page, timeout = 30000) {
   }
 }
 
-function cleanWebPageToText(input: string): string {
+function _cleanWebPageToText(input: string): string {
   const window = new JSDOM('').window;
   const DOMPurify = createDOMPurify(window);
   return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });

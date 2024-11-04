@@ -1,10 +1,9 @@
 import { Message, ToolCall } from 'ollama';
 import { db } from './database';
 import { DBImage, DBMessage } from './model';
-import { MemoId } from './type';
 
 export class MessageView {
-  static loadMsgById(messageId: number, memoId = MemoId.chat): Message | null {
+  static loadMsgById(messageId: number, memoId = 'chat'): Message | null {
     const messageStmt = db.prepare('SELECT id, role, content FROM messages WHERE id = ? AND memo_id = ?');
     const messageRow = messageStmt.get(messageId, memoId) as DBMessage | null | undefined;
 
@@ -77,7 +76,7 @@ export class MessageView {
     return argumentsObj;
   }
 
-  static listAllMessages(memoId = MemoId.chat): Message[] {
+  static listAllMessages(memoId = 'chat'): Message[] {
     const stmt = db.prepare('SELECT id FROM messages WHERE memo_id = ?');
     const rows = stmt.all(memoId) as Pick<DBMessage, 'id'>[];
 

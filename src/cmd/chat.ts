@@ -11,9 +11,9 @@ export async function chat({ promptNames, saveMemory }: ChatProp) {
     if (!brain.isLLMServerRunning()) {
       await brain.startLLMServer();
     }
-    await brain.chat([]);
+    await brain.chat();
   } catch (error) {
-    console.error('failed to start the ollama server, ', error);
+    console.error('some thing went wrong, ', error);
     process.exit(1);
   }
 }
