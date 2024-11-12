@@ -6,7 +6,6 @@ import { Privkey } from './privkey';
 import { Prompt } from './prompt';
 import { chat } from './cmd/chat';
 import { Config, ConfigItem } from './cmd/config';
-import { customTask } from './cmd/task';
 
 loadWasmSync();
 createTables();
@@ -23,19 +22,20 @@ program
   .command('task')
   .description('Wake up Sisyphus to do a routine task')
   .action(async () => {
-    await customTask();
+    // todo
+    throw new Error('not implemented!');
   });
 
 program
   .command('chat')
   .description('Chat with user through the command line')
   .option('-c, --clean', 'clean chat without saving to memory')
-  .option('--prompt <prompt...>', 'Specific the prompt file name', [])
+  .option('--prompt <prompt>', 'Specific the prompt file name', undefined)
   .action(async (opt) => {
-    const promptNames = opt.prompt.length > 0 ? opt.prompt : undefined;
+    const promptName = opt.prompt;
     const saveMemory = opt.clean != null ? !opt.clean : undefined;
 
-    return await chat({ promptNames, saveMemory });
+    return await chat({ promptName, saveMemory });
   });
 
 program

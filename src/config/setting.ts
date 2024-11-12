@@ -35,13 +35,13 @@ export interface Settings {
   };
   prompt: {
     rootFolder: string;
-    chatPromptNames: string[];
-    selfRunPromptNames: string[];
+    selectedPromptName: string;
   };
-  ckbNetwork: 'devnet' | 'testnet' | 'mainnet';
-  llm: {
+  memory: {
     apiUrl: string;
-    model: string;
+    database: {
+      folderPath: string;
+    };
   };
 }
 
@@ -55,13 +55,13 @@ export const defaultSettings: Settings = {
   },
   prompt: {
     rootFolder: path.resolve(dataPath, 'prompt'),
-    chatPromptNames: [defaultPromptName],
-    selfRunPromptNames: [defaultPromptName],
+    selectedPromptName: defaultPromptName,
   },
-  ckbNetwork: 'testnet',
-  llm: {
-    apiUrl: 'http://127.0.0.1:11434',
-    model: 'llama3.1',
+  memory: {
+    apiUrl: 'http://127.0.0.1:8000',
+    database: {
+      folderPath: path.resolve(dataPath, 'memory/chroma'),
+    },
   },
 };
 

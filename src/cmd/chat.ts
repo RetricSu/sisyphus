@@ -1,14 +1,17 @@
 import { Brain } from '../llm/brain';
 
 export interface ChatProp {
-  promptNames?: string[];
+  promptName?: string;
   saveMemory?: boolean;
 }
 
-export async function chat({ promptNames, saveMemory }: ChatProp) {
-  const brain = new Brain({ promptNames, saveMemory });
+export async function chat({ promptName, saveMemory }: ChatProp) {
+  const brain = new Brain({ promptName, saveMemory });
   try {
-    if (!brain.isLLMServerRunning()) {
+    if (!(await brain.isChromaServerRunning())) {
+      await brain.startChromaServer();
+    }
+    if (!(await brain.isLLMServerRunning())) {
       await brain.startLLMServer();
     }
     await brain.chat();
