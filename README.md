@@ -4,9 +4,9 @@ At the beginning, what I really want to achieve is something like [this](/docs/p
 
 In order to achieve this goal, a different phases plan are proposed.
 
-Right now the Phase 1 called Toy-Story amis to make Sisyphus a fun-to-play toy that everybody can run in their laptop to communicate in Nostr network and do crypto transactions stuff on CKB blockchain.
+Right now in the first early stage we amis to make Sisyphus a fun-to-play toy that everybody can run in their laptop to communicate in Nostr network and do crypto transactions stuff on CKB blockchain.
 
-In simple terms, you can run Sisyphus in your computer and chat with it, it has a private key and the ability to control a Nostr account and a CKB account, like publishing nostr short notes, checking CKB balance and transfer CKB.
+In simple terms, you can run Sisyphus in your computer and chat with it. It comes with a built-in function tool that can execute terminal commands on your computer and a simple memory database so it can search information from the persistent memory. Moreover, it has a private key and the ability to control a Nostr account and a CKB account, like publishing nostr short notes, checking CKB balance and transfer CKB. We hope it can handle fiber network tasks too. Additionally, we want the AI to build its own tool functions during chat. This requires a standard for tool function runtime and ABI.
 
 ## How to Run
 
@@ -33,13 +33,17 @@ ollama pull llama3.1
 npm install -g @sisyphus-ai/cli
 ```
 
-### 4. Run
+### 4. Install Chroma
 
-Before chatting with Sisyphus, set CKB blockchain network:
+[Chroma](https://docs.trychroma.com/getting-started#1.-install) is needed for memory tool.
 
 ```sh
-export NETWORK=testnet # or devnet, mainnet
+pip install chromadb 
 ```
+
+make sure `chroma` binary is available in command line.
+
+### 5. Run
 
 Start chatting:
 

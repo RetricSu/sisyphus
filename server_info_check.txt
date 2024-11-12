@@ -1,7 +1,0 @@
-Hello, I am now starting up on this new server. Please run the following commands to check my system configuration.
-1. `uname -a` to verify the operating system version.
-2. `cat /proc/cpuinfo` to confirm the CPU details.
-3. `df -h` to check the disk usage.
-4. `top` or `htop` to get an overview of running processes and system resources.
-
-Please output the results for each command in order.
