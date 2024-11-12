@@ -5,13 +5,14 @@ export enum AvailableToolName {
   callTerminalSimulator = 'call_terminal_simulator',
   readWebpageContent = 'read_webpage_content',
   getCKBBalance = 'get_ckb_balance',
-  publishNote = 'publish_note',
   transferCKB = 'transfer_ckb',
   getMyAccountInfo = 'get_my_account_info',
-  readNostrEvents = 'read_nostr_events',
-  readMentionNotesWithMe = 'read_mention_notes_with_me',
-  publishReplyNotesToEvent = 'publish_replay_notes_to_event',
-  publishProfileEvent = 'publish_profile_event',
+  publishNostrSocialPost = 'publish_nostr_social_post',
+  readSocialPostOnNostrWithFilter = 'read_social_post_on_nostr_with_filters',
+  readSocialNotificationMessageOnNostr = 'read_social_notification_message_on_nostr',
+  publishReplyPostToOtherOnNostr = 'publish_reply_post_to_other_on_nostr',
+  updateSocialProfileOnNostr = 'update_social_profile_on_nostr',
+  searchMemory = 'search_memory',
 }
 
 export interface ToolBox<T extends any[] = any[], R = any> {

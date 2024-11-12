@@ -2,7 +2,7 @@ import { AvailableToolName, ToolBox } from './type';
 import { HexNoPrefix, NosCKB, TransferOption } from '../sdk';
 import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
-import { readSettings } from '../config/setting';
+import { Network } from '../offckb/offckb.config';
 
 export type CKBBalanceToolBoxType = ToolBox<Parameters<NosCKB['getBalance']>, ReturnType<NosCKB['getBalance']>>;
 export type PublishNoteToolBoxType = ToolBox<[string], ReturnType<NosCKB['publishNote']>>;
@@ -22,8 +22,7 @@ export type PublishNostrProfileEventToolBoxType = ToolBox<
   ReturnType<NosCKB['publishProfileEvent']>
 >;
 
-export function buildNosCKBToolBox(nostrPrivkey: string) {
-  const network = readSettings().ckbNetwork;
+export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
   const nosCKB = new NosCKB({ network, nostrPrivkey });
 
   const ckbBalanceToolBox: CKBBalanceToolBoxType = {
@@ -48,14 +47,14 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.publishNote,
-        description: 'Publish Nip01 Notes to Nostr networks',
+        name: AvailableToolName.publishNostrSocialPost,
+        description: 'Publish Social Post to Nostr networks with Nip-01 Event',
         parameters: {
           type: 'object',
           properties: {
             text: {
               type: 'string',
-              description: 'the text content of the Nostr short note to publish',
+              description: 'the text content of the Nostr short post to publish',
             },
           },
           required: ['text'],
@@ -121,8 +120,8 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.readNostrEvents,
-        description: 'get nostr events from nostr network with specific filters',
+        name: AvailableToolName.readSocialPostOnNostrWithFilter,
+        description: 'get nostr social post from nostr network with specific filters',
         parameters: {
           type: 'object',
           properties: {
@@ -148,8 +147,8 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.readMentionNotesWithMe,
-        description: 'get notification message (mention-me or reply-to-me notes) from nostr network',
+        name: AvailableToolName.readSocialNotificationMessageOnNostr,
+        description: 'get social notification message (mention-me or reply-to-me posts) from nostr network',
         parameters: {
           type: 'object',
           properties: {},
@@ -166,8 +165,8 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.publishReplyNotesToEvent,
-        description: 'publish a reply notes to a specific note in nostr network',
+        name: AvailableToolName.publishReplyPostToOtherOnNostr,
+        description: 'publish a reply post to a specific post(a nostr event) in nostr network',
         parameters: {
           type: 'object',
           properties: {
@@ -193,7 +192,7 @@ export function buildNosCKBToolBox(nostrPrivkey: string) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.publishProfileEvent,
+        name: AvailableToolName.updateSocialProfileOnNostr,
         description: 'publish a profile metadata event in nostr network',
         parameters: {
           type: 'object',

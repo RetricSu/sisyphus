@@ -1,26 +1,26 @@
 import { Message, Ollama } from 'ollama';
-import { ToolBox } from '../tools/type';
 import { readSettings } from '../config/setting';
 import { spawn } from 'child_process';
 import { Prompt } from '../prompt';
-import { MessageView } from '../memory/message-view';
-import { MemoId } from '../memory/type';
 import { AMessage } from '../memory/a-message';
 import { checkIfToolCall } from '../tools/util';
 import { Tools } from '../tools/tools';
+import { Memory } from '../memory/long-term';
+import { Network } from '../offckb/offckb.config';
+import { buildNosCKBToolBox } from '../tools/nosCKB';
+import { readWebPageToolBox } from '../tools/readWebPage';
+import { terminalToolBox } from '../tools/terminal';
+import { timeToolBox } from '../tools/time';
+import { Privkey } from '../privkey';
+import { memoryToolBox } from '../tools/memory';
+import fs from 'fs';
 
 const settings = readSettings();
 
 export interface AgentProp {
-  name: string;
-  memoId: string;
-  role?: string;
-  toolBoxes?: ToolBox[];
-  llmApiUrl?: string;
-  model?: string;
   saveMemory?: boolean;
   pipeResponse?: (name: string, word: string) => any;
-  promptNames?: string[];
+  promptName?: string;
 }
 
 export class Agent {
@@ -31,33 +31,58 @@ export class Agent {
   model: string;
   tools: Tools;
   saveMemory: boolean;
-  promptNames: string[];
+  promptName: string;
   memoId: string;
+  ckbNetwork: Network;
   messages: Message[];
   pipeResponse?: (name: string, word: string) => any;
+  memory: Memory;
 
-  constructor({
-    name,
-    memoId,
-    role = 'assistant',
-    llmApiUrl = settings.llm.apiUrl,
-    model = settings.llm.model,
-    toolBoxes = [],
-    saveMemory = true,
-    pipeResponse,
-    promptNames: promptName = readSettings().prompt.chatPromptNames,
-  }: AgentProp) {
-    this.name = name;
-    this.role = role;
-    this.apiUrl = llmApiUrl;
-    this.model = model;
-    this.memoId = memoId;
-    this.saveMemory = saveMemory;
-    this.promptNames = promptName;
-    this.pipeResponse = pipeResponse;
-    this.ollama = new Ollama({ host: this.apiUrl });
-    this.tools = new Tools(toolBoxes);
+  constructor({ saveMemory = true, pipeResponse, promptName = readSettings().prompt.selectedPromptName }: AgentProp) {
+    this.role = 'assistant';
     this.messages = [];
+
+    this.saveMemory = saveMemory;
+    this.promptName = promptName;
+    this.pipeResponse = pipeResponse;
+
+    const promptFile = Prompt.Reader.parseFrom(this.promptName);
+    this.name = promptFile.name;
+    this.apiUrl = promptFile.llm.apiUrl;
+    this.model = promptFile.llm.model;
+    this.ollama = new Ollama({ host: this.apiUrl });
+    this.ckbNetwork = promptFile.ckbNetwork;
+    this.memoId = promptFile.memoId;
+    this.memory = new Memory(this.memoId);
+    const toolNames = promptFile.tools;
+
+    const {
+      ckbBalanceToolBox,
+      accountInfoToolBox,
+      transferCKBToolBox,
+      publishNoteToolBox,
+      readNostrEvents,
+      readMentionNotesWithMe,
+      publishProfileEvent,
+      publishReplyNotesToEvent,
+    } = buildNosCKBToolBox(this.ckbNetwork, Privkey.load());
+
+    const toolBoxes = [
+      timeToolBox,
+      terminalToolBox,
+      readWebPageToolBox,
+      ckbBalanceToolBox,
+      accountInfoToolBox,
+      transferCKBToolBox,
+      publishNoteToolBox,
+      readNostrEvents,
+      readMentionNotesWithMe,
+      publishProfileEvent,
+      publishReplyNotesToEvent,
+      memoryToolBox,
+    ].filter((t) => toolNames.includes(t.fi.function.name));
+
+    this.tools = new Tools(toolBoxes);
   }
 
   isLLMServerRunning(): Promise<boolean> {
@@ -98,13 +123,56 @@ export class Agent {
     });
   }
 
+  isChromaServerRunning(): Promise<boolean> {
+    return fetch(`${settings.memory.apiUrl}`)
+      .then((response) => response.text())
+      .then((_data) => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  startChromaServer() {
+    if (!fs.existsSync(settings.memory.database.folderPath)) {
+      fs.mkdirSync(settings.memory.database.folderPath, { recursive: true });
+    }
+
+    return new Promise((resolve: (val: string) => void, reject: (error: string) => void) => {
+      const child = spawn('chroma', ['run', '--path', settings.memory.database.folderPath], {
+        env: { ...process.env },
+      });
+
+      // Listen to the stdout of the process
+      child.stdout.on('data', (data) => {
+        const output = data.toString();
+        resolve(output); // Resolve when any data is received
+      });
+
+      child.stderr.on('data', (data) => {
+        resolve(data); // Resolve when any data is received
+      });
+
+      child.on('close', (code) => {
+        if (code !== 0) {
+          reject(`Process exited with code ${code}`);
+        }
+      });
+
+      child.on('error', (error) => {
+        reject(`Process error: ${error.message}`);
+      });
+    });
+  }
+
   loadPromptMessage() {
     const messages: Message[] = [];
-    for (const promptName of this.promptNames) {
-      const promptFile = Prompt.Reader.parseFrom(promptName);
+    const promptFile = Prompt.Reader.parseFrom(this.promptName);
+    for (const p of promptFile.prompts) {
       const msg: Message = {
-        role: promptFile.role,
-        content: promptFile.content,
+        role: p.role,
+        content: p.content,
       };
       messages.push(msg);
     }
@@ -113,15 +181,19 @@ export class Agent {
   }
 
   LoadInitialMessages() {
-    const msgs = this.saveMemory ? MessageView.listAllMessages(this.memoId as MemoId) : [];
-    this.messages = [...this.loadPromptMessage(), ...msgs];
+    this.messages = this.loadPromptMessage();
+  }
+
+  async saveMessageIntoMemoryIfEnable(message: AMessage) {
+    if (this.saveMemory) {
+      message.save();
+      await this.memory.save(message);
+    }
   }
 
   async call(m: Message, isSTream: boolean | undefined = undefined): Promise<AMessage> {
     const message = new AMessage(this.memoId, m.role, m.content);
-    if (this.saveMemory) {
-      message.save();
-    }
+    await this.saveMessageIntoMemoryIfEnable(message);
     this.messages.push(message.msg);
 
     if (isSTream) {
@@ -146,13 +218,12 @@ export class Agent {
         const toolCmsg = await this.tools.buildToolCallResponseCMessage(answer);
         const message = new AMessage(this.memoId, toolCmsg.role, toolCmsg.content);
         console.debug(message);
-        if (this.saveMemory) {
-          message.save();
-        }
+        await this.saveMessageIntoMemoryIfEnable(message);
         return await this.call(message.msg, isSTream);
       }
 
       const resMessage = new AMessage(this.memoId, this.role, answer);
+      await this.saveMessageIntoMemoryIfEnable(resMessage);
       this.messages.push(resMessage.msg);
       return resMessage;
     } else {
@@ -168,9 +239,7 @@ export class Agent {
 
           const message = new AMessage(this.memoId, toolCmsg.role, toolCmsg.content);
           console.debug(message);
-          if (this.saveMemory) {
-            message.save();
-          }
+          await this.saveMessageIntoMemoryIfEnable(message);
           // Add function response to the conversation
           this.messages.push(message.msg);
         }
@@ -185,6 +254,7 @@ export class Agent {
           await this.pipeResponse(this.name, answer);
         }
         const resMessage = new AMessage(this.memoId, this.role, answer);
+        await this.saveMessageIntoMemoryIfEnable(resMessage);
         this.messages.push(resMessage.msg);
         return resMessage;
       }
@@ -194,6 +264,7 @@ export class Agent {
         await this.pipeResponse(this.name, answer);
       }
       const resMessage = new AMessage(this.memoId, this.role, answer);
+      await this.saveMessageIntoMemoryIfEnable(resMessage);
       this.messages.push(resMessage.msg);
       return resMessage;
     }

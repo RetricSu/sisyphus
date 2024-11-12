@@ -15,6 +15,7 @@ import { AvailableToolName, ToolBox, ToolCallResponse } from './type';
 import { parseToolCall } from './util';
 import { Hex } from '@ckb-ccc/core';
 import { Message, ToolCall } from 'ollama';
+import { MemoryToolBoxType } from './memory';
 
 export class Tools {
   toolBox: ToolBox[];
@@ -56,7 +57,7 @@ export class Tools {
           functionResponse = await (executor as CKBBalanceToolBoxType['exec'])();
           break;
 
-        case AvailableToolName.publishNote:
+        case AvailableToolName.publishNostrSocialPost:
           functionResponse = await (executor as PublishNoteToolBoxType['exec'])(toolCall.parameters.text);
           break;
 
@@ -71,15 +72,15 @@ export class Tools {
           functionResponse = await (executor as AccountInfoToolBoxType['exec'])();
           break;
 
-        case AvailableToolName.readNostrEvents:
+        case AvailableToolName.readSocialPostOnNostrWithFilter:
           functionResponse = await (executor as ReadNostrEventsToolBoxType['exec'])(toolCall.parameters.kind);
           break;
 
-        case AvailableToolName.readMentionNotesWithMe:
+        case AvailableToolName.readSocialNotificationMessageOnNostr:
           functionResponse = await (executor as ReadNostrMentionNotesWithMeToolBoxType['exec'])();
           break;
 
-        case AvailableToolName.publishProfileEvent:
+        case AvailableToolName.updateSocialProfileOnNostr:
           functionResponse = await (executor as PublishNostrProfileEventToolBoxType['exec'])(
             toolCall.parameters.name,
             toolCall.parameters.about,
@@ -87,11 +88,15 @@ export class Tools {
           );
           break;
 
-        case AvailableToolName.publishReplyNotesToEvent:
+        case AvailableToolName.publishReplyPostToOtherOnNostr:
           functionResponse = await (executor as PublishNostrReplyNotesToEventToolBoxType['exec'])(
             toolCall.parameters.text,
             toolCall.parameters.eventId as Hex,
           );
+          break;
+
+        case AvailableToolName.searchMemory:
+          functionResponse = await (executor as MemoryToolBoxType['exec'])(toolCall.parameters.text);
           break;
 
         default: {
@@ -158,7 +163,7 @@ export class Tools {
           functionResponse = await (executor as CKBBalanceToolBoxType['exec'])();
           break;
 
-        case AvailableToolName.publishNote:
+        case AvailableToolName.publishNostrSocialPost:
           functionResponse = await (executor as PublishNoteToolBoxType['exec'])(parameters.text);
           break;
 
@@ -173,15 +178,15 @@ export class Tools {
           functionResponse = await (executor as AccountInfoToolBoxType['exec'])();
           break;
 
-        case AvailableToolName.readNostrEvents:
+        case AvailableToolName.readSocialPostOnNostrWithFilter:
           functionResponse = await (executor as ReadNostrEventsToolBoxType['exec'])(parameters.kind);
           break;
 
-        case AvailableToolName.readMentionNotesWithMe:
+        case AvailableToolName.readSocialNotificationMessageOnNostr:
           functionResponse = await (executor as ReadNostrMentionNotesWithMeToolBoxType['exec'])();
           break;
 
-        case AvailableToolName.publishProfileEvent:
+        case AvailableToolName.updateSocialProfileOnNostr:
           functionResponse = await (executor as PublishNostrProfileEventToolBoxType['exec'])(
             parameters.name,
             parameters.about,
@@ -189,11 +194,15 @@ export class Tools {
           );
           break;
 
-        case AvailableToolName.publishReplyNotesToEvent:
+        case AvailableToolName.publishReplyPostToOtherOnNostr:
           functionResponse = await (executor as PublishNostrReplyNotesToEventToolBoxType['exec'])(
             parameters.text,
             parameters.eventId as Hex,
           );
+          break;
+
+        case AvailableToolName.searchMemory:
+          functionResponse = await (executor as MemoryToolBoxType['exec'])(parameters.text);
           break;
 
         default: {
