@@ -12,7 +12,7 @@ import { readWebPageToolBox } from '../tools/readWebPage';
 import { terminalToolBox } from '../tools/terminal';
 import { timeToolBox } from '../tools/time';
 import { Privkey } from '../privkey';
-import { memoryToolBox } from '../tools/memory';
+import { buildMemoryToolBox } from '../tools/memory';
 import fs from 'fs';
 
 const settings = readSettings();
@@ -66,6 +66,8 @@ export class Agent {
       publishProfileEvent,
       publishReplyNotesToEvent,
     } = buildNosCKBToolBox(this.ckbNetwork, Privkey.load());
+
+    const memoryToolBox = buildMemoryToolBox(this.memoId);
 
     const toolBoxes = [
       timeToolBox,

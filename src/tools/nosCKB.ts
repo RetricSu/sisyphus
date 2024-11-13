@@ -4,21 +4,44 @@ import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
 import { Network } from '../offckb/offckb.config';
 
-export type CKBBalanceToolBoxType = ToolBox<Parameters<NosCKB['getBalance']>, ReturnType<NosCKB['getBalance']>>;
-export type PublishNoteToolBoxType = ToolBox<[string], ReturnType<NosCKB['publishNote']>>;
-export type TransferCKBToolBoxType = ToolBox<[TransferOption], Promise<{ txHash: Hex }>>;
-export type AccountInfoToolBoxType = ToolBox<
-  Parameters<NosCKB['getMyAccountInfo']>,
-  ReturnType<NosCKB['getMyAccountInfo']>
+export interface CKBBalanceToolExecParameter {}
+export interface PublishNoteToolExecParameter {
+  text: string;
+}
+export type TransferCKBToolExecParameter = TransferOption;
+export interface AccountInfoToolExecParameter {}
+export interface ReadNostrEventsToolExecParameter {
+  kind: string;
+}
+export interface ReadNostrMentionNotesToolExecParameter {}
+export interface PublishNostrReplyNotesToEventToolExecParameter {
+  text: string;
+  eventId: HexNoPrefix;
+}
+export interface PublishNostrProfileEventToolExecParameter {
+  name: string;
+  about: string;
+  avatarPictureUrl?: string;
+}
+
+export type CKBBalanceToolBoxType = ToolBox<[CKBBalanceToolExecParameter], ReturnType<NosCKB['getBalance']>>;
+export type PublishNoteToolBoxType = ToolBox<[PublishNoteToolExecParameter], ReturnType<NosCKB['publishNote']>>;
+export type TransferCKBToolBoxType = ToolBox<[TransferCKBToolExecParameter], Promise<{ txHash: Hex }>>;
+export type AccountInfoToolBoxType = ToolBox<[AccountInfoToolExecParameter], ReturnType<NosCKB['getMyAccountInfo']>>;
+export type ReadNostrEventsToolBoxType = ToolBox<
+  [ReadNostrEventsToolExecParameter],
+  ReturnType<NosCKB['readNostrEvents']>
 >;
-export type ReadNostrEventsToolBoxType = ToolBox<[string], ReturnType<NosCKB['readNostrEvents']>>;
-export type ReadNostrMentionNotesWithMeToolBoxType = ToolBox<[], ReturnType<NosCKB['readMentionNotesWithMe']>>;
+export type ReadNostrMentionNotesWithMeToolBoxType = ToolBox<
+  [ReadNostrMentionNotesToolExecParameter],
+  ReturnType<NosCKB['readMentionNotesWithMe']>
+>;
 export type PublishNostrReplyNotesToEventToolBoxType = ToolBox<
-  Parameters<NosCKB['publishReplyNotesToEvent']>,
+  [PublishNostrReplyNotesToEventToolExecParameter],
   ReturnType<NosCKB['publishReplyNotesToEvent']>
 >;
 export type PublishNostrProfileEventToolBoxType = ToolBox<
-  Parameters<NosCKB['publishProfileEvent']>,
+  [PublishNostrProfileEventToolExecParameter],
   ReturnType<NosCKB['publishProfileEvent']>
 >;
 
@@ -38,7 +61,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
         },
       },
     },
-    exec: async () => {
+    exec: async (_p: CKBBalanceToolExecParameter) => {
       return await nosCKB.getBalance();
     },
   };
@@ -61,7 +84,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
         },
       },
     },
-    exec: async (text: string) => {
+    exec: async ({ text }: PublishNoteToolExecParameter) => {
       return await nosCKB.publishNote(text);
     },
   };
@@ -111,7 +134,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
         },
       },
     },
-    exec: async () => {
+    exec: async (_p: AccountInfoToolExecParameter) => {
       return await nosCKB.getMyAccountInfo();
     },
   };
@@ -127,14 +150,14 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
           properties: {
             kind: {
               type: 'string',
-              description: 'event kind to fetch',
+              description: 'event kind, a number string, to fetch the event of specific type',
             },
           },
           required: ['kind'],
         },
       },
     },
-    exec: async (kind: string) => {
+    exec: async ({ kind }: ReadNostrEventsToolExecParameter) => {
       const f = {
         kinds: [+kind],
       };
@@ -156,7 +179,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
         },
       },
     },
-    exec: async () => {
+    exec: async (_p: ReadNostrMentionNotesToolExecParameter) => {
       return await nosCKB.readMentionNotesWithMe();
     },
   };
@@ -183,7 +206,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
         },
       },
     },
-    exec: async (text: string, eventId: HexNoPrefix) => {
+    exec: async ({ text, eventId }: PublishNostrReplyNotesToEventToolExecParameter) => {
       return await nosCKB.publishReplyNotesToEvent(text, eventId);
     },
   };
@@ -214,7 +237,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
         },
       },
     },
-    exec: async (name: string, about: string, avatarPictureUrl?: string) => {
+    exec: async ({ name, about, avatarPictureUrl }: PublishNostrProfileEventToolExecParameter) => {
       return await nosCKB.publishProfileEvent(name, about, avatarPictureUrl);
     },
   };

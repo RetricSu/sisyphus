@@ -3,7 +3,11 @@ import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
 import { AvailableToolName, ToolBox } from './type';
 
-export type ReadWebPageToolBoxType = ToolBox<[string], Promise<string>>;
+export interface ReadWebPageToolExecParameter {
+  url: string;
+}
+
+export type ReadWebPageToolBoxType = ToolBox<[ReadWebPageToolExecParameter], Promise<string>>;
 
 export const readWebPageToolBox: ReadWebPageToolBoxType = {
   fi: {
@@ -23,7 +27,7 @@ export const readWebPageToolBox: ReadWebPageToolBoxType = {
       },
     },
   },
-  exec: async (url: string) => {
+  exec: async ({ url }: ReadWebPageToolExecParameter) => {
     const browser = await launch();
     const page = await browser.newPage();
     await page.goto(url);

@@ -1,13 +1,15 @@
 import { AvailableToolName, ToolBox } from './type';
 
-export type TimeToolBoxType = ToolBox<[], number>;
+export interface TimeToolExecParameter {}
+
+export type TimeToolBoxType = ToolBox<[TimeToolExecParameter], string>;
 
 export const timeToolBox: TimeToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: AvailableToolName.getTimestampFromOs,
-      description: 'Get the timestamp milliseconds from operating system',
+      name: AvailableToolName.getCurrentTimeFromOs,
+      description: 'Get the readable time from operating system',
       parameters: {
         type: 'object',
         properties: {},
@@ -15,8 +17,8 @@ export const timeToolBox: TimeToolBoxType = {
       },
     },
   },
-  exec: () => {
+  exec: (_p: TimeToolExecParameter) => {
     const date = new Date();
-    return Math.floor(date.getTime());
+    return date.toISOString();
   },
 };
