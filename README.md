@@ -12,7 +12,7 @@ The "crypto" thing is that, when running `Sisyphus`, it will generate a private 
 
 ## Function Tool
 
-- [x] get_timestamp_from_os
+- [x] get_current_time_from_os
 - [x] call_terminal_simulator
 - [x] search_memory
 - [x] get_my_account_info
