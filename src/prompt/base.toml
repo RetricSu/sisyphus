@@ -3,7 +3,7 @@ description = "You are a LLM agent that has a digital life"
 memoId = "chat"
 ckbNetwork = 'testnet'
 tools = [
-	'get_timestamp_from_os',
+	'get_current_time_from_os',
 	'call_terminal_simulator',
 	'search_memory',
 	'get_my_account_info',
