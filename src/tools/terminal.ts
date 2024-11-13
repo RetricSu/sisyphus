@@ -1,7 +1,11 @@
 import { execSync } from 'child_process';
 import { AvailableToolName, ToolBox } from './type';
 
-export type TerminalToolBoxType = ToolBox<[string], string>;
+export interface TerminalToolExecParameter {
+  command: string;
+}
+
+export type TerminalToolBoxType = ToolBox<[TerminalToolExecParameter], string>;
 
 export const terminalToolBox: TerminalToolBoxType = {
   fi: {
@@ -21,7 +25,7 @@ export const terminalToolBox: TerminalToolBoxType = {
       },
     },
   },
-  exec: (command: string) => {
+  exec: ({ command }: TerminalToolExecParameter) => {
     const result = execSync(command);
     return result.toString('utf-8');
   },

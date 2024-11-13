@@ -1,7 +1,7 @@
 import { Tool as ToolInterface } from 'ollama';
 
 export enum AvailableToolName {
-  getTimestampFromOs = 'get_timestamp_from_os',
+  getCurrentTimeFromOs = 'get_current_time_from_os',
   callTerminalSimulator = 'call_terminal_simulator',
   readWebpageContent = 'read_webpage_content',
   getCKBBalance = 'get_ckb_balance',
