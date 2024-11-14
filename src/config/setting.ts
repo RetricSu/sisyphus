@@ -30,6 +30,7 @@ export interface Settings {
   database: {
     filePath: string;
   };
+  IPCSocketPathRootFolder: string;
   privkey: {
     filePath: string;
   };
@@ -50,6 +51,7 @@ export const defaultSettings: Settings = {
   database: {
     filePath: path.resolve(dataPath, 'database/chat-message.db'),
   },
+  IPCSocketPathRootFolder: path.resolve(dataPath, 'ipc/'),
   privkey: {
     filePath: path.resolve(dataPath, 'secret/.privkey'),
   },
@@ -92,6 +94,12 @@ export function writeSettings(settings: Settings): void {
 export function getPromptFilePath(selectedPromptName: string) {
   const settings = readSettings();
   const tomlFile = path.resolve(settings.prompt.rootFolder, `${selectedPromptName}.toml`);
+  return tomlFile;
+}
+
+export function getDefaultIPCSocketPath(memoId: string) {
+  const settings = readSettings();
+  const tomlFile = path.resolve(settings.IPCSocketPathRootFolder, `${memoId}.socket`);
   return tomlFile;
 }
 

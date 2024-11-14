@@ -4,7 +4,7 @@ import { stdOutWriteSync } from './util';
 import { Agent } from './agent';
 import { AMessage } from '../memory/a-message';
 
-export class Brain extends Agent {
+export class TerminalBot extends Agent {
   pipeResponse?: ((name: string, word: string) => any) | undefined;
   constructor({ saveMemory, promptName }: { saveMemory?: boolean; promptName?: string }) {
     const pipeResponse = async (_name: string, word: string) => {

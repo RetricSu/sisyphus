@@ -1,4 +1,4 @@
-import { Brain } from '../llm/brain';
+import { TerminalBot } from '../llm/terminal-bot';
 
 export interface ChatProp {
   promptName?: string;
@@ -6,7 +6,7 @@ export interface ChatProp {
 }
 
 export async function chat({ promptName, saveMemory }: ChatProp) {
-  const brain = new Brain({ promptName, saveMemory });
+  const brain = new TerminalBot({ promptName, saveMemory });
   try {
     if (!(await brain.isChromaServerRunning())) {
       await brain.startChromaServer();

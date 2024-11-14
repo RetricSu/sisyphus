@@ -1,4 +1,4 @@
-# Sisyphus is a Web5 Crypto AI agent experiment
+# Sisyphus is a Web5 Crypto AI Agent Experiment
 
 At the beginning, what I really want to achieve is something like [this](/docs/project-sisyphus.md). But that is a very ultimate goal and is so hard for current open source small models and tech stack to work it out.
 
@@ -9,6 +9,25 @@ Right now in the first early stage we amis to make Sisyphus a fun-to-play toy th
 In simple terms, you can run `Sisyphus` in your computer and chat with it. It comes with a built-in function tool that can execute terminal commands on your computer and a simple memory database so it can search information from the previous history.
 
 The "crypto" thing is that, when running `Sisyphus`, it will generate a private key and can control both Nostr and CKB accounts—publishing short Nostr notes, checking CKB balances, and transferring CKB. We hope it can handle fiber network tasks too. Additionally, we want the AI to build its own tool functions during chat in the future. This might require a standard for tool function runtime and ABI.
+
+## Overview
+
+```sh
+Usage: sisyphus [options] [command]
+
+Sisyphus is a project that explores the idea of Web5 Crypto AI Agent. It is ported as a CLI tool that
+can be run in the terminal.
+
+Options:
+  -V, --version                   output the version number
+  -h, --help                      display help for command
+
+Commands:
+  ipc                             Run IPC Bot
+  chat [options]                  Chat with user through the command line
+  config <action> [item] [value]  do a configuration action
+  help [command]                  display help for command
+```
 
 ## Function Tool
 
