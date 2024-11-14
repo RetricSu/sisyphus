@@ -2,7 +2,6 @@ import { ccc, Client, NostrEvent } from '@ckb-ccc/core';
 import { Network } from '../offckb/offckb.config';
 import { Nip07 } from '@ckb-ccc/nip07';
 import { NostrProvider } from './NostrProvider';
-import { defaultRelays } from './defaultRelays';
 import { NostrSigner, Keys, loadWasmSync, Client as NostrClient, Filter, Tag, Metadata } from '@rust-nostr/nostr-sdk';
 import { buildCccClient } from './cccClient';
 import { HexNoPrefix, TransferOption } from './type';
@@ -25,10 +24,9 @@ export class NosCKB {
     const keys = Keys.parse(nostrPrivkey);
     this.nostrKeys = keys;
     this.nostrSigner = NostrSigner.keys(keys);
-    const relayList = [...defaultRelays, ...relays];
-    this.relayList = relayList;
+    this.relayList = relays;
     this.nostrClient = new NostrClient(this.nostrSigner);
-    for (const relay of relayList) {
+    for (const relay of this.relayList) {
       this.nostrClient.addRelay(relay);
     }
 
@@ -39,12 +37,14 @@ export class NosCKB {
   async publishNote(text: string) {
     await this.nostrClient.connect();
     const res = await this.nostrClient.publishTextNote(text, []);
+    await this.nostrClient.disconnect();
     return { eventId: res.id.toBech32() };
   }
 
   async readNostrEvents(filters: Filter[]) {
     await this.nostrClient.connect();
     const events = await this.nostrClient.getEventsFrom(this.relayList, filters);
+    await this.nostrClient.disconnect();
     return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
   }
 
@@ -57,6 +57,7 @@ export class NosCKB {
     );
     await this.nostrClient.connect();
     const events = await this.nostrClient.getEventsFrom(this.relayList, [filter]);
+    await this.nostrClient.disconnect();
     return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
   }
 
@@ -64,6 +65,7 @@ export class NosCKB {
     await this.nostrClient.connect();
     const tag = Tag.parse(['e', eventId]);
     const res = await this.nostrClient.publishTextNote(text, [tag]);
+    await this.nostrClient.disconnect();
     return { eventId: res.id.toBech32() };
   }
 
@@ -73,10 +75,9 @@ export class NosCKB {
     avatarPictureUrl: string = 'https://image.nostr.build/13ee4c26a7b40da80fd7078cd12621ca072ce09cbd5f1ac081e3300c1639bbfb.jpg',
   ) {
     await this.nostrClient.connect();
-
     const metadata = new Metadata().name(name).about(about).picture(avatarPictureUrl);
-
     const res = await this.nostrClient.setMetadata(metadata);
+    await this.nostrClient.disconnect();
     return { eventId: res.id.toBech32() };
   }
 

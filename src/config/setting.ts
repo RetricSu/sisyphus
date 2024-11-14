@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import envPaths from './env-path';
+import { logger } from '../logger';
 
 const paths = envPaths('sisyphus');
 
@@ -32,7 +33,7 @@ export interface Settings {
   };
   IPCSocketPathRootFolder: string;
   privkey: {
-    filePath: string;
+    rootFolder: string;
   };
   prompt: {
     rootFolder: string;
@@ -53,7 +54,7 @@ export const defaultSettings: Settings = {
   },
   IPCSocketPathRootFolder: path.resolve(dataPath, 'ipc/'),
   privkey: {
-    filePath: path.resolve(dataPath, 'secret/.privkey'),
+    rootFolder: path.resolve(dataPath, 'privkey/'),
   },
   prompt: {
     rootFolder: path.resolve(dataPath, 'prompt'),
@@ -76,7 +77,7 @@ export function readSettings(): Settings {
       return defaultSettings;
     }
   } catch (error) {
-    console.error('Error reading settings:', error);
+    logger.error('Error reading settings:', error);
     return defaultSettings;
   }
 }
@@ -87,7 +88,7 @@ export function writeSettings(settings: Settings): void {
     fs.writeFileSync(configPath, JSON.stringify(settings, null, 2));
     console.log('save new settings');
   } catch (error) {
-    console.error('Error writing settings:', error);
+    logger.error('Error writing settings:', error);
   }
 }
 
@@ -101,6 +102,11 @@ export function getDefaultIPCSocketPath(memoId: string) {
   const settings = readSettings();
   const tomlFile = path.resolve(settings.IPCSocketPathRootFolder, `${memoId}.socket`);
   return tomlFile;
+}
+
+export function getDefaultPrivkeyFilePath(memoId: string) {
+  const settings = readSettings();
+  return path.resolve(settings.privkey.rootFolder, `.${memoId}`);
 }
 
 function deepMerge(target: any, source: any): any {

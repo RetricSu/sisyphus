@@ -2,17 +2,16 @@
 import { Command } from 'commander';
 import { loadWasmSync } from '@rust-nostr/nostr-sdk';
 import { createTables } from './memory/database';
-import { Privkey } from './privkey';
 import { Prompt } from './prompt';
 import { chat } from './cmd/chat';
 import { Config, ConfigItem } from './cmd/config';
 import { buildIPCBot } from './cmd/ipc';
 import { getDefaultIPCSocketPath } from './config/setting';
+import { logger } from './logger';
 
 loadWasmSync();
 createTables();
 Prompt.init();
-Privkey.init();
 
 const version = require('../package.json').version;
 const description = require('../package.json').description;
@@ -79,3 +78,9 @@ program.parse(process.argv);
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
+
+// deal with program panic
+process.on('uncaughtException', (error) => {
+  logger.error(`uncaughtException ${error?.message}`);
+  process.exit(1);
+});

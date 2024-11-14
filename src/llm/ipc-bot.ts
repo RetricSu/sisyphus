@@ -4,6 +4,7 @@ import { getDefaultIPCSocketPath } from '../config/setting';
 import net from 'net';
 import fs from 'fs';
 import path from 'path';
+import { logger } from '../logger';
 
 export class IPCBot extends Agent {
   socketPath: string;
@@ -38,7 +39,7 @@ export class IPCBot extends Agent {
       });
 
       socket.on('end', () => {
-        console.log('disconnect from client-side');
+        logger.debug('disconnect from client-side');
       });
     });
     this.server = server;
@@ -55,8 +56,8 @@ export class IPCBot extends Agent {
     // start listening
     this.server
       .listen(this.socketPath, () => {
-        console.log(`IPC Bot Server Listening at ${this.socketPath}`);
-        console.log(`Waiting for connection...`);
+        logger.info(`IPC Bot Server Listening at ${this.socketPath}`);
+        logger.info(`Waiting for connection...`);
       })
       .on('error', (err) => {
         throw new Error(`can't start the server: ${err.message}`);
@@ -66,22 +67,22 @@ export class IPCBot extends Agent {
     // 1. deal with program exit
     process.on('exit', () => {
       this.server.close(() => {
-        console.log(`Sever closed, release socketPath at ${this.socketPath}`);
+        logger.debug(`Sever closed, release socketPath at ${this.socketPath}`);
         process.exit(0);
       });
     });
     // 2. deal with SIGINT eg Ctrl+C
     process.on('SIGINT', () => {
       this.server.close(() => {
-        console.log(`Sever closed, released socketPath at ${this.socketPath}`);
+        logger.debug(`Sever closed, released socketPath at ${this.socketPath}`);
         process.exit(0);
       });
     });
     // 3. deal with program panic
     process.on('uncaughtException', (error) => {
       this.server.close(() => {
-        console.log(`uncaughtException ${error?.message}`);
-        console.log(`Sever closed, released socketPath at ${this.socketPath}`);
+        logger.debug(`uncaughtException ${error?.message}`);
+        logger.debug(`Sever closed, released socketPath at ${this.socketPath}`);
         process.exit(0);
       });
     });
@@ -100,7 +101,7 @@ export class IPCBot extends Agent {
     });
 
     client.on('end', () => {
-      console.log('disconnect from IPC Sever.');
+      logger.info('disconnect from IPC Sever.');
     });
   }
 }

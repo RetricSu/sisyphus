@@ -18,7 +18,7 @@ export interface PromptFile {
   author?: string;
   tags?: string[];
   nostr?: {
-    eventId: string;
-    relays: string[];
+    eventId?: string;
+    relays?: string[];
   };
 }

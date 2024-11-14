@@ -14,6 +14,8 @@ import { timeToolBox } from '../tools/time';
 import { Privkey } from '../privkey';
 import { buildMemoryToolBox } from '../tools/memory';
 import fs from 'fs';
+import { logger } from '../logger';
+import { ToolCallResponse } from '../tools/type';
 
 const settings = readSettings();
 
@@ -56,6 +58,9 @@ export class Agent {
     this.memory = new Memory(this.memoId);
     const toolNames = promptFile.tools;
 
+    Privkey.init(this.memoId);
+    const privkey = Privkey.load(this.memoId);
+
     const {
       ckbBalanceToolBox,
       accountInfoToolBox,
@@ -65,7 +70,7 @@ export class Agent {
       readMentionNotesWithMe,
       publishProfileEvent,
       publishReplyNotesToEvent,
-    } = buildNosCKBToolBox(this.ckbNetwork, Privkey.load());
+    } = buildNosCKBToolBox(this.ckbNetwork, privkey, promptFile.nostr?.relays);
 
     const memoryToolBox = buildMemoryToolBox(this.memoId);
 
@@ -198,6 +203,12 @@ export class Agent {
     await this.saveMessageIntoMemoryIfEnable(message);
     this.messages.push(message.msg);
 
+    const debugToolCallResult = (res: ToolCallResponse) => {
+      logger.debug(
+        `tool-call[${res.name}] => ${res.status}, ${res.error ? JSON.stringify(res.error) : JSON.stringify(res.result)}`,
+      );
+    };
+
     if (isSTream) {
       const response = await this.ollama.chat({
         model: this.model,
@@ -217,9 +228,10 @@ export class Agent {
 
       if (checkIfToolCall(answer)) {
         // Add function response to the conversation
-        const toolCmsg = await this.tools.buildToolCallResponseCMessage(answer);
-        const message = new AMessage(this.memoId, toolCmsg.role, toolCmsg.content);
-        console.debug(message);
+        const toolMsg = await this.tools.buildToolCallResponseCMessage(answer);
+        const res: ToolCallResponse = JSON.parse(toolMsg.content);
+        debugToolCallResult(res);
+        const message = new AMessage(this.memoId, toolMsg.role, toolMsg.content);
         await this.saveMessageIntoMemoryIfEnable(message);
         return await this.call(message.msg, isSTream);
       }
@@ -237,10 +249,10 @@ export class Agent {
       // Process function calls made by the model
       if (response.message.tool_calls) {
         for (const tool of response.message.tool_calls) {
-          const toolCmsg = await this.tools.executeToolCall(tool);
-
-          const message = new AMessage(this.memoId, toolCmsg.role, toolCmsg.content);
-          console.debug(message);
+          const toolMsg = await this.tools.executeToolCall(tool);
+          const res: ToolCallResponse = JSON.parse(toolMsg.content);
+          debugToolCallResult(res);
+          const message = new AMessage(this.memoId, toolMsg.role, toolMsg.content);
           await this.saveMessageIntoMemoryIfEnable(message);
           // Add function response to the conversation
           this.messages.push(message.msg);

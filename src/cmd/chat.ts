@@ -1,4 +1,5 @@
 import { TerminalBot } from '../llm/terminal-bot';
+import { logger } from '../logger';
 
 export interface ChatProp {
   promptName?: string;
@@ -16,7 +17,7 @@ export async function chat({ promptName, saveMemory }: ChatProp) {
     }
     await brain.chat();
   } catch (error) {
-    console.error('some thing went wrong, ', error);
+    logger.error('some thing went wrong, ', error);
     process.exit(1);
   }
 }

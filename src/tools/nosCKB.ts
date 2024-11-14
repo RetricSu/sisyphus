@@ -45,8 +45,8 @@ export type PublishNostrProfileEventToolBoxType = ToolBox<
   ReturnType<NosCKB['publishProfileEvent']>
 >;
 
-export function buildNosCKBToolBox(network: Network, nostrPrivkey: string) {
-  const nosCKB = new NosCKB({ network, nostrPrivkey });
+export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relays: string[] = []) {
+  const nosCKB = new NosCKB({ network, nostrPrivkey, relays });
 
   const ckbBalanceToolBox: CKBBalanceToolBoxType = {
     fi: {
