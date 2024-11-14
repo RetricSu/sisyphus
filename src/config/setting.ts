@@ -105,7 +105,7 @@ export function getDefaultIPCSocketPath(memoId: string) {
 
 export function getDefaultPrivkeyFilePath(memoId: string) {
   const settings = readSettings();
-  return path.resolve(settings.privkey.rootFolder, `${memoId}.privkey`);
+  return path.resolve(settings.privkey.rootFolder, `.${memoId}`);
 }
 
 function deepMerge(target: any, source: any): any {
