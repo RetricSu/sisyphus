@@ -1,7 +1,7 @@
 import { AMessage } from '../memory/a-message';
 import { Agent } from './agent';
-import net from 'net';
 import { getDefaultIPCSocketPath } from '../config/setting';
+import net from 'net';
 import fs from 'fs';
 import path from 'path';
 
@@ -38,7 +38,7 @@ export class IPCBot extends Agent {
       });
 
       socket.on('end', () => {
-        console.log('客户端已断开连接');
+        console.log('disconnect from client-side');
       });
     });
     this.server = server;
@@ -55,48 +55,52 @@ export class IPCBot extends Agent {
     // start listening
     this.server
       .listen(this.socketPath, () => {
-        console.log(`服务器已启动，等待客户端连接: ${this.socketPath}`);
+        console.log(`IPC Bot Server Listening at ${this.socketPath}`);
+        console.log(`Waiting for connection...`);
       })
       .on('error', (err) => {
-        throw new Error(`无法启动服务器: ${err.message}`);
+        throw new Error(`can't start the server: ${err.message}`);
       });
 
-    // 处理进程退出时关闭服务器
+    // take care of the socketPath file descriptor release when program shutdown
+    // 1. deal with program exit
     process.on('exit', () => {
       this.server.close(() => {
-        console.log(`服务器已关闭，释放 socketPath ${this.socketPath}`);
-        process.exit(0); // 优雅退出
+        console.log(`Sever closed, release socketPath at ${this.socketPath}`);
+        process.exit(0);
       });
     });
-    // 处理 SIGINT 信号（如 Ctrl+C）
+    // 2. deal with SIGINT eg Ctrl+C
     process.on('SIGINT', () => {
       this.server.close(() => {
-        console.log(`服务器已关闭，释放 socketPath ${this.socketPath}`);
-        process.exit(0); // 优雅退出
+        console.log(`Sever closed, released socketPath at ${this.socketPath}`);
+        process.exit(0);
       });
     });
+    // 3. deal with program panic
     process.on('uncaughtException', (error) => {
       this.server.close(() => {
-        console.log(`uncaughtException ${error?.message}, 服务器已关闭，释放 socketPath ${this.socketPath}`);
-        process.exit(0); // 优雅退出
+        console.log(`uncaughtException ${error?.message}`);
+        console.log(`Sever closed, released socketPath at ${this.socketPath}`);
+        process.exit(0);
       });
     });
   }
 
   sendClientRequest(socketPath: string, initialMessage: string) {
     const client = net.createConnection(socketPath, () => {
-      client.write(initialMessage); // 发送消息
+      client.write(initialMessage); // send message
     });
 
     client.on('data', async (data) => {
       const requestText = data.toString();
       const msg = new AMessage(this.memoId, 'user', requestText);
       const resp = await this.call(msg.msg);
-      client.write(resp.msg.content); // 回复消息
+      client.write(resp.msg.content); // send response
     });
 
     client.on('end', () => {
-      console.log('与服务器的连接已断开');
+      console.log('disconnect from IPC Sever.');
     });
   }
 }
