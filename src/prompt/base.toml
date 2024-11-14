@@ -65,5 +65,4 @@ author = "retric" # optional
 tags = []         # optional
 
 [nostr] # optional
-eventId = ""
-relays = []
+relays = ['wss://relay.damus.io', 'wss://relay.nostr.band']

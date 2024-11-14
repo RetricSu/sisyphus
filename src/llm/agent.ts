@@ -68,7 +68,7 @@ export class Agent {
       readMentionNotesWithMe,
       publishProfileEvent,
       publishReplyNotesToEvent,
-    } = buildNosCKBToolBox(this.ckbNetwork, privkey);
+    } = buildNosCKBToolBox(this.ckbNetwork, privkey, promptFile.nostr?.relays);
 
     const memoryToolBox = buildMemoryToolBox(this.memoId);
 
