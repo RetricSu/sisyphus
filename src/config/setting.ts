@@ -32,7 +32,7 @@ export interface Settings {
   };
   IPCSocketPathRootFolder: string;
   privkey: {
-    filePath: string;
+    rootFolder: string;
   };
   prompt: {
     rootFolder: string;
@@ -53,7 +53,7 @@ export const defaultSettings: Settings = {
   },
   IPCSocketPathRootFolder: path.resolve(dataPath, 'ipc/'),
   privkey: {
-    filePath: path.resolve(dataPath, 'secret/.privkey'),
+    rootFolder: path.resolve(dataPath, 'privkey/'),
   },
   prompt: {
     rootFolder: path.resolve(dataPath, 'prompt'),
@@ -101,6 +101,11 @@ export function getDefaultIPCSocketPath(memoId: string) {
   const settings = readSettings();
   const tomlFile = path.resolve(settings.IPCSocketPathRootFolder, `${memoId}.socket`);
   return tomlFile;
+}
+
+export function getDefaultPrivkeyFilePath(memoId: string) {
+  const settings = readSettings();
+  return path.resolve(settings.privkey.rootFolder, `${memoId}.privkey`);
 }
 
 function deepMerge(target: any, source: any): any {

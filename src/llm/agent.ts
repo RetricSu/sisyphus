@@ -56,6 +56,9 @@ export class Agent {
     this.memory = new Memory(this.memoId);
     const toolNames = promptFile.tools;
 
+    Privkey.init(this.memoId);
+    const privkey = Privkey.load(this.memoId);
+
     const {
       ckbBalanceToolBox,
       accountInfoToolBox,
@@ -65,7 +68,7 @@ export class Agent {
       readMentionNotesWithMe,
       publishProfileEvent,
       publishReplyNotesToEvent,
-    } = buildNosCKBToolBox(this.ckbNetwork, Privkey.load());
+    } = buildNosCKBToolBox(this.ckbNetwork, privkey);
 
     const memoryToolBox = buildMemoryToolBox(this.memoId);
 

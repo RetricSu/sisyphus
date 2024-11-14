@@ -2,7 +2,6 @@
 import { Command } from 'commander';
 import { loadWasmSync } from '@rust-nostr/nostr-sdk';
 import { createTables } from './memory/database';
-import { Privkey } from './privkey';
 import { Prompt } from './prompt';
 import { chat } from './cmd/chat';
 import { Config, ConfigItem } from './cmd/config';
@@ -12,7 +11,6 @@ import { getDefaultIPCSocketPath } from './config/setting';
 loadWasmSync();
 createTables();
 Prompt.init();
-Privkey.init();
 
 const version = require('../package.json').version;
 const description = require('../package.json').description;
