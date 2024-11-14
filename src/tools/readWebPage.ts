@@ -2,6 +2,7 @@ import { launch, Page } from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
 import { AvailableToolName, ToolBox } from './type';
+import { logger } from '../logger';
 
 export interface ReadWebPageToolExecParameter {
   url: string;
@@ -56,7 +57,7 @@ async function waitTillHTMLRendered(page: Page, timeout = 30000) {
     else countStableSizeIterations = 0; //reset the counter
 
     if (countStableSizeIterations >= minStableSizeIterations) {
-      //console.log("Page rendered fully..");
+      logger.debug('Page rendered fully..');
       break;
     }
 

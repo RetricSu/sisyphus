@@ -7,6 +7,7 @@ import { chat } from './cmd/chat';
 import { Config, ConfigItem } from './cmd/config';
 import { buildIPCBot } from './cmd/ipc';
 import { getDefaultIPCSocketPath } from './config/setting';
+import { logger } from './logger';
 
 loadWasmSync();
 createTables();
@@ -80,6 +81,6 @@ if (!process.argv.slice(2).length) {
 
 // deal with program panic
 process.on('uncaughtException', (error) => {
-  console.log(`uncaughtException ${error?.message}`);
+  logger.error(`uncaughtException ${error?.message}`);
   process.exit(1);
 });

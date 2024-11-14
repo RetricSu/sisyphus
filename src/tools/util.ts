@@ -1,3 +1,4 @@
+import { logger } from '../logger';
 import { ToolCallRequest } from './type';
 
 export function checkIfToolCall(content: string) {
@@ -33,7 +34,7 @@ export function parseToolCall(input: string) {
       const parsedJson = JSON.parse(match[0]);
       return parsedJson as ToolCallRequest;
     } catch (error) {
-      console.error('Failed to parse JSON:', error);
+      logger.error('Failed to parse JSON:', error);
     }
   }
 
