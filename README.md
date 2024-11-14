@@ -90,7 +90,22 @@ sisyphus --version
 sisyphus chat
 ```
 
-### Update Prompts
+## Privkey
+
+Each prompt file/ MemoId has its own privkey to their Nostr and CKB account.
+
+> [!WARNING]
+> The privkey is stored in a plain text file without any encryption for convenient now.
+> Please USE AT YOUR OWN RISK
+
+```sh
+sisyphus config list
+```
+
+the key file name is `.[your-agent-memo-id]` under `privkey.rootFolder`.
+
+
+## Update Prompts
 
 ```sh
 sisyphus config list
@@ -99,3 +114,9 @@ sisyphus config list
 Locate the prompt store position from the config and edit the `.toml` file to update prompts.
 
 [Example Prompt Config](/src/prompt/base.toml)
+
+## Set Logger Level
+
+```sh
+LOG_LEVEL=debug sisyphus chat
+```
