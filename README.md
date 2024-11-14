@@ -118,5 +118,5 @@ Locate the prompt store position from the config and edit the `.toml` file to up
 ## Set Logger Level
 
 ```sh
-LOG_LEVEL=debug sisyphus chat
+LOG_LEVEL=info sisyphus chat
 ```
