@@ -77,3 +77,9 @@ program.parse(process.argv);
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
+
+// deal with program panic
+process.on('uncaughtException', (error) => {
+  console.log(`uncaughtException ${error?.message}`);
+  process.exit(1);
+});
