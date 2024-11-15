@@ -1,4 +1,4 @@
-import { Tool as ToolInterface } from 'ollama';
+import { Tool as OllamaTool } from 'ollama';
 
 export enum AvailableToolName {
   getCurrentTimeFromOs = 'get_current_time_from_os',
@@ -22,6 +22,7 @@ export interface ToolBox<T extends any[] = any[], R = any> {
 
 export type ToolBoxSet = Record<AvailableToolName, ToolBox>;
 
+export type ToolInterface = OllamaTool;
 export interface ToolCallRequest {
   name: string;
   parameters: {
