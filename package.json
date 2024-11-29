@@ -43,6 +43,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@ckb-ccc/core": "0.1.0-alpha.5",
     "@ckb-ccc/nip07": "0.0.16-alpha.5",
     "@iarna/toml": "^2.2.5",
