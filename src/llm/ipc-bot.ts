@@ -5,7 +5,6 @@ import net from 'net';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../logger';
-import { Message } from '../core/type';
 
 export class IPCBot extends Agent {
   socketPath: string;
@@ -35,7 +34,7 @@ export class IPCBot extends Agent {
       socket.on('data', async (data) => {
         const requestText = data.toString();
         const msg = new AMessage(this.memoId, 'user', requestText);
-        const resp = await this.call(msg.msg as Message);
+        const resp = await this.call(msg.msg);
         socket.write(resp.msg.content);
       });
 
@@ -97,7 +96,7 @@ export class IPCBot extends Agent {
     client.on('data', async (data) => {
       const requestText = data.toString();
       const msg = new AMessage(this.memoId, 'user', requestText);
-      const resp = await this.call(msg.msg as Message);
+      const resp = await this.call(msg.msg);
       client.write(resp.msg.content); // send response
     });
 

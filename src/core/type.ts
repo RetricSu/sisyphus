@@ -1,20 +1,11 @@
 import { ToolBox } from '../tools/type';
+import { CoreMessage } from 'ai';
 
 export interface AIInterface {
   chat: (props: AIChatProp) => Promise<AIChatResponse>;
 }
 
-export enum MessageRole {
-  system = 'system',
-  user = 'user',
-  assistant = 'assistant',
-  tool = 'tool',
-}
-
-export interface Message {
-  role: MessageRole;
-  content: string;
-}
+export type Message = CoreMessage;
 
 export interface AIChatProp {
   msgs: Message[];
@@ -24,7 +15,7 @@ export interface AIChatProp {
 }
 
 export interface AIChatResponse {
-  message: Message;
+  msgs: Message[];
 }
 
 export interface ToolCallResponse {

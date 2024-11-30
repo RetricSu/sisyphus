@@ -11,7 +11,7 @@ import { timeToolBox } from '../tools/time';
 import { Privkey } from '../privkey';
 import { buildMemoryToolBox } from '../tools/memory';
 import fs from 'fs';
-import { AIInterface, Message, MessageRole } from '../core/type';
+import { AIInterface, Message } from '../core/type';
 import { OllamaAdapter } from '../core/ollama';
 import { ToolBox } from '../tools/type';
 
@@ -176,7 +176,7 @@ export class Agent {
     const promptFile = Prompt.Reader.parseFrom(this.promptName);
     for (const p of promptFile.prompts) {
       const msg: Message = {
-        role: p.role as MessageRole,
+        role: p.role,
         content: p.content,
       };
       messages.push(msg);
@@ -196,18 +196,31 @@ export class Agent {
     }
   }
 
-  async call(m: Message, isSTream: boolean | undefined = undefined): Promise<AMessage> {
-    const message = new AMessage(this.memoId, m.role, m.content);
+  async call(m: { role: string; content: string }, isSTream: boolean | undefined = undefined): Promise<AMessage> {
+    const message = new AMessage(this.memoId, m.role, m.content as string);
     await this.saveMessageIntoMemoryIfEnable(message);
     this.messages.push(message.msg as Message);
 
-    const response = await this.ai.chat({
+    const { msgs } = await this.ai.chat({
       model: this.model,
       msgs: this.messages,
-      isSTream: false,
+      isSTream: isSTream ?? false,
       tools: this.tools,
     });
-    const answer = response.message.content;
+
+    // todo: handle details of the msgs
+    const lastReplyMsgContent = msgs[msgs.length - 1].content;
+    let answer: string = '';
+    if (typeof lastReplyMsgContent === 'string') {
+      answer = lastReplyMsgContent;
+    } else {
+      if (Array.isArray(lastReplyMsgContent)) {
+        answer += lastReplyMsgContent.filter((c) => c.type === 'text').map((c) => c.text);
+      } else {
+        answer = JSON.stringify(lastReplyMsgContent);
+      }
+    }
+
     if (this.pipeResponse) {
       await this.pipeResponse(this.name, answer);
     }

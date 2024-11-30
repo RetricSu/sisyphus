@@ -3,7 +3,6 @@ import Readline from 'readline/promises';
 import { stdOutWriteSync } from './util';
 import { Agent } from './agent';
 import { AMessage } from '../memory/a-message';
-import { Message } from '../core/type';
 
 export class TerminalBot extends Agent {
   pipeResponse?: ((name: string, word: string) => any) | undefined;
@@ -33,7 +32,7 @@ export class TerminalBot extends Agent {
 
       await stdOutWriteSync(`>>> ${this.name}: `);
       const msg = new AMessage(this.memoId, 'user', input);
-      await this.call(msg.msg as Message);
+      await this.call(msg.msg);
     }
   }
 }

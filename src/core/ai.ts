@@ -1,12 +1,12 @@
-import { MessageRole, ToolCallResponse } from './type';
+import { ToolCallResponse } from './type';
 import { CoreTool, tool } from 'ai';
 import { ToolBox } from '../tools/type';
 import { logger } from '../logger';
 
 export class AI {
-  role: MessageRole;
+  role: string;
 
-  constructor(role: MessageRole = MessageRole.assistant) {
+  constructor(role = 'assistant') {
     this.role = role;
   }
 
@@ -43,7 +43,7 @@ export class AI {
 
   debugToolCall(name: string, resp: ToolCallResponse) {
     logger.debug(
-      `tool-call[${name}] => ${resp.status}, ${resp.error ? JSON.stringify(resp.error) : JSON.stringify(resp.result)}`,
+      `[${name}] => ${resp.status}, ${resp.error ? JSON.stringify(resp.error) : JSON.stringify(resp.result)}\n`,
     );
   }
 }

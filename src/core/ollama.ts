@@ -1,4 +1,4 @@
-import { AIInterface, AIChatProp, AIChatResponse, MessageRole } from './type';
+import { AIInterface, AIChatProp, AIChatResponse } from './type';
 import { createOllama, OllamaProvider } from 'ollama-ai-provider';
 import { generateText } from 'ai';
 import { AI } from './ai';
@@ -11,22 +11,16 @@ export class OllamaAdapter extends AI implements AIInterface {
     this.client = createOllama({ baseURL: apiUrl });
   }
 
-  async chat({ isSTream, msgs, model, tools }: AIChatProp): Promise<AIChatResponse> {
+  async chat({ isSTream: _isSTream, msgs, model, tools }: AIChatProp): Promise<AIChatResponse> {
     const result = await generateText({
       model: this.client(model),
       messages: msgs as any,
       tools: this.fromTools(tools),
-      maxSteps: 3,
+      maxSteps: 5,
     });
 
-    const message = {
-      role: MessageRole.assistant,
-      content: result.text,
-    };
-    result.response.messages;
-
     return {
-      message,
+      msgs: result.response.messages,
     };
   }
 }

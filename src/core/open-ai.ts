@@ -1,4 +1,4 @@
-import { AIInterface, AIChatProp, AIChatResponse, MessageRole } from './type';
+import { AIInterface, AIChatProp, AIChatResponse } from './type';
 import { createOpenAI, OpenAIProvider } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { AI } from './ai';
@@ -11,7 +11,7 @@ export class OpenAIAdapter extends AI implements AIInterface {
     this.client = createOpenAI({ baseURL: apiUrl, apiKey });
   }
 
-  async chat({ isSTream, msgs, model, tools }: AIChatProp): Promise<AIChatResponse> {
+  async chat({ isSTream: _isSTream, msgs, model, tools }: AIChatProp): Promise<AIChatResponse> {
     const result = await generateText({
       model: this.client(model),
       messages: msgs as any,
@@ -19,12 +19,8 @@ export class OpenAIAdapter extends AI implements AIInterface {
       maxSteps: 3,
     });
 
-    const message = {
-      role: MessageRole.assistant,
-      content: result.text,
-    };
     return {
-      message,
+      msgs: result.response.messages,
     };
   }
 }
