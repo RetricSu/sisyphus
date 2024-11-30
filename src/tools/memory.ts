@@ -1,6 +1,7 @@
 import { AvailableToolName, ToolBox } from './type';
 import { Memory, MemoryMetadata } from '../memory/long-term';
 import { Message } from 'ollama';
+import z from 'zod';
 
 export interface MemoryToolExecParameter {
   text: string;
@@ -27,6 +28,9 @@ export function buildMemoryToolBox(memoId: string) {
         },
       },
     },
+    params: z.object({
+      text: z.string().describe('The text to search in the memory'),
+    }),
     exec: async ({ text }: MemoryToolExecParameter) => {
       const memory = new Memory(memoId);
       const results = await memory.query({ searchString: text, limit: 5 });

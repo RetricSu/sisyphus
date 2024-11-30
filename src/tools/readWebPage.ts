@@ -3,6 +3,7 @@ import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
 import { AvailableToolName, ToolBox } from './type';
 import { logger } from '../logger';
+import z from 'zod';
 
 export interface ReadWebPageToolExecParameter {
   url: string;
@@ -28,6 +29,9 @@ export const readWebPageToolBox: ReadWebPageToolBoxType = {
       },
     },
   },
+  params: z.object({
+    url: z.string().describe('the url of the web page requesting to read'),
+  }),
   exec: async ({ url }: ReadWebPageToolExecParameter) => {
     const browser = await launch();
     const page = await browser.newPage();

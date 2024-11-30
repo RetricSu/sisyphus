@@ -43,11 +43,13 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^1.0.5",
     "@anthropic-ai/sdk": "^0.32.1",
     "@ckb-ccc/core": "0.1.0-alpha.5",
     "@ckb-ccc/nip07": "0.0.16-alpha.5",
     "@iarna/toml": "^2.2.5",
     "@rust-nostr/nostr-sdk": "latest",
+    "ai": "^4.0.9",
     "better-sqlite3": "^11.2.1",
     "chromadb": "^1.9.2",
     "chromadb-default-embed": "^2.13.2",
@@ -55,8 +57,10 @@
     "dompurify": "^3.1.6",
     "jsdom": "^25.0.0",
     "ollama": "^0.5.8",
+    "ollama-ai-provider": "^1.0.0",
     "openai": "^4.72.0",
     "puppeteer": "^23.3.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "zod": "^3.23.8"
   }
 }

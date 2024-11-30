@@ -3,6 +3,7 @@ import { HexNoPrefix, NosCKB, TransferOption } from '../sdk';
 import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
 import { Network } from '../offckb/offckb.config';
+import z from 'zod';
 
 export interface CKBBalanceToolExecParameter {}
 export interface PublishNoteToolExecParameter {
@@ -61,6 +62,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({}),
     exec: async (_p: CKBBalanceToolExecParameter) => {
       return await nosCKB.getBalance();
     },
@@ -84,6 +86,9 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({
+      text: z.string().describe('the text content of the Nostr short post to publish'),
+    }),
     exec: async ({ text }: PublishNoteToolExecParameter) => {
       return await nosCKB.publishNote(text);
     },
@@ -115,6 +120,11 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({
+      toAddress: z.string().describe('the receiver CKB address'),
+      amountInCKB: z.string().describe('the amount hex number string of CKB'),
+      feeRate: z.string().optional().describe('the fee rate for the CKB transfer transaction, default to 1000'),
+    }),
     exec: async (opt: TransferOption) => {
       const txHash = await nosCKB.transfer(opt);
       return { txHash };
@@ -134,6 +144,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({}),
     exec: async (_p: AccountInfoToolExecParameter) => {
       return await nosCKB.getMyAccountInfo();
     },
@@ -157,6 +168,9 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({
+      kind: z.string().describe('event kind, a number string, to fetch the event of specific type'),
+    }),
     exec: async ({ kind }: ReadNostrEventsToolExecParameter) => {
       const f = {
         kinds: [+kind],
@@ -179,6 +193,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({}),
     exec: async (_p: ReadNostrMentionNotesToolExecParameter) => {
       return await nosCKB.readMentionNotesWithMe();
     },
@@ -206,6 +221,10 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({
+      text: z.string().describe('the reply content text'),
+      eventId: z.string().describe('the id of the event to reply, hex string'),
+    }),
     exec: async ({ text, eventId }: PublishNostrReplyNotesToEventToolExecParameter) => {
       return await nosCKB.publishReplyNotesToEvent(text, eventId);
     },
@@ -237,6 +256,11 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
         },
       },
     },
+    params: z.object({
+      name: z.string().describe('the name of your nostr account profile'),
+      about: z.string().describe('the introduction/about me/description of yourself in the nostr account profile'),
+      avatarPictureUrl: z.string().optional().describe('the avatar picture url of your nostr profile'),
+    }),
     exec: async ({ name, about, avatarPictureUrl }: PublishNostrProfileEventToolExecParameter) => {
       return await nosCKB.publishProfileEvent(name, about, avatarPictureUrl);
     },

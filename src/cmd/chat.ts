@@ -17,7 +17,8 @@ export async function chat({ promptName, saveMemory }: ChatProp) {
     }
     await brain.chat();
   } catch (error) {
-    logger.error('some thing went wrong, ', error);
+    logger.error('some thing went wrong...');
+    console.log(error);
     process.exit(1);
   }
 }

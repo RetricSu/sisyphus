@@ -1,4 +1,5 @@
 import { Tool as OllamaTool } from 'ollama';
+import z, { Schema } from 'zod';
 
 export enum AvailableToolName {
   getCurrentTimeFromOs = 'get_current_time_from_os',
@@ -18,6 +19,7 @@ export enum AvailableToolName {
 export interface ToolBox<T extends any[] = any[], R = any> {
   fi: ToolInterface;
   exec: (...args: T) => R;
+  params: z.ZodTypeAny | Schema<any>;
 }
 
 export type ToolBoxSet = Record<AvailableToolName, ToolBox>;

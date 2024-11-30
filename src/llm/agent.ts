@@ -1,10 +1,7 @@
-import { Message, Ollama } from 'ollama';
 import { readSettings } from '../config/setting';
 import { spawn } from 'child_process';
 import { Prompt } from '../prompt';
 import { AMessage } from '../memory/a-message';
-import { checkIfToolCall } from '../tools/util';
-import { Tools } from '../tools/tools';
 import { Memory } from '../memory/long-term';
 import { Network } from '../offckb/offckb.config';
 import { buildNosCKBToolBox } from '../tools/nosCKB';
@@ -14,8 +11,9 @@ import { timeToolBox } from '../tools/time';
 import { Privkey } from '../privkey';
 import { buildMemoryToolBox } from '../tools/memory';
 import fs from 'fs';
-import { logger } from '../logger';
-import { ToolCallResponse } from '../tools/type';
+import { AIInterface, Message, MessageRole } from '../core/type';
+import { OllamaAdapter } from '../core/ollama';
+import { ToolBox } from '../tools/type';
 
 const settings = readSettings();
 
@@ -28,10 +26,10 @@ export interface AgentProp {
 export class Agent {
   name: string;
   role: string;
-  ollama: Ollama;
+  ai: AIInterface;
   apiUrl: string;
   model: string;
-  tools: Tools;
+  tools: ToolBox[];
   saveMemory: boolean;
   promptName: string;
   memoId: string;
@@ -52,7 +50,7 @@ export class Agent {
     this.name = promptFile.name;
     this.apiUrl = promptFile.llm.apiUrl;
     this.model = promptFile.llm.model;
-    this.ollama = new Ollama({ host: this.apiUrl });
+    this.ai = new OllamaAdapter(this.apiUrl);
     this.ckbNetwork = promptFile.ckbNetwork;
     this.memoId = promptFile.memoId;
     this.memory = new Memory(this.memoId);
@@ -89,7 +87,7 @@ export class Agent {
       memoryToolBox,
     ].filter((t) => toolNames.includes(t.fi.function.name));
 
-    this.tools = new Tools(toolBoxes);
+    this.tools = toolBoxes;
   }
 
   isLLMServerRunning(): Promise<boolean> {
@@ -178,7 +176,7 @@ export class Agent {
     const promptFile = Prompt.Reader.parseFrom(this.promptName);
     for (const p of promptFile.prompts) {
       const msg: Message = {
-        role: p.role,
+        role: p.role as MessageRole,
         content: p.content,
       };
       messages.push(msg);
@@ -201,86 +199,21 @@ export class Agent {
   async call(m: Message, isSTream: boolean | undefined = undefined): Promise<AMessage> {
     const message = new AMessage(this.memoId, m.role, m.content);
     await this.saveMessageIntoMemoryIfEnable(message);
-    this.messages.push(message.msg);
+    this.messages.push(message.msg as Message);
 
-    const debugToolCallResult = (res: ToolCallResponse) => {
-      logger.debug(
-        `tool-call[${res.name}] => ${res.status}, ${res.error ? JSON.stringify(res.error) : JSON.stringify(res.result)}`,
-      );
-    };
-
-    if (isSTream) {
-      const response = await this.ollama.chat({
-        model: this.model,
-        messages: this.messages,
-        stream: isSTream as any,
-        tools: this.tools.toolBox.map((tool) => tool.fi),
-      });
-
-      let answer: string = '';
-      for await (const part of response) {
-        const words = part.message.content;
-        if (this.pipeResponse) {
-          await this.pipeResponse(this.name, words);
-        }
-        answer += words;
-      }
-
-      if (checkIfToolCall(answer)) {
-        // Add function response to the conversation
-        const toolMsg = await this.tools.buildToolCallResponseCMessage(answer);
-        const res: ToolCallResponse = JSON.parse(toolMsg.content);
-        debugToolCallResult(res);
-        const message = new AMessage(this.memoId, toolMsg.role, toolMsg.content);
-        await this.saveMessageIntoMemoryIfEnable(message);
-        return await this.call(message.msg, isSTream);
-      }
-
-      const resMessage = new AMessage(this.memoId, this.role, answer);
-      await this.saveMessageIntoMemoryIfEnable(resMessage);
-      this.messages.push(resMessage.msg);
-      return resMessage;
-    } else {
-      const response = await this.ollama.chat({
-        model: this.model,
-        messages: this.messages,
-        tools: this.tools.toolBox.map((tool) => tool.fi),
-      });
-      // Process function calls made by the model
-      if (response.message.tool_calls) {
-        for (const tool of response.message.tool_calls) {
-          const toolMsg = await this.tools.executeToolCall(tool);
-          const res: ToolCallResponse = JSON.parse(toolMsg.content);
-          debugToolCallResult(res);
-          const message = new AMessage(this.memoId, toolMsg.role, toolMsg.content);
-          await this.saveMessageIntoMemoryIfEnable(message);
-          // Add function response to the conversation
-          this.messages.push(message.msg);
-        }
-
-        const finalResp = await this.ollama.chat({
-          model: this.model,
-          messages: this.messages,
-          tools: this.tools.toolBox.map((tool) => tool.fi),
-        });
-        const answer = finalResp.message.content;
-        if (this.pipeResponse) {
-          await this.pipeResponse(this.name, answer);
-        }
-        const resMessage = new AMessage(this.memoId, this.role, answer);
-        await this.saveMessageIntoMemoryIfEnable(resMessage);
-        this.messages.push(resMessage.msg);
-        return resMessage;
-      }
-
-      const answer = response.message.content;
-      if (this.pipeResponse) {
-        await this.pipeResponse(this.name, answer);
-      }
-      const resMessage = new AMessage(this.memoId, this.role, answer);
-      await this.saveMessageIntoMemoryIfEnable(resMessage);
-      this.messages.push(resMessage.msg);
-      return resMessage;
+    const response = await this.ai.chat({
+      model: this.model,
+      msgs: this.messages,
+      isSTream: false,
+      tools: this.tools,
+    });
+    const answer = response.message.content;
+    if (this.pipeResponse) {
+      await this.pipeResponse(this.name, answer);
     }
+    const resMessage = new AMessage(this.memoId, this.role, answer);
+    await this.saveMessageIntoMemoryIfEnable(resMessage);
+    this.messages.push(resMessage.msg as Message);
+    return resMessage;
   }
 }
