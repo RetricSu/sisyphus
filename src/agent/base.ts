@@ -14,6 +14,8 @@ import fs from 'fs';
 import { AIInterface, Message } from '../core/type';
 import { OllamaAdapter } from '../core/ollama';
 import { ToolBox } from '../tools/type';
+import { OpenAIAdapter } from '../core/open-ai';
+import { AnthropicAdapter } from '../core/anthropic';
 
 const settings = readSettings();
 
@@ -28,6 +30,7 @@ export class Agent {
   role: string;
   ai: AIInterface;
   apiUrl: string;
+  apiKey: string | undefined;
   model: string;
   tools: ToolBox[];
   saveMemory: boolean;
@@ -49,12 +52,33 @@ export class Agent {
     const promptFile = Prompt.Reader.parseFrom(this.promptName);
     this.name = promptFile.name;
     this.apiUrl = promptFile.llm.apiUrl;
+    this.apiKey = promptFile.llm.apiKey;
     this.model = promptFile.llm.model;
-    this.ai = new OllamaAdapter(this.apiUrl);
     this.ckbNetwork = promptFile.ckbNetwork;
     this.memoId = promptFile.memoId;
     this.memory = new Memory(this.memoId);
     const toolNames = promptFile.tools;
+
+    switch (promptFile.llm.provider) {
+      case 'ollama':
+        this.ai = new OllamaAdapter(this.apiUrl);
+        break;
+
+      case 'openai':
+        if (this.apiKey == null) throw new Error('openai requires apiKey!');
+        this.ai = new OpenAIAdapter(this.apiKey, this.apiUrl);
+        break;
+
+      case 'anthropic':
+        if (this.apiKey == null) throw new Error('anthropic requires apiKey!');
+        this.ai = new AnthropicAdapter(this.apiKey, this.apiUrl);
+        break;
+
+      default:
+        throw new Error(
+          `invalid provider from prompt, ${promptFile.llm.provider}, provider must be 'ollama', 'openai' or 'anthropic'`,
+        );
+    }
 
     Privkey.init(this.memoId);
     const privkey = Privkey.load(this.memoId);
@@ -88,44 +112,6 @@ export class Agent {
     ].filter((t) => toolNames.includes(t.fi.function.name));
 
     this.tools = toolBoxes;
-  }
-
-  isLLMServerRunning(): Promise<boolean> {
-    // make a http get request to this.apiUrl to check if it response with "Ollama is running"
-    return fetch(`${this.apiUrl}`)
-      .then((response) => response.text())
-      .then((data) => data === 'Ollama is running')
-      .catch(() => {
-        return false;
-      });
-  }
-
-  startLLMServer() {
-    return new Promise((resolve: (val: string) => void, reject: (error: string) => void) => {
-      const child = spawn('ollama', ['serve'], {
-        env: { ...process.env, OLLAMA_HOST: this.apiUrl },
-      });
-
-      // Listen to the stdout of the process
-      child.stdout.on('data', (data) => {
-        const output = data.toString();
-        resolve(output); // Resolve when any data is received
-      });
-
-      child.stderr.on('data', (data) => {
-        resolve(data); // Resolve when any data is received
-      });
-
-      child.on('close', (code) => {
-        if (code !== 0) {
-          reject(`Process exited with code ${code}`);
-        }
-      });
-
-      child.on('error', (error) => {
-        reject(`Process error: ${error.message}`);
-      });
-    });
   }
 
   isChromaServerRunning(): Promise<boolean> {

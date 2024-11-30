@@ -1,5 +1,5 @@
 import { AMessage } from '../memory/a-message';
-import { Agent } from './agent';
+import { Agent } from './base';
 import { getDefaultIPCSocketPath } from '../config/setting';
 import net from 'net';
 import fs from 'fs';

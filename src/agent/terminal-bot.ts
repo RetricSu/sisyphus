@@ -1,7 +1,7 @@
 import process from 'process';
 import Readline from 'readline/promises';
 import { stdOutWriteSync } from './util';
-import { Agent } from './agent';
+import { Agent } from './base';
 import { AMessage } from '../memory/a-message';
 
 export class TerminalBot extends Agent {

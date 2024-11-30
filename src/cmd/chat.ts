@@ -1,4 +1,4 @@
-import { TerminalBot } from '../llm/terminal-bot';
+import { TerminalBot } from '../agent/terminal-bot';
 import { logger } from '../logger';
 
 export interface ChatProp {
@@ -7,15 +7,12 @@ export interface ChatProp {
 }
 
 export async function chat({ promptName, saveMemory }: ChatProp) {
-  const brain = new TerminalBot({ promptName, saveMemory });
+  const bot = new TerminalBot({ promptName, saveMemory });
   try {
-    if (!(await brain.isChromaServerRunning())) {
-      await brain.startChromaServer();
+    if (!(await bot.isChromaServerRunning())) {
+      await bot.startChromaServer();
     }
-    if (!(await brain.isLLMServerRunning())) {
-      await brain.startLLMServer();
-    }
-    await brain.chat();
+    await bot.chat();
   } catch (error) {
     logger.error('some thing went wrong...');
     console.log(error);

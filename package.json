@@ -43,6 +43,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.2",
     "@ai-sdk/openai": "^1.0.5",
     "@ckb-ccc/core": "0.1.0-alpha.5",
     "@ckb-ccc/nip07": "0.0.16-alpha.5",

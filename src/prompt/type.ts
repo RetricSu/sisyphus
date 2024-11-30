@@ -14,6 +14,8 @@ export interface PromptFile {
   llm: {
     apiUrl: string;
     model: string;
+    provider: 'ollama' | 'openai' | 'anthropic';
+    apiKey?: string;
   };
   author?: string;
   tags?: string[];
