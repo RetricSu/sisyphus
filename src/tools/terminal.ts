@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import { AvailableToolName, ToolBox } from './type';
+import z from 'zod';
 
 export interface TerminalToolExecParameter {
   command: string;
@@ -25,6 +26,9 @@ export const terminalToolBox: TerminalToolBoxType = {
       },
     },
   },
+  params: z.object({
+    command: z.string().describe('The command to exec in the linux terminal'),
+  }),
   exec: ({ command }: TerminalToolExecParameter) => {
     const result = execSync(command);
     return result.toString('utf-8');

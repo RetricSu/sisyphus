@@ -1,3 +1,4 @@
+import z from 'zod';
 import { AvailableToolName, ToolBox } from './type';
 
 export interface TimeToolExecParameter {}
@@ -17,6 +18,7 @@ export const timeToolBox: TimeToolBoxType = {
       },
     },
   },
+  params: z.object({}),
   exec: (_p: TimeToolExecParameter) => {
     const date = new Date();
     return date.toISOString();

@@ -1,4 +1,4 @@
-import { IPCBot } from '../llm/ipc-bot';
+import { IPCBot } from '../agent/ipc-bot';
 
 export interface buildIPCBotProp {
   promptName: string;
@@ -12,9 +12,6 @@ export async function buildIPCBot({ promptName, saveMemory, socketPath }: buildI
   try {
     if (!(await bot.isChromaServerRunning())) {
       await bot.startChromaServer();
-    }
-    if (!(await bot.isLLMServerRunning())) {
-      await bot.startLLMServer();
     }
 
     return bot;
