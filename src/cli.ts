@@ -19,9 +19,21 @@ const description = require('../package.json').description;
 const program = new Command();
 program.name('sisyphus').description(description).version(version);
 
+program
+  .command('chat')
+  .description('chat with AI Agent through the command line')
+  .option('-c, --clean', 'clean chat without saving to memory')
+  .option('--prompt <prompt>', 'Specific the prompt file name', undefined)
+  .action(async (opt) => {
+    const promptName = opt.prompt;
+    const saveMemory = opt.clean != null ? !opt.clean : undefined;
+
+    return await chat({ promptName, saveMemory });
+  });
+
 const ipcCommand = program
   .command('ipc')
-  .description('Run IPC Bot')
+  .description('make two AI Agents talk to each other in the same computer')
   .action(() => {
     console.log('IPC command called. Use "ipc send" or "ipc listen".');
   });
@@ -53,18 +65,6 @@ ipcCommand
     }
     const bot = await buildIPCBot({ promptName, saveMemory: false });
     bot.sendClientRequest(socketPath, message);
-  });
-
-program
-  .command('chat')
-  .description('Chat with user through the command line')
-  .option('-c, --clean', 'clean chat without saving to memory')
-  .option('--prompt <prompt>', 'Specific the prompt file name', undefined)
-  .action(async (opt) => {
-    const promptName = opt.prompt;
-    const saveMemory = opt.clean != null ? !opt.clean : undefined;
-
-    return await chat({ promptName, saveMemory });
   });
 
 program
