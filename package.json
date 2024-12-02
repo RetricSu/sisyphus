@@ -11,7 +11,8 @@
     "url": "git+https://github.com/retricsu/sisyphus.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "pnpm-lock.yaml"
   ],
   "private": false,
   "publishConfig": {
@@ -48,7 +49,7 @@
     "@ckb-ccc/core": "0.1.0-alpha.5",
     "@ckb-ccc/nip07": "0.0.16-alpha.5",
     "@iarna/toml": "^2.2.5",
-    "@rust-nostr/nostr-sdk": "latest",
+    "@rust-nostr/nostr-sdk": "0.35.0",
     "ai": "^4.0.9",
     "better-sqlite3": "^11.2.1",
     "chromadb": "^1.9.2",

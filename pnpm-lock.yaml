@@ -24,7 +24,7 @@ importers:
         specifier: ^2.2.5
         version: 2.2.5
       '@rust-nostr/nostr-sdk':
-        specifier: latest
+        specifier: 0.35.0
         version: 0.35.0
       ai:
         specifier: ^4.0.9
