@@ -12,6 +12,7 @@ export interface AIChatProp {
   model: string;
   tools: ToolBox[];
   isSTream: boolean;
+  maxSteps: number;
 }
 
 export interface AIChatResponse {
