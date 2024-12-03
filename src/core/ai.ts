@@ -29,7 +29,7 @@ export class AI {
           } catch (error) {
             const resp: ToolCallResponse = {
               status: 'failed',
-              error: (error as unknown as Error).message,
+              error: (error as unknown as Error).message || JSON.stringify(error),
             };
             this.debugToolCall(value.fi.function.name, resp);
             return resp;

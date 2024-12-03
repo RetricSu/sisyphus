@@ -11,12 +11,12 @@ export class OllamaAdapter extends AI implements AIInterface {
     this.client = createOllama({ baseURL: apiUrl });
   }
 
-  async chat({ isSTream: _isSTream, msgs, model, tools }: AIChatProp): Promise<AIChatResponse> {
+  async chat({ isSTream: _isSTream, msgs, model, tools, maxSteps }: AIChatProp): Promise<AIChatResponse> {
     const result = await generateText({
       model: this.client(model),
       messages: msgs as any,
       tools: this.fromTools(tools),
-      maxSteps: 5,
+      maxSteps,
     });
 
     return {

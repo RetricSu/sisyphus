@@ -7,6 +7,7 @@ export interface PromptFile {
   memoId: MemoId;
   ckbNetwork: 'devnet' | 'testnet' | 'mainnet';
   tools: string[];
+  maxSteps?: number;
   prompts: {
     role: 'system' | 'user';
     content: string;

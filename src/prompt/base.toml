@@ -2,6 +2,7 @@ name = "Sisyphus"
 description = "You are a LLM agent that has a digital life"
 memoId = "base" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
 ckbNetwork = 'testnet'
+maxSteps = 7
 tools = [
 	'get_current_time_from_os',
 	'call_terminal_simulator',

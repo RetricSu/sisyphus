@@ -37,6 +37,7 @@ export class Agent {
   promptName: string;
   memoId: string;
   ckbNetwork: Network;
+  maxSteps: number;
   messages: Message[];
   pipeResponse?: (name: string, word: string) => any;
   memory: Memory;
@@ -55,6 +56,7 @@ export class Agent {
     this.apiKey = promptFile.llm.apiKey;
     this.model = promptFile.llm.model;
     this.ckbNetwork = promptFile.ckbNetwork;
+    this.maxSteps = promptFile.maxSteps || 7;
     this.memoId = promptFile.memoId;
     this.memory = new Memory(this.memoId);
     const toolNames = promptFile.tools;
@@ -192,6 +194,7 @@ export class Agent {
       msgs: this.messages,
       isSTream: isSTream ?? false,
       tools: this.tools,
+      maxSteps: this.maxSteps,
     });
 
     // todo: handle details of the msgs
