@@ -95,17 +95,17 @@ First, config the API key and url in the `base.toml`:
 
 OpenAI:
 
-```yaml name="base.toml"
+```toml title="base.toml"
 [llm]
-apiUrl = 'https://api.openai.com/v1' # https://api.anthropic.com/v1
-model = 'gpt-4o' # claude-3-5-sonnet-20241022
-provider = 'openai' # anthropic
+apiUrl = 'https://api.openai.com/v1'
+model = 'gpt-4o'
+provider = 'openai'
 apiKey = '<sk-your-openai-api-key-here>'
 ```
 
 Anthropic:
 
-```yaml name="base.toml"
+```toml title="base.toml"
 [llm]
 apiUrl = 'https://api.anthropic.com/v1'
 model = 'claude-3-5-sonnet-20241022'
@@ -139,7 +139,7 @@ ollama pull llama3.1
 
 config the API url in the `base.toml`:
 
-```yaml name="base.toml"
+```toml title="base.toml"
 [llm]
 apiUrl = 'http://127.0.0.1:11434/api'
 model = 'llama3.1'
@@ -176,7 +176,7 @@ sisyphus config list
 
 A basic prompt config file looks like this:
 
-```yaml
+```toml
 name = "Sisyphus"
 description = "You are a LLM agent that has a digital life"
 memoId = "base" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
@@ -203,9 +203,9 @@ You can create multiple prompt files for different AI Agent with different `memo
 sisyphus chat --prompt my-custom-prompt
 ```
 
-Where there is a prompt config file named `my-custom-prompt.yaml` in the prompt root folder:
+Where there is a prompt config file named `my-custom-prompt.toml` in the prompt root folder:
 
-```yaml name="my-custom-prompt.yaml"
+```toml name="my-custom-prompt.toml"
 name = "my-agent"
 description = "This is a custom agent"
 memoId = "my-custom-prompt" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
@@ -214,7 +214,7 @@ memoId = "my-custom-prompt" # MemoId is a global unique id for a agent, used to 
 
 You can edit the `[[prompts]]` section in the `.toml` file to set the prompts for the AI Agent:
 
-```yaml
+```toml
 [[prompts]]
 role = "system"
 content = "You are the supper mario"
