@@ -16,6 +16,7 @@ import { OllamaAdapter } from '../core/ollama';
 import { ToolBox } from '../tools/type';
 import { OpenAIAdapter } from '../core/open-ai';
 import { AnthropicAdapter } from '../core/anthropic';
+import { CoreMessage } from 'ai';
 
 const settings = readSettings();
 
@@ -184,7 +185,7 @@ export class Agent {
     }
   }
 
-  async call(m: { role: string; content: string }, isSTream: boolean | undefined = undefined): Promise<AMessage> {
+  async call(m: { role: string; content: string }, isSTream: boolean | undefined = undefined): Promise<CoreMessage[]> {
     const message = new AMessage(this.memoId, m.role, m.content as string);
     await this.saveMessageIntoMemoryIfEnable(message);
     this.messages.push(message.msg as Message);
@@ -197,25 +198,27 @@ export class Agent {
       maxSteps: this.maxSteps,
     });
 
-    // todo: handle details of the msgs
-    const lastReplyMsgContent = msgs[msgs.length - 1].content;
-    let answer: string = '';
-    if (typeof lastReplyMsgContent === 'string') {
-      answer = lastReplyMsgContent;
-    } else {
-      if (Array.isArray(lastReplyMsgContent)) {
-        answer += lastReplyMsgContent.filter((c) => c.type === 'text').map((c) => c.text);
+    for (let i = 0; i < msgs.length; i++) {
+      // todo: handle details of the msgs
+      const msg = msgs[i].content;
+      let answer: string = '';
+      if (typeof msg === 'string') {
+        answer = msg;
       } else {
-        answer = JSON.stringify(lastReplyMsgContent);
+        if (Array.isArray(msg)) {
+          answer += msg.filter((c) => c.type === 'text').map((c) => c.text);
+        } else {
+          answer = JSON.stringify(msg);
+        }
       }
+      if (this.pipeResponse) {
+        await this.pipeResponse(this.name, answer);
+      }
+      const resMessage = new AMessage(this.memoId, msgs[i].role, answer);
+      await this.saveMessageIntoMemoryIfEnable(resMessage);
+      this.messages.push(msgs[i]);
     }
 
-    if (this.pipeResponse) {
-      await this.pipeResponse(this.name, answer);
-    }
-    const resMessage = new AMessage(this.memoId, this.role, answer);
-    await this.saveMessageIntoMemoryIfEnable(resMessage);
-    this.messages.push(resMessage.msg as Message);
-    return resMessage;
+    return msgs;
   }
 }

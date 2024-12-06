@@ -34,8 +34,13 @@ export class IPCBot extends Agent {
       socket.on('data', async (data) => {
         const requestText = data.toString();
         const msg = new AMessage(this.memoId, 'user', requestText);
-        const resp = await this.call(msg.msg);
-        socket.write(resp.msg.content);
+        const newMsgs = await this.call(msg.msg);
+        let answer = '';
+        for (let i = 0; i < newMsgs.length; i++) {
+          answer += JSON.stringify(newMsgs[i].content);
+        }
+        // todo: need a more sophisticated interface for two ipc
+        socket.write(answer);
       });
 
       socket.on('end', () => {
@@ -96,8 +101,13 @@ export class IPCBot extends Agent {
     client.on('data', async (data) => {
       const requestText = data.toString();
       const msg = new AMessage(this.memoId, 'user', requestText);
-      const resp = await this.call(msg.msg);
-      client.write(resp.msg.content); // send response
+      const newMsgs = await this.call(msg.msg);
+      let answer = '';
+      for (let i = 0; i < this.messages.length; i++) {
+        answer += JSON.stringify(newMsgs[i].content);
+      }
+      // todo: need a more sophisticated interface for two ipc
+      client.write(answer); // send response
     });
 
     client.on('end', () => {
