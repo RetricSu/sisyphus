@@ -17,6 +17,7 @@ import { ToolBox } from '../tools/type';
 import { OpenAIAdapter } from '../core/open-ai';
 import { AnthropicAdapter } from '../core/anthropic';
 import { CoreMessage } from 'ai';
+import { logger } from '../logger';
 
 const settings = readSettings();
 
