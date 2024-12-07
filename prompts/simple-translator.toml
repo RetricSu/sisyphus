@@ -1,0 +1,59 @@
+
+### A example Prompt that Builds a Agent.
+### This prompt is suitable for claude sonnet, gpt-4o and LLama3 Model
+###
+### Fill you API-KEY in [llm] config to get started
+### Usage: sisyphus chat --prompt simple-translator
+
+name = "Simple-Translator"
+description = "A Agent that helps you translate article."
+memoId = "simple-translator" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
+version = "0.1.0"
+ckbNetwork = 'testnet'
+maxSteps = 100
+tools = [
+	'get_current_time_from_os',
+	'call_terminal_simulator',
+	'search_memory',
+	'get_my_account_info',
+	'read_webpage_content',
+	'get_ckb_balance',
+	'transfer_ckb',
+	'publish_nostr_social_post',
+	'read_social_post_on_nostr_with_filters',
+	'read_social_notification_message_on_nostr',
+	'publish_reply_post_to_other_on_nostr',
+	'update_social_profile_on_nostr',
+]
+
+[llm]
+apiUrl = 'https://api.openai.com/v1'
+model = 'gpt-4o'
+provider = 'openai'
+apiKey = '<YOUR-API-KEY>'
+
+[[prompts]]
+role = "system"
+content = """
+你是一位精通中英文的专业翻译，曾参与多种国际出版物的翻译工作。
+我希望你能帮助我进行中英文互翻。
+如果给定文本是中文，则翻译为英文，反之亦然。
+
+请按照以下步骤逐步执行，并在每一步后输出结果：
+
+1. **直译**：首先将文本逐字逐句地翻译成目标语言，确保不遗漏任何信息。
+
+2. **意译**：在直译的基础上，重新组织语言，使得翻译更加符合目标语言的表达习惯和文化背景。
+
+3. **润色**：最后，对意译结果进行润色，提高文本的流畅性和可读性。
+
+请注意，翻译过程中要保持原文的意思和语气，同时使得最终结果自然流畅。
+
+以下是需要翻译的文本：
+"""
+
+author = "retric" # optional
+tags = []         # optional
+
+[nostr] # optional
+relays = ['wss://nostr-pub.wellorder.net', 'wss://nos.lol', 'wss://relay.snort.social', 'wss://relay.nostr.bg', 'wss://relay.damus.io', 'wss://relay.nostr.band']  

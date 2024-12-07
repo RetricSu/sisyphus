@@ -1,5 +1,5 @@
-import { configPath, readSettings } from '../config/setting';
-import fs from 'fs';
+import { configPath, readSettings, writeSettings } from '../config/setting';
+import { Request } from '../util/request';
 
 export enum ConfigAction {
   list = 'list',
@@ -9,11 +9,11 @@ export enum ConfigAction {
 }
 
 export enum ConfigItem {
-  prompt = 'prompt',
+  proxy = 'proxy',
   ckbNetwork = 'ckb-network',
 }
 
-export async function Config(action: ConfigAction, item: ConfigItem, _value?: string) {
+export async function Config(action: ConfigAction, item: ConfigItem, value?: string) {
   if (action === ConfigAction.list) {
     console.log('config file: ', configPath);
     return console.log(readSettings());
@@ -21,16 +21,14 @@ export async function Config(action: ConfigAction, item: ConfigItem, _value?: st
 
   if (action === ConfigAction.get) {
     switch (item) {
-      case ConfigItem.prompt: {
+      case ConfigItem.proxy: {
         const settings = readSettings();
-        const files = fs.readdirSync(settings.prompt.rootFolder);
-        console.log('Available Prompts: ');
-        files.forEach((f) => {
-          console.log('  - ', f);
-        });
-        console.log('');
-        console.log('store at', settings.prompt.rootFolder);
-        return;
+        const proxy = settings.proxy;
+        if (proxy == null) {
+          console.log(`No Proxy.`);
+          process.exit(0);
+        }
+        return console.log(`${Request.proxyConfigToUrl(proxy)}`);
       }
 
       default:
@@ -40,8 +38,17 @@ export async function Config(action: ConfigAction, item: ConfigItem, _value?: st
 
   if (action === ConfigAction.set) {
     switch (item) {
-      case ConfigItem.prompt: {
-        return console.log('not impl');
+      case ConfigItem.proxy: {
+        if (value == null) throw new Error('No proxyUrl!');
+
+        try {
+          const proxy = Request.parseProxyUrl(value);
+          const settings = readSettings();
+          settings.proxy = proxy;
+          return writeSettings(settings);
+        } catch (error: unknown) {
+          return console.error(`invalid proxyURL, `, (error as Error).message);
+        }
       }
 
       default:
@@ -50,8 +57,13 @@ export async function Config(action: ConfigAction, item: ConfigItem, _value?: st
   }
 
   if (action === ConfigAction.rm) {
-    console.log('not impl');
     switch (item) {
+      case ConfigItem.proxy: {
+        const settings = readSettings();
+        settings.proxy = undefined;
+        return writeSettings(settings);
+      }
+
       default:
         break;
     }

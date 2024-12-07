@@ -15,9 +15,15 @@ one-line command to run Crypto AI Agent.
       - [2. Pull llama3.1 8b](#2-pull-llama31-8b)
       - [3. Config](#3-config)
       - [3. Run](#3-run)
-  - [Update Prompts](#update-prompts)
+  - [Mange Prompts](#mange-prompts)
+    - [Run Predefined Agents](#run-predefined-agents)
+    - [List All available Prompts on local](#list-all-available-prompts-on-local)
+    - [Update Prompts](#update-prompts)
   - [Run IPC Bot](#run-ipc-bot)
   - [Privkey](#privkey)
+  - [Config Setting](#config-setting)
+    - [List All Settings](#list-all-settings)
+    - [Set Network Proxy](#set-network-proxy)
   - [Set Logger Level](#set-logger-level)
   - [Fun Facts](#fun-facts)
 
@@ -154,7 +160,35 @@ Start chatting:
 sisyphus chat --prompt base
 ```
 
-## Update Prompts
+## Mange Prompts
+
+### Run Predefined Agents
+
+There are some predefined prompt config files at [Github Repo](https://github.com/RetricSu/sisyphus/tree/master/prompts)
+
+You can download them and start running the agent without writing the prompt by yourself. 
+
+For example, using the predefined config `article-recommender.toml` to start a article recommendation Agent:
+
+```sh
+sisyphus prompt download article-recommender
+```
+
+After downloading the prompt, you need to update the file with your own apiKey.
+
+Then you can start the agent:
+
+```sh
+sisyphus chat --prompt article-recommender
+```
+
+### List All available Prompts on local
+
+```sh
+sisyphus prompt list
+```
+
+### Update Prompts
 
 Sisyphus defines a unique AI Agent with a unique `memoId` in a prompt config file. The default prompt config file is `base.toml` under the prompt root folder.
 
@@ -260,6 +294,27 @@ sisyphus config list
 ```
 
 the key file name is `.[your-agent-memo-id]` under `privkey.rootFolder`.
+
+## Config Setting
+
+### List All Settings
+
+```sh
+sisyphus config list
+```
+
+### Set Network Proxy
+
+```sh
+sisyphus config set proxy http://127.0.0.1:1086
+> save new settings
+sisyphus config get proxy
+> http://127.0.0.1:1086
+sisyphus config rm proxy
+> save new settings
+offckb config get proxy
+> No Proxy.
+```
 
 ## Set Logger Level
 

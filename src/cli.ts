@@ -8,6 +8,8 @@ import { Config, ConfigItem } from './cmd/config';
 import { buildIPCBot } from './cmd/ipc';
 import { getDefaultIPCSocketPath } from './config/setting';
 import { logger } from './logger';
+import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
+import { input } from '@inquirer/prompts';
 
 loadWasmSync();
 createTables();
@@ -66,6 +68,32 @@ ipcCommand
     const bot = await buildIPCBot({ promptName, saveMemory: false });
     bot.sendClientRequest(socketPath, message);
   });
+
+const promptCommand = program
+  .command('prompt')
+  .description('Manger prompt files')
+  .action(() => {
+    console.log('prompt command called. Use "prompt get", "prompt create" or "prompt list".');
+  });
+
+promptCommand
+  .command('download <name>')
+  .description('Downloading Prompt Config File from Github')
+  .action((name) => downloadPrompt(name));
+
+promptCommand
+  .command('create')
+  .description('Create a prompt file in prompts folder.')
+  .option('--folder <folder>', 'Specific the prompt folder path', undefined)
+  .action(async (opt) => {
+    const name = await input({ message: 'Enter a unique id for your Agent: ', required: true });
+    await createPrompt(name, opt.folder);
+  });
+
+promptCommand
+  .command('list')
+  .description('List all local available Prompt Config Files')
+  .action(() => listLocalAvailablePrompts());
 
 program
   .command('config <action> [item] [value]')
