@@ -10,6 +10,7 @@ import { getDefaultIPCSocketPath } from './config/setting';
 import { logger } from './logger';
 import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
 import { input } from '@inquirer/prompts';
+import { convertReadableTimeToMilSecs, runner } from './cmd/runner';
 
 loadWasmSync();
 createTables();
@@ -31,6 +32,21 @@ program
     const saveMemory = opt.clean != null ? !opt.clean : undefined;
 
     return await chat({ promptName, saveMemory });
+  });
+
+program
+  .command('run')
+  .description('run AI Agent at interval')
+  .option('-c, --clean', 'clean chat without saving to memory')
+  .option('--prompt <prompt>', 'Specific the prompt file name', undefined)
+  .option('--hour <hour>', 'Specific the interval hour time', '0')
+  .option('--minute <minute>', 'Specific the interval minute time', '0')
+  .option('--second <hour>', 'Specific the interval second time', '0')
+  .action(async (opt) => {
+    const promptName = opt.prompt;
+    const saveMemory = opt.clean != null ? !opt.clean : undefined;
+    const intervalMilSecs = convertReadableTimeToMilSecs(+opt.hour, +opt.minute, +opt.second);
+    return await runner({ promptName, saveMemory, intervalMilSecs });
   });
 
 const ipcCommand = program

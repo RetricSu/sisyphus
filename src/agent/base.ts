@@ -185,10 +185,12 @@ export class Agent {
     }
   }
 
-  async call(m: { role: string; content: string }, isSTream: boolean | undefined = undefined): Promise<CoreMessage[]> {
-    const message = new AMessage(this.memoId, m.role, m.content as string);
-    await this.saveMessageIntoMemoryIfEnable(message);
-    this.messages.push(message.msg as Message);
+  async call(m?: { role: string; content: string }, isSTream: boolean | undefined = undefined): Promise<CoreMessage[]> {
+    if (m) {
+      const message = new AMessage(this.memoId, m.role, m.content as string);
+      await this.saveMessageIntoMemoryIfEnable(message);
+      this.messages.push(message.msg as Message);
+    }
 
     const { msgs } = await this.ai.chat({
       model: this.model,
