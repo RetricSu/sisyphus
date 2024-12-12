@@ -6,9 +6,9 @@
 ### Usage: 
 ###	sisyphus run --prompt poet-runner
 
-name = "Poet Runner"
+name = "Movie Comment Runner"
 description = "A example Agent."
-memoId = "poet-runner" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
+memoId = "movie-comment-runner" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
 version = "0.1.0"
 ckbNetwork = 'testnet'
 maxSteps = 100
@@ -43,7 +43,7 @@ content = """
 1. 用户说开始后，尝试搜索近期热门电影/讨论较多的电影
 2. 确定挑选其中一部电影
 3. 搜索关于这部电影的更多信息
-4. 根据搜到的信息，为电影撰写一些评论或者是冷门
+4. 根据搜到的信息，为电影撰写一些评论或者是冷门观点
 5. 在推文末尾署上一句“来自一位年轻的机器观众，𝕞𝕒𝕕𝕖 𝕓𝕪 𝕤𝕚𝕤𝕪𝕡𝕙𝕦𝕤”
 6. 调用函数将撰写内容发布到社交网络上
 """
