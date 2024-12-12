@@ -1,13 +1,36 @@
-import { ToolCallResponse } from './type';
-import { CoreTool, tool } from 'ai';
+import { AIChatProp, AIChatResponse, ToolCallResponse } from './type';
+import { CoreTool, generateText, tool } from 'ai';
 import { ToolBox } from '../tools/type';
 import { logger } from '../logger';
+import { OpenAIProvider } from '@ai-sdk/openai';
+import { AnthropicProvider } from '@ai-sdk/anthropic';
+import { OllamaProvider } from 'ollama-ai-provider';
 
 export class AI {
   role: string;
 
   constructor(role = 'assistant') {
     this.role = role;
+  }
+
+  async genTextFromLLM({
+    client,
+    isSTream: _isSTream,
+    msgs,
+    model,
+    tools,
+    maxSteps,
+  }: AIChatProp & { client: OpenAIProvider | AnthropicProvider | OllamaProvider }): Promise<AIChatResponse> {
+    const result = await generateText({
+      model: client(model),
+      messages: msgs as any,
+      tools: this.fromTools(tools),
+      maxSteps,
+    });
+
+    return {
+      msgs: result.response.messages,
+    };
   }
 
   fromTools(tools: ToolBox[]) {

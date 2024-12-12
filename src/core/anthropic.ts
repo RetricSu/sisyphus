@@ -1,6 +1,5 @@
 import { AIInterface, AIChatProp, AIChatResponse } from './type';
 import { AnthropicProvider, createAnthropic } from '@ai-sdk/anthropic';
-import { generateText } from 'ai';
 import { AI } from './ai';
 
 export class AnthropicAdapter extends AI implements AIInterface {
@@ -11,16 +10,7 @@ export class AnthropicAdapter extends AI implements AIInterface {
     this.client = createAnthropic({ baseURL: apiUrl, apiKey });
   }
 
-  async chat({ isSTream: _isSTream, msgs, model, tools, maxSteps }: AIChatProp): Promise<AIChatResponse> {
-    const result = await generateText({
-      model: this.client(model),
-      messages: msgs as any,
-      tools: this.fromTools(tools),
-      maxSteps,
-    });
-
-    return {
-      msgs: result.response.messages,
-    };
+  async chat({ isSTream, msgs, model, tools, maxSteps }: AIChatProp): Promise<AIChatResponse> {
+    return await this.genTextFromLLM({ client: this.client, isSTream, msgs, model, tools, maxSteps });
   }
 }

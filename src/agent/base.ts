@@ -17,6 +17,7 @@ import { ToolBox } from '../tools/type';
 import { OpenAIAdapter } from '../core/open-ai';
 import { AnthropicAdapter } from '../core/anthropic';
 import { CoreMessage } from 'ai';
+import { ReAct } from '../strategy/reAct';
 
 const settings = readSettings();
 
@@ -171,11 +172,8 @@ export class Agent {
       messages.push(msg);
     }
 
+    this.messages = messages;
     return messages;
-  }
-
-  LoadInitialMessages() {
-    this.messages = this.loadPromptMessage();
   }
 
   async saveMessageIntoMemoryIfEnable(message: AMessage) {
@@ -185,20 +183,10 @@ export class Agent {
     }
   }
 
-  async call(m: { role: string; content: string }, isSTream: boolean | undefined = undefined): Promise<CoreMessage[]> {
-    const message = new AMessage(this.memoId, m.role, m.content as string);
-    await this.saveMessageIntoMemoryIfEnable(message);
-    this.messages.push(message.msg as Message);
-
-    const { msgs } = await this.ai.chat({
-      model: this.model,
-      msgs: this.messages,
-      isSTream: isSTream ?? false,
-      tools: this.tools,
-      maxSteps: this.maxSteps,
-    });
-
+  async handleMsgsOutput(msgs: CoreMessage[]) {
     for (let i = 0; i < msgs.length; i++) {
+      this.messages.push(msgs[i]);
+
       // todo: handle details of the msgs
       const msg = msgs[i].content;
       let answer: string = '';
@@ -216,9 +204,50 @@ export class Agent {
       }
       const resMessage = new AMessage(this.memoId, msgs[i].role, answer);
       await this.saveMessageIntoMemoryIfEnable(resMessage);
-      this.messages.push(msgs[i]);
+    }
+  }
+
+  async callMessage(
+    m?: { role: string; content: string },
+    isSTream: boolean | undefined = undefined,
+  ): Promise<CoreMessage[]> {
+    if (m) {
+      const message = new AMessage(this.memoId, m.role, m.content as string);
+      await this.saveMessageIntoMemoryIfEnable(message);
+      this.messages.push(message.msg as Message);
     }
 
+    const { msgs } = await this.ai.chat({
+      model: this.model,
+      msgs: this.messages,
+      isSTream: isSTream ?? false,
+      tools: this.tools,
+      maxSteps: this.maxSteps,
+    });
+
+    await this.handleMsgsOutput(msgs);
+
+    return msgs;
+  }
+
+  async callMessageWithStrategy(
+    m?: { role: string; content: string },
+    isSTream: boolean | undefined = undefined,
+  ): Promise<CoreMessage[]> {
+    if (m) {
+      const message = new AMessage(this.memoId, m.role, m.content as string);
+      await this.saveMessageIntoMemoryIfEnable(message);
+      this.messages.push(message.msg as Message);
+    }
+
+    const strategy = new ReAct(this.ai);
+    const msgs = await strategy.execute(this.messages, {
+      model: this.model,
+      isSTream: isSTream ?? false,
+      tools: this.tools,
+      maxSteps: this.maxSteps,
+    });
+    await this.handleMsgsOutput(msgs);
     return msgs;
   }
 }
