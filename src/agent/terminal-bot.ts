@@ -18,7 +18,7 @@ export class TerminalBot extends Agent {
   }
 
   async chat() {
-    await this.LoadInitialMessages();
+    await this.loadPromptMessage();
 
     while (true) {
       // if the last message is not a toolCall Response, let user input
@@ -32,7 +32,7 @@ export class TerminalBot extends Agent {
 
       await stdOutWriteSync(`>>> ${this.name}: `);
       const msg = new AMessage(this.memoId, 'user', input);
-      await this.call(msg.msg);
+      await this.callMessage(msg.msg);
     }
   }
 }

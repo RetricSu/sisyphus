@@ -33,6 +33,7 @@ export const readWebPageToolBox: ReadWebPageToolBoxType = {
     url: z.string().describe('the url of the web page requesting to read'),
   }),
   exec: async ({ url }: ReadWebPageToolExecParameter) => {
+    logger.debug(`Get WebPage ${url} ...`);
     const browser = await launch();
     const page = await browser.newPage();
     await page.goto(url);
@@ -61,7 +62,6 @@ async function waitTillHTMLRendered(page: Page, timeout = 30000) {
     else countStableSizeIterations = 0; //reset the counter
 
     if (countStableSizeIterations >= minStableSizeIterations) {
-      logger.debug('Page rendered fully..');
       break;
     }
 

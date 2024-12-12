@@ -26,9 +26,6 @@ export class AI {
       messages: msgs as any,
       tools: this.fromTools(tools),
       maxSteps,
-      onStepFinish({ text, toolCalls }) {
-        logger.debug(`Step Finished: `, text, toolCalls);
-      },
     });
 
     return {
