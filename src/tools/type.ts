@@ -14,6 +14,7 @@ export enum AvailableToolName {
   publishReplyPostToOtherOnNostr = 'publish_reply_post_to_other_on_nostr',
   updateSocialProfileOnNostr = 'update_social_profile_on_nostr',
   searchMemory = 'search_memory',
+  sendTweet = 'send_tweet',
 }
 
 export interface ToolBox<T extends any[] = any[], R = any> {

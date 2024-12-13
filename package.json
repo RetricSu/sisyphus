@@ -52,6 +52,7 @@
     "@iarna/toml": "^2.2.5",
     "@inquirer/prompts": "^7.1.0",
     "@rust-nostr/nostr-sdk": "0.35.0",
+    "agent-twitter-client": "^0.0.16",
     "ai": "^4.0.9",
     "better-sqlite3": "^11.2.1",
     "chromadb": "^1.9.2",

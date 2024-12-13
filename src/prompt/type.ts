@@ -18,6 +18,10 @@ export interface PromptFile {
     provider: 'ollama' | 'openai' | 'anthropic';
     apiKey?: string;
   };
+  twitter?: {
+    username: string;
+    password: string;
+  };
   author?: string;
   tags?: string[];
   nostr?: {
