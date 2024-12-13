@@ -2,7 +2,7 @@ import { Scraper } from 'agent-twitter-client';
 import fs from 'fs';
 import { getDefaultTwitterFilePath } from '../config/setting';
 import { PromptFile } from '../prompt';
-import { AvailableToolName, ToolBox } from './type';
+import { ToolBox } from './type';
 import z from 'zod';
 import { logger } from '../logger';
 import path from 'path';
@@ -21,7 +21,7 @@ export function buildTwitterTools(promptFile: PromptFile) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.sendTweet,
+        name: 'send_tweet',
         description: 'post a new tweet to Twitter',
         parameters: {
           type: 'object',
@@ -69,7 +69,7 @@ export function saveCookies(username: string, cookies: any[]) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  
+
   const cookieStrings = cookies.map((cookie) => cookie.toString());
   fs.writeFileSync(cookieFilePath, cookieStrings.join('\n'));
 }

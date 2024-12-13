@@ -37,7 +37,7 @@ export interface Settings {
   };
   twitter: {
     rootFolder: string;
-  }
+  };
   prompt: {
     rootFolder: string;
     selectedPromptName: string;

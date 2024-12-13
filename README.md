@@ -87,6 +87,7 @@ Commands:
 - [x] read_social_notification_message_on_nostr
 - [x] publish_reply_post_to_other_on_nostr
 - [x] update_social_profile_on_nostr
+- [x] send_tweet
 
 You can config `tools` in `.toml` to allow AI to access specific function tools.
 

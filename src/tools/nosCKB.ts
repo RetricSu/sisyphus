@@ -1,4 +1,4 @@
-import { AvailableToolName, ToolBox } from './type';
+import { ToolBox } from './type';
 import { HexNoPrefix, NosCKB, TransferOption } from '../sdk';
 import { Hex } from '@ckb-ccc/core';
 import { Filter } from '@rust-nostr/nostr-sdk';
@@ -53,7 +53,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.getCKBBalance,
+        name: 'get_ckb_balance',
         description: 'Get CKB balance from CKB blockchain',
         parameters: {
           type: 'object',
@@ -72,7 +72,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.publishNostrSocialPost,
+        name: 'publish_nostr_social_post',
         description: 'Publish Social Post to Nostr networks with Nip-01 Event',
         parameters: {
           type: 'object',
@@ -98,7 +98,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.transferCKB,
+        name: 'transfer_ckb',
         description: 'Transfer some CKB to a CKB Address',
         parameters: {
           type: 'object',
@@ -135,7 +135,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.getMyAccountInfo,
+        name: 'get_my_account_info',
         description: 'get the CKB Address and Nostr publickey information',
         parameters: {
           type: 'object',
@@ -154,7 +154,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.readSocialPostOnNostrWithFilter,
+        name: 'read_social_post_on_nostr_with_filters',
         description: 'get nostr social post from nostr network with specific filters',
         parameters: {
           type: 'object',
@@ -184,7 +184,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.readSocialNotificationMessageOnNostr,
+        name: 'read_social_notification_message_on_nostr',
         description: 'get social notification message (mention-me or reply-to-me posts) from nostr network',
         parameters: {
           type: 'object',
@@ -203,7 +203,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.publishReplyPostToOtherOnNostr,
+        name: 'publish_reply_post_to_other_on_nostr',
         description: 'publish a reply post to a specific post(a nostr event) in nostr network',
         parameters: {
           type: 'object',
@@ -234,7 +234,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.updateSocialProfileOnNostr,
+        name: 'update_social_profile_on_nostr',
         description: 'publish a profile metadata event in nostr network',
         parameters: {
           type: 'object',
