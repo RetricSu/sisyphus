@@ -103,7 +103,7 @@ export class Agent {
 
     const memoryToolBox = buildMemoryToolBox(this.memoId);
 
-    const toolBoxes = [
+    const toolBoxes: ToolBox[] = [
       timeToolBox,
       terminalToolBox,
       readWebPageToolBox,
@@ -120,7 +120,7 @@ export class Agent {
 
     if (toolNames.includes('send_tweet')) {
       const twitterTools = buildTwitterTools(this.promptFile);
-      toolBoxes.push(twitterTools[0] as any);
+      toolBoxes.push(twitterTools[0]);
     }
 
     this.tools = toolBoxes;
