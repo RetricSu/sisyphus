@@ -87,7 +87,7 @@ export function storePromptConfigFile(fileName: string, content: string) {
   logger.info(`Save successfully, ${filePath}`);
   logger.info(`Please edit the file for ApiKey or any other required content before running the Agent.`);
   logger.info(`You can list all the local available Prompt Config Files by running: `);
-  logger.info(`  sisyphus config get prompt`);
+  logger.info(`  sisyphus prompt list`);
 }
 
 export function buildPromptFileDownloadUrl(fileName: string) {
