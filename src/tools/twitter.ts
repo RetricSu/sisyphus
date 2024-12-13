@@ -59,7 +59,9 @@ export async function sendTweets(username: string, password: string, text: strin
   }
 
   const sendTweetResults = await scraper.sendTweet(text);
-  return { status: sendTweetResults.status };
+  const responseJson = await sendTweetResults.json();
+  const headers = await sendTweetResults.headers;
+  return { status: sendTweetResults.status, headers, responseJson: responseJson };
 }
 
 export function saveCookies(username: string, cookies: any[]) {
