@@ -26,6 +26,10 @@ tools = [
 	'send_tweet',
 ]
 
+[twitter]
+username = '<YOUR-TWITTER-USERNAME or EMAIL>'
+password = '<YOUR-TWITTER-PASSWORD>'
+
 [llm]
 apiUrl = 'https://api.openai.com/v1'
 model = 'gpt-4o'
