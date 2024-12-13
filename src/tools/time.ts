@@ -1,5 +1,5 @@
 import z from 'zod';
-import { AvailableToolName, ToolBox } from './type';
+import { ToolBox } from './type';
 
 export interface TimeToolExecParameter {}
 
@@ -9,7 +9,7 @@ export const timeToolBox: TimeToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: AvailableToolName.getCurrentTimeFromOs,
+      name: 'get_current_time_from_os',
       description: 'Get the readable time from operating system',
       parameters: {
         type: 'object',

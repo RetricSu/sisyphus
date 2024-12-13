@@ -35,6 +35,9 @@ export interface Settings {
   privkey: {
     rootFolder: string;
   };
+  twitter: {
+    rootFolder: string;
+  };
   prompt: {
     rootFolder: string;
     selectedPromptName: string;
@@ -55,6 +58,9 @@ export const defaultSettings: Settings = {
   IPCSocketPathRootFolder: path.resolve(dataPath, 'ipc/'),
   privkey: {
     rootFolder: path.resolve(dataPath, 'privkey/'),
+  },
+  twitter: {
+    rootFolder: path.resolve(dataPath, 'twitter/'),
   },
   prompt: {
     rootFolder: path.resolve(dataPath, 'prompt'),
@@ -107,6 +113,11 @@ export function getDefaultIPCSocketPath(memoId: string) {
 export function getDefaultPrivkeyFilePath(memoId: string) {
   const settings = readSettings();
   return path.resolve(settings.privkey.rootFolder, `.${memoId}`);
+}
+
+export function getDefaultTwitterFilePath(username: string) {
+  const settings = readSettings();
+  return path.resolve(settings.twitter.rootFolder, `.${username}`);
 }
 
 function deepMerge(target: any, source: any): any {

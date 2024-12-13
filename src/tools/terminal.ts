@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { AvailableToolName, ToolBox } from './type';
+import { ToolBox } from './type';
 import z from 'zod';
 
 export interface TerminalToolExecParameter {
@@ -12,7 +12,7 @@ export const terminalToolBox: TerminalToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: AvailableToolName.callTerminalSimulator,
+      name: 'call_terminal_simulator',
       description: 'Get the result of executing a command in the linux terminal of the living server',
       parameters: {
         type: 'object',

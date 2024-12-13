@@ -1,4 +1,4 @@
-import { AvailableToolName, ToolBox } from './type';
+import { ToolBox } from './type';
 import { Memory, MemoryMetadata } from '../memory/long-term';
 import { Message } from 'ollama';
 import z from 'zod';
@@ -14,7 +14,7 @@ export function buildMemoryToolBox(memoId: string) {
     fi: {
       type: 'function',
       function: {
-        name: AvailableToolName.searchMemory,
+        name: 'search_memory',
         description: 'Search the remembered and maybe-related content from the persistent memory',
         parameters: {
           type: 'object',

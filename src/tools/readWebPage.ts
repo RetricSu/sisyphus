@@ -1,7 +1,7 @@
 import { launch, Page } from 'puppeteer';
 import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
-import { AvailableToolName, ToolBox } from './type';
+import { ToolBox } from './type';
 import { logger } from '../logger';
 import z from 'zod';
 
@@ -15,7 +15,7 @@ export const readWebPageToolBox: ReadWebPageToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: AvailableToolName.readWebpageContent,
+      name: 'read_webpage_content',
       description: 'use puppeteer to get the content of a web page from a url',
       parameters: {
         type: 'object',

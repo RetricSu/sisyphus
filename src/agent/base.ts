@@ -1,6 +1,6 @@
 import { readSettings } from '../config/setting';
 import { spawn } from 'child_process';
-import { Prompt } from '../prompt';
+import { Prompt, PromptFile } from '../prompt';
 import { AMessage } from '../memory/a-message';
 import { Memory } from '../memory/long-term';
 import { Network } from '../offckb/offckb.config';
@@ -18,6 +18,7 @@ import { OpenAIAdapter } from '../core/open-ai';
 import { AnthropicAdapter } from '../core/anthropic';
 import { CoreMessage } from 'ai';
 import { ReAct } from '../strategy/reAct';
+import { buildTwitterTools } from '../tools/twitter';
 
 const settings = readSettings();
 
@@ -43,6 +44,7 @@ export class Agent {
   messages: Message[];
   pipeResponse?: (name: string, word: string) => any;
   memory: Memory;
+  promptFile: PromptFile;
 
   constructor({ saveMemory = true, pipeResponse, promptName = readSettings().prompt.selectedPromptName }: AgentProp) {
     this.role = 'assistant';
@@ -53,6 +55,7 @@ export class Agent {
     this.pipeResponse = pipeResponse;
 
     const promptFile = Prompt.Reader.parseFrom(this.promptName);
+    this.promptFile = promptFile;
     this.name = promptFile.name;
     this.apiUrl = promptFile.llm.apiUrl;
     this.apiKey = promptFile.llm.apiKey;
@@ -100,7 +103,7 @@ export class Agent {
 
     const memoryToolBox = buildMemoryToolBox(this.memoId);
 
-    const toolBoxes = [
+    const toolBoxes: ToolBox[] = [
       timeToolBox,
       terminalToolBox,
       readWebPageToolBox,
@@ -114,6 +117,11 @@ export class Agent {
       publishReplyNotesToEvent,
       memoryToolBox,
     ].filter((t) => toolNames.includes(t.fi.function.name));
+
+    if (toolNames.includes('send_tweet')) {
+      const twitterTools = buildTwitterTools(this.promptFile);
+      toolBoxes.push(twitterTools[0]);
+    }
 
     this.tools = toolBoxes;
   }

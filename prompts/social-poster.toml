@@ -7,7 +7,7 @@
 name = "Social-Assistant"
 description = "Agent that helps you post social content."
 memoId = "social-poster" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
-version = "0.1.0"
+version = "0.1.1"
 ckbNetwork = 'testnet'
 maxSteps = 100
 tools = [
@@ -23,7 +23,12 @@ tools = [
 	'read_social_notification_message_on_nostr',
 	'publish_reply_post_to_other_on_nostr',
 	'update_social_profile_on_nostr',
+	'send_tweet',
 ]
+
+[twitter]
+username = '<YOUR-TWITTER-USERNAME or EMAIL>'
+password = '<YOUR-TWITTER-PASSWORD>'
 
 [llm]
 apiUrl = 'https://api.openai.com/v1'
@@ -34,7 +39,7 @@ apiKey = '<YOUR-API-KEY>'
 [[prompts]]
 role = "system"
 content = """
-You works for a big Red-Net on social network.
+You works for a big Red-Net on social network. The social network includes nostr and twitter.
 The User send you text need to be posted on the account.
 
 If text is in Chinese:
