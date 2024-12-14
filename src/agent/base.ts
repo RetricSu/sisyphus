@@ -19,6 +19,8 @@ import { AnthropicAdapter } from '../core/anthropic';
 import { CoreMessage } from 'ai';
 import { ReAct } from '../strategy/reAct';
 import { buildTwitterTools } from '../tools/twitter';
+import { StrategyType } from '../strategy/type';
+import { logger } from '../logger';
 
 const settings = readSettings();
 
@@ -30,8 +32,6 @@ export interface AgentProp {
 
 export class Agent {
   name: string;
-  role: string;
-  ai: AIInterface;
   apiUrl: string;
   apiKey: string | undefined;
   model: string;
@@ -41,10 +41,14 @@ export class Agent {
   memoId: string;
   ckbNetwork: Network;
   maxSteps: number;
+  strategy: { type: StrategyType; maxLoop?: number } | undefined;
+  promptFile: PromptFile;
+
+  role: string;
+  ai: AIInterface;
   messages: Message[];
   pipeResponse?: (name: string, word: string) => any;
   memory: Memory;
-  promptFile: PromptFile;
 
   constructor({ saveMemory = true, pipeResponse, promptName = readSettings().prompt.selectedPromptName }: AgentProp) {
     this.role = 'assistant';
@@ -64,7 +68,29 @@ export class Agent {
     this.maxSteps = promptFile.maxSteps || 7;
     this.memoId = promptFile.memoId;
     this.memory = new Memory(this.memoId);
-    const toolNames = promptFile.tools;
+
+    if (promptFile.strategy) {
+      const maxLoop = promptFile.strategy.maxLoop;
+      switch (promptFile.strategy.type) {
+        case 'cot':
+          this.strategy = { type: StrategyType.cot, maxLoop };
+          break;
+        case 'react':
+          this.strategy = { type: StrategyType.reAct, maxLoop };
+          break;
+        case 'tot':
+          this.strategy = { type: StrategyType.tot, maxLoop };
+          break;
+        case 'lats':
+          this.strategy = { type: StrategyType.lats, maxLoop };
+          break;
+        default:
+          logger.debug(
+            `invalid strategy in the prompt config: ${this.strategy!.type}, possible values are 'cot' | 'react' | 'tot' | 'lats'`,
+          );
+          break;
+      }
+    }
 
     switch (promptFile.llm.provider) {
       case 'ollama':
@@ -90,6 +116,7 @@ export class Agent {
     Privkey.init(this.memoId);
     const privkey = Privkey.load(this.memoId);
 
+    const toolNames = promptFile.tools;
     const {
       ckbBalanceToolBox,
       accountInfoToolBox,
@@ -215,47 +242,42 @@ export class Agent {
     }
   }
 
-  async callMessage(
-    m?: { role: string; content: string },
-    isSTream: boolean | undefined = undefined,
-  ): Promise<CoreMessage[]> {
-    if (m) {
-      const message = new AMessage(this.memoId, m.role, m.content as string);
+  async call({
+    requestMsg,
+    isSTream,
+  }: {
+    requestMsg?: { role: string; content: string };
+    isSTream?: boolean;
+  }): Promise<CoreMessage[]> {
+    if (requestMsg) {
+      const message = new AMessage(this.memoId, requestMsg.role, requestMsg.content as string);
       await this.saveMessageIntoMemoryIfEnable(message);
       this.messages.push(message.msg as Message);
     }
 
-    const { msgs } = await this.ai.chat({
-      model: this.model,
+    const opts = {
       msgs: this.messages,
-      isSTream: isSTream ?? false,
-      tools: this.tools,
-      maxSteps: this.maxSteps,
-    });
-
-    await this.handleMsgsOutput(msgs);
-
-    return msgs;
-  }
-
-  async callMessageWithStrategy(
-    m?: { role: string; content: string },
-    isSTream: boolean | undefined = undefined,
-  ): Promise<CoreMessage[]> {
-    if (m) {
-      const message = new AMessage(this.memoId, m.role, m.content as string);
-      await this.saveMessageIntoMemoryIfEnable(message);
-      this.messages.push(message.msg as Message);
-    }
-
-    const strategy = new ReAct(this.ai);
-    const msgs = await strategy.execute(this.messages, {
       model: this.model,
       isSTream: isSTream ?? false,
       tools: this.tools,
       maxSteps: this.maxSteps,
-    });
+    };
+
+    const strategyType = this.strategy?.type;
+    if (strategyType) {
+      if (strategyType != StrategyType.reAct) {
+        throw new Error(`${strategyType} Strategy not implemented`);
+      }
+
+      const strategy = new ReAct(this.ai, this.strategy!.maxLoop);
+      const msgs = await strategy.execute(opts);
+      await this.handleMsgsOutput(msgs);
+      return msgs;
+    }
+
+    const { msgs } = await this.ai.chat(opts);
     await this.handleMsgsOutput(msgs);
+
     return msgs;
   }
 }

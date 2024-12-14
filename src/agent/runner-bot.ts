@@ -15,6 +15,6 @@ export class RunnerBot extends Agent {
 
   async start() {
     await this.loadPromptMessage();
-    await this.callMessageWithStrategy();
+    await this.call({});
   }
 }

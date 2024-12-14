@@ -33,8 +33,8 @@ export class IPCBot extends Agent {
     const server = net.createServer((socket) => {
       socket.on('data', async (data) => {
         const requestText = data.toString();
-        const msg = new AMessage(this.memoId, 'user', requestText);
-        const newMsgs = await this.callMessage(msg.msg);
+        const amsg = new AMessage(this.memoId, 'user', requestText);
+        const newMsgs = await this.call({ requestMsg: amsg.msg });
         let answer = '';
         for (let i = 0; i < newMsgs.length; i++) {
           answer += JSON.stringify(newMsgs[i].content);
@@ -100,8 +100,8 @@ export class IPCBot extends Agent {
 
     client.on('data', async (data) => {
       const requestText = data.toString();
-      const msg = new AMessage(this.memoId, 'user', requestText);
-      const newMsgs = await this.callMessage(msg.msg);
+      const amsg = new AMessage(this.memoId, 'user', requestText);
+      const newMsgs = await this.call({ requestMsg: amsg.msg });
       let answer = '';
       for (let i = 0; i < this.messages.length; i++) {
         answer += JSON.stringify(newMsgs[i].content);

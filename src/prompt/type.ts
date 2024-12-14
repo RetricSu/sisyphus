@@ -8,20 +8,24 @@ export interface PromptFile {
   ckbNetwork: 'devnet' | 'testnet' | 'mainnet';
   tools: string[];
   maxSteps?: number;
-  prompts: {
-    role: 'system' | 'user';
-    content: string;
-  }[];
+  twitter?: {
+    username: string;
+    password: string;
+  };
+  strategy?: {
+    type: 'cot' | 'react' | 'tot' | 'lats';
+    maxLoop?: number;
+  };
   llm: {
     apiUrl: string;
     model: string;
     provider: 'ollama' | 'openai' | 'anthropic';
     apiKey?: string;
   };
-  twitter?: {
-    username: string;
-    password: string;
-  };
+  prompts: {
+    role: 'system' | 'user';
+    content: string;
+  }[];
   author?: string;
   tags?: string[];
   nostr?: {

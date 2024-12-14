@@ -31,8 +31,8 @@ export class TerminalBot extends Agent {
       console.log('----');
 
       await stdOutWriteSync(`>>> ${this.name}: `);
-      const msg = new AMessage(this.memoId, 'user', input);
-      await this.callMessage(msg.msg);
+      const amsg = new AMessage(this.memoId, 'user', input);
+      await this.call({ requestMsg: amsg.msg });
     }
   }
 }

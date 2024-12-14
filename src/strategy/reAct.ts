@@ -12,24 +12,28 @@ export class ReAct extends Strategy implements StrategyInterface {
     this.maxLoopSteps = maxLoopSteps;
   }
 
-  async execute(
-    history: CoreMessage[],
-    opt: { model: string; isSTream: boolean; tools: ToolBox[]; maxSteps?: number },
-  ): Promise<CoreMessage[]> {
-    const originalHistory: CoreMessage[] = [...history];
-    const strategyMessages: CoreMessage[] = [];
+  async execute(opt: {
+    msgs: CoreMessage[];
+    model: string;
+    isSTream: boolean;
+    tools: ToolBox[];
+    maxSteps?: number;
+  }): Promise<CoreMessage[]> {
+    const history = opt.msgs;
+    const strategyHistoryMsgs: CoreMessage[] = [...history];
+    const newMsgs: CoreMessage[] = [];
     let i = 0;
 
     while (true) {
-      const msgs = await this.execOneStep(originalHistory, opt);
+      const msgs = await this.execOneStep(strategyHistoryMsgs, opt);
       i++;
 
       if (msgs == null) {
         logger.debug('done.');
         break;
       } else {
-        originalHistory.push(...msgs);
-        strategyMessages.push(...msgs);
+        strategyHistoryMsgs.push(...msgs);
+        newMsgs.push(...msgs);
       }
 
       if (i >= this.maxLoopSteps) {
@@ -38,7 +42,7 @@ export class ReAct extends Strategy implements StrategyInterface {
       }
     }
 
-    return strategyMessages.filter((m) => {
+    return newMsgs.filter((m) => {
       // we filter all the tool related msgs to save context in the main thread
       if (m.role === 'tool') {
         // filter toolResult msg
