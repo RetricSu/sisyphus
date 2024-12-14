@@ -7,7 +7,7 @@ one-line command to run Crypto AI Agent.
     - [Install Sisyphus CLI tool](#install-sisyphus-cli-tool)
     - [Install Chroma db](#install-chroma-db)
   - [Overview](#overview)
-  - [Function Tool](#function-tool)
+  - [Getting Started](#getting-started)
   - [How to Run](#how-to-run)
     - [OpenAI and Anthropic](#openai-and-anthropic)
     - [Self-host With ollama](#self-host-with-ollama)
@@ -20,6 +20,7 @@ one-line command to run Crypto AI Agent.
     - [List All available Prompts on local](#list-all-available-prompts-on-local)
     - [Update Prompts](#update-prompts)
   - [Run IPC Bot](#run-ipc-bot)
+  - [Function Tool](#function-tool)
   - [Privkey](#privkey)
   - [Config Setting](#config-setting)
     - [List All Settings](#list-all-settings)
@@ -58,8 +59,8 @@ make sure `chroma` binary is available in your computer command line.
 ```sh
 Usage: sisyphus [options] [command]
 
-Sisyphus is a project that explores the idea of Web5 Crypto AI Agent. It is ported as a
-CLI tool that can be run in the terminal.
+Sisyphus is a project that explores the idea of Web5 Crypto AI Agent. It is ported as a CLI tool that
+can be run in the terminal.
 
 Options:
   -V, --version                   output the version number
@@ -67,32 +68,26 @@ Options:
 
 Commands:
   chat [options]                  chat with AI Agent through the command line
-  ipc                             make two AI Agents talk to each other in the same
-                                  computer
+  run [options]                   run AI Agent at interval
+  ipc                             make two AI Agents talk to each other in the same computer
+  prompt                          Manger prompt files
   config <action> [item] [value]  do a configuration action
   help [command]                  display help for command
 ```
 
-## Function Tool
+## Getting Started
 
-- [x] get_current_time_from_os
-- [x] call_terminal_simulator
-- [x] search_memory
-- [x] get_my_account_info
-- [x] read_webpage_content
-- [x] get_ckb_balance
-- [x] transfer_ckb
-- [x] publish_nostr_social_post
-- [x] read_social_post_on_nostr_with_filters
-- [x] read_social_notification_message_on_nostr
-- [x] publish_reply_post_to_other_on_nostr
-- [x] update_social_profile_on_nostr
-- [x] send_tweet
+After installed, run following commands to get a feeling of how easily sisyphus can be to run a Agent:
 
-You can config `tools` in `.toml` to allow AI to access specific function tools.
+```sh
+sisyphus prompt download simple-translator
+```
 
-> [!WARNING]
-> Please Note that running Sisyphus on your computer with `call_terminal_simulator` function tool might cause unexpected behavior(think like LLM agent can delete your files)
+Update the OpenAI API Key in the `simple-translator.toml` and run:
+
+```sh
+sisyphus chat --prompt simple-translator
+```
 
 ## How to Run
 
@@ -281,6 +276,27 @@ sisyphus ipc send --prompt bot2 --memo-id <the-memo-id-of-bot1> "<a first messag
 ```
 
 Boom! They will talk to each other on and on without any interruption.
+
+## Function Tool
+
+- [x] get_current_time_from_os
+- [x] call_terminal_simulator
+- [x] search_memory
+- [x] get_my_account_info
+- [x] read_webpage_content
+- [x] get_ckb_balance
+- [x] transfer_ckb
+- [x] publish_nostr_social_post
+- [x] read_social_post_on_nostr_with_filters
+- [x] read_social_notification_message_on_nostr
+- [x] publish_reply_post_to_other_on_nostr
+- [x] update_social_profile_on_nostr
+- [x] send_tweet
+
+You can config `tools` in `.toml` to allow AI to access specific function tools.
+
+> [!WARNING]
+> Please Note that running Sisyphus on your computer with `call_terminal_simulator` function tool might cause unexpected behavior(think like LLM agent can delete your files)
 
 ## Privkey
 
