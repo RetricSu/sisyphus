@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { OpenAIProvider } from '@ai-sdk/openai';
 import { AnthropicProvider } from '@ai-sdk/anthropic';
 import { OllamaProvider } from 'ollama-ai-provider';
+import { GoogleGenerativeAIProvider } from '@ai-sdk/google';
 
 export class AI {
   role: string;
@@ -20,7 +21,9 @@ export class AI {
     model,
     tools,
     maxSteps,
-  }: AIChatProp & { client: OpenAIProvider | AnthropicProvider | OllamaProvider }): Promise<AIChatResponse> {
+  }: AIChatProp & {
+    client: OpenAIProvider | AnthropicProvider | OllamaProvider | GoogleGenerativeAIProvider;
+  }): Promise<AIChatResponse> {
     const result = await generateText({
       model: client(model),
       messages: msgs as any,

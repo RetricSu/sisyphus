@@ -21,6 +21,7 @@ import { ReAct } from '../strategy/reAct';
 import { buildTwitterTools } from '../tools/twitter';
 import { StrategyType } from '../strategy/type';
 import { logger } from '../logger';
+import { GoogleAdapter } from '../core/gemini';
 
 const settings = readSettings();
 
@@ -105,6 +106,11 @@ export class Agent {
       case 'anthropic':
         if (this.apiKey == null) throw new Error('anthropic requires apiKey!');
         this.ai = new AnthropicAdapter(this.apiKey, this.apiUrl);
+        break;
+
+      case 'google':
+        if (this.apiKey == null) throw new Error('anthropic requires apiKey!');
+        this.ai = new GoogleAdapter(this.apiKey, this.apiUrl);
         break;
 
       default:

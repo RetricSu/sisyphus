@@ -19,7 +19,7 @@ export interface PromptFile {
   llm: {
     apiUrl: string;
     model: string;
-    provider: 'ollama' | 'openai' | 'anthropic';
+    provider: 'ollama' | 'openai' | 'anthropic' | 'google';
     apiKey?: string;
   };
   prompts: {
