@@ -9,7 +9,7 @@ one-line command to run Crypto AI Agent.
   - [Overview](#overview)
   - [Getting Started](#getting-started)
   - [How to Run](#how-to-run)
-    - [OpenAI and Anthropic](#openai-and-anthropic)
+    - [OpenAI, Anthropic and Google](#openai-anthropic-and-google)
     - [Self-host With ollama](#self-host-with-ollama)
       - [1. Install ollama](#1-install-ollama)
       - [2. Pull llama3.1 8b](#2-pull-llama31-8b)
@@ -91,7 +91,7 @@ sisyphus chat --prompt simple-translator
 
 ## How to Run
 
-### OpenAI and Anthropic
+### OpenAI, Anthropic and Google
 
 First, config the API key and url in the `base.toml`:
 
@@ -113,6 +113,16 @@ apiUrl = 'https://api.anthropic.com/v1'
 model = 'claude-3-5-sonnet-20241022'
 provider = 'anthropic'
 apiKey = '<your-anthropic-api-key-here>'
+```
+
+Google:
+
+```toml title="base.toml"
+[llm]
+apiUrl = 'https://generativelanguage.googleapis.com/v1beta'
+model = 'gemini-2.0-flash-exp'
+provider = 'google'
+apiKey = '<your-google-api-key-here>'
 ```
 
 Run:

@@ -21,8 +21,8 @@ tools = [
 [llm]
 apiUrl = 'http://127.0.0.1:11434/api'
 model = 'llama3.1'
-provider = 'ollama' # ollama, openai, anthropic
-#apiKey = '...' # openai and anthropic requires apiKey
+provider = 'ollama' # ollama, openai, anthropic, google
+#apiKey = '...' # openai, google and anthropic requires apiKey
 
 [[prompts]]
 role = "system"
