@@ -151,9 +151,9 @@ export class Agent {
       memoryToolBox,
     ].filter((t) => toolNames.includes(t.fi.function.name));
 
-    if (toolNames.includes('send_tweet')) {
+    if (toolNames.includes('send_tweet') || toolNames.includes('reply_tweet')) {
       const twitterTools = buildTwitterTools(this.promptFile);
-      toolBoxes.push(twitterTools[0]);
+      toolBoxes.push(...twitterTools.filter((t) => toolNames.includes(t.fi.function.name)));
     }
 
     this.tools = toolBoxes;
