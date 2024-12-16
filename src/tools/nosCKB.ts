@@ -1,7 +1,7 @@
 import { ToolBox } from './type';
 import { HexNoPrefix, NosCKB, TransferOption } from '../sdk';
 import { Hex } from '@ckb-ccc/core';
-import { Filter } from '@rust-nostr/nostr-sdk';
+import { EventId, Filter } from '@rust-nostr/nostr-sdk';
 import { Network } from '../offckb/offckb.config';
 import z from 'zod';
 
@@ -214,7 +214,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
             },
             eventId: {
               type: 'string',
-              description: 'the id of the event to reply, hex string',
+              description: 'the id of the event to reply',
             },
           },
           required: ['text', 'eventId'],
@@ -223,10 +223,22 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     },
     params: z.object({
       text: z.string().describe('the reply content text'),
-      eventId: z.string().describe('the id of the event to reply, hex string'),
+      eventId: z.string().describe('the id of the event to reply'),
     }),
     exec: async ({ text, eventId }: PublishNostrReplyNotesToEventToolExecParameter) => {
-      return await nosCKB.publishReplyNotesToEvent(text, eventId);
+      let eventIdHexWithoutPrefix = '';
+      if (eventId.startsWith('0x')) {
+        eventIdHexWithoutPrefix = eventId.slice(2);
+      } else if (eventId.startsWith('nevent')) {
+        eventIdHexWithoutPrefix = EventId.fromBech32(eventId).toHex();
+      } else if (eventId.startsWith('note')) {
+        eventIdHexWithoutPrefix = EventId.fromBech32(eventId).toHex();
+      } else if (/^[0-9a-fA-F]+$/.test(eventId)) {
+        eventIdHexWithoutPrefix = eventId;
+      } else {
+        throw new Error(`Invalid event id to reply ${eventId}`);
+      }
+      return await nosCKB.publishReplyNotesToEvent(text, eventIdHexWithoutPrefix);
     },
   };
 

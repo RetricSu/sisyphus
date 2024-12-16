@@ -13,3 +13,4 @@
 - update_social_profile_on_nostr
 - search_memory
 - send_tweet
+- reply_tweet

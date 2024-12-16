@@ -12,6 +12,12 @@ export interface SendTweetToolExecParameter {
 }
 export type SendTweetToolBoxType = ToolBox<[SendTweetToolExecParameter], ReturnType<typeof sendTweets>>;
 
+export interface ReplyTweetToolExecParameter {
+  content: string;
+  replyToTweetId: string;
+}
+export type ReplyTweetToolBoxType = ToolBox<[ReplyTweetToolExecParameter], ReturnType<typeof replyTweet>>;
+
 export function buildTwitterTools(promptFile: PromptFile) {
   const twitter = promptFile.twitter;
   if (twitter?.username == null || twitter.password == null)
@@ -41,10 +47,57 @@ export function buildTwitterTools(promptFile: PromptFile) {
     },
   };
 
-  return [sendTweetToolBox];
+  const replyTweetToolBox: ReplyTweetToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'reply_tweet',
+        description: 'post a reply tweet to a tweet on Twitter',
+        parameters: {
+          type: 'object',
+          properties: {
+            content: {
+              type: 'string',
+              description: 'the reply text content',
+            },
+            replyToTweetId: {
+              type: 'string',
+              description: 'the tweet id to reply to',
+            },
+          },
+          required: ['content', 'replyToTweetId'],
+        },
+      },
+    },
+    params: z.object({
+      content: z.string().describe('post a new tweet to Twitter'),
+      replyToTweetId: z.string().describe('post a reply tweet to a tweet on Twitter'),
+    }),
+    exec: async ({ content, replyToTweetId }: ReplyTweetToolExecParameter) => {
+      return await replyTweet(twitter.username, twitter.password, content, replyToTweetId);
+    },
+  };
+
+  return [sendTweetToolBox, replyTweetToolBox];
 }
 
 export async function sendTweets(username: string, password: string, text: string) {
+  const scraper = await buildScraper(username, password);
+  const sendTweetResults = await scraper.sendTweet(text);
+  const responseJson = await sendTweetResults.json();
+  const headers = await sendTweetResults.headers;
+  return { status: sendTweetResults.status, headers, responseJson: responseJson };
+}
+
+export async function replyTweet(username: string, password: string, text: string, replyToTweetId: string) {
+  const scraper = await buildScraper(username, password);
+  const result = await scraper.sendTweet(text, replyToTweetId);
+  const responseJson = await result.json();
+  const headers = await result.headers;
+  return { status: result.status, headers, responseJson: responseJson };
+}
+
+export async function buildScraper(username: string, password: string) {
   const scraper = new Scraper();
 
   if (!isCookiesExits(username)) {
@@ -57,11 +110,7 @@ export async function sendTweets(username: string, password: string, text: strin
     await scraper.setCookies(cookies);
     logger.debug(`using cookies from storage account: ${username}`);
   }
-
-  const sendTweetResults = await scraper.sendTweet(text);
-  const responseJson = await sendTweetResults.json();
-  const headers = await sendTweetResults.headers;
-  return { status: sendTweetResults.status, headers, responseJson: responseJson };
+  return scraper;
 }
 
 export function saveCookies(username: string, cookies: any[]) {

@@ -7,7 +7,7 @@
 name = "Social-Assistant"
 description = "Agent that helps you post social content."
 memoId = "social-poster" # MemoId is a global unique id for a agent, used to distinct memory/privkey/data of this agent.
-version = "0.1.1"
+version = "0.1.2"
 ckbNetwork = 'testnet'
 maxSteps = 100
 tools = [
@@ -24,6 +24,7 @@ tools = [
 	'publish_reply_post_to_other_on_nostr',
 	'update_social_profile_on_nostr',
 	'send_tweet',
+	'reply_tweet',
 ]
 
 [twitter]
@@ -39,8 +40,12 @@ apiKey = '<YOUR-API-KEY>'
 [[prompts]]
 role = "system"
 content = """
-You works for a big Red-Net on social network. The social network includes nostr and twitter.
-The User send you text need to be posted on the account.
+You works for a big Red-Net on social network including Twitter and Nostr.
+You have two functionalities:
+  1. The User send you text need to be posted on the account.
+  2. The User asking you to reply text to a tweet on Twitter or reply text to a Note on Nostr.
+
+For both functionalities, you should go through the same process in the following:
 
 If text is in Chinese:
    First, translate the text into straightforward English
@@ -53,7 +58,9 @@ Else If text is in English:
 Else:
    Post the text on social network
 
-Note: Please attach a new line "ℙ𝕠𝕤𝕥𝕖𝕕 𝕗𝕣𝕠𝕞 𝔸𝕀 𝔸𝕘𝕖𝕟𝕥 𝕞𝕒𝕕𝕖 𝕓𝕪 𝕤𝕚𝕤𝕪𝕡𝕙𝕦𝕤" at the end of the post before sending the post.
+Note1: Please attach a new line "ℙ𝕠𝕤𝕥𝕖𝕕 𝕗𝕣𝕠𝕞 𝔸𝕀 𝔸𝕘𝕖𝕟𝕥 𝕞𝕒𝕕𝕖 𝕓𝕪 𝕤𝕚𝕤𝕪𝕡𝕙𝕦𝕤" at the end of the post before sending the post.
+Note2: If it is a direct posting, send to twitter first and then send to nostr.
+Note3: If it is a reply posting, only posting on one social network where the corresponding reply id lives in.
 """
 
 author = "retric" # optional
