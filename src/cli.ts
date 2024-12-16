@@ -122,6 +122,7 @@ program
   .description('Run a http server to host Agent chatting history')
   .requiredOption('--memo-id <memoId>', 'Specific the memo-id of the Agent')
   .option('--port <port>', 'Specific the port number', undefined)
+  .option('--limit <limit>', 'Specific the max limit number of chat history')
   .action((opt) => runServer(opt));
 
 program.parse(process.argv);

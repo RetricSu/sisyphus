@@ -76,9 +76,9 @@ export class MessageView {
     return argumentsObj;
   }
 
-  static listAllMessages(memoId = 'chat'): Message[] {
-    const stmt = db.prepare('SELECT * FROM messages WHERE memo_id = ?');
-    const rows = stmt.all(memoId) as DBMessage[];
-    return rows as Message[];
+  static listAllMessages(memoId = 'chat', limit = 20): Message[] {
+    const stmt = db.prepare('SELECT * FROM messages WHERE memo_id = ? ORDER BY created_at DESC LIMIT ?');
+    const rows = stmt.all(memoId, limit) as DBMessage[];
+    return rows.reverse() as Message[];
   }
 }
