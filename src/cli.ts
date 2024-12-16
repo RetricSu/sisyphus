@@ -11,6 +11,7 @@ import { logger } from './logger';
 import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
 import { input } from '@inquirer/prompts';
 import { convertReadableTimeToMilSecs, runner } from './cmd/runner';
+import { runServer } from './cmd/server';
 
 loadWasmSync();
 createTables();
@@ -115,6 +116,13 @@ program
   .command('config <action> [item] [value]')
   .description('do a configuration action')
   .action((action, item, value) => Config(action, item as ConfigItem, value));
+
+program
+  .command('server')
+  .description('Run a http server to host Agent chatting history')
+  .requiredOption('--memo-id <memoId>', 'Specific the memo-id of the Agent')
+  .option('--port <port>', 'Specific the port number', undefined)
+  .action((opt) => runServer(opt));
 
 program.parse(process.argv);
 

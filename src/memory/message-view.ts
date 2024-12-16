@@ -77,17 +77,8 @@ export class MessageView {
   }
 
   static listAllMessages(memoId = 'chat'): Message[] {
-    const stmt = db.prepare('SELECT id FROM messages WHERE memo_id = ?');
-    const rows = stmt.all(memoId) as Pick<DBMessage, 'id'>[];
-
-    const messages: Message[] = [];
-    rows.forEach((row) => {
-      const message = this.loadMsgById(row.id);
-      if (message) {
-        messages.push(message);
-      }
-    });
-
-    return messages;
+    const stmt = db.prepare('SELECT * FROM messages WHERE memo_id = ?');
+    const rows = stmt.all(memoId) as DBMessage[];
+    return rows as Message[];
   }
 }
