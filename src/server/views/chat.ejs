@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sisyphus AI Agent Brain</title>
+</head>
+<body>
+    <style>
+        .message-content {
+            white-space: pre-wrap;
+            word-wrap: break-word; 
+            margin: 10px 10px;
+        }
+        .time{
+            font-size: smaller;
+            color: gray;
+        }
+    </style>
+    <h1>Sisyphus AI Agent Brain</h1>
+    <ul
+        <% messages.forEach(message => { %>
+            <div>
+                <div><strong><%= message.role.toUpperCase() %>:</strong></div>
+                <div  class="message-content"><%= message.content %></div>
+                <div class="time"><%= new Date(message.created_at * 1000).toLocaleString('zh-CN') %></div>
+                <br><br>
+            </div>
+        <% }) %>
+    </ul>
+</body>
+</html>

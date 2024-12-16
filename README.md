@@ -72,6 +72,7 @@ Commands:
   ipc                             make two AI Agents talk to each other in the same computer
   prompt                          Manger prompt files
   config <action> [item] [value]  do a configuration action
+  server [options]                Run a http server to host Agent chatting history
   help [command]                  display help for command
 ```
 
