@@ -10,6 +10,10 @@ export interface PublishNoteToolExecParameter {
   text: string;
 }
 export type TransferCKBToolExecParameter = TransferOption;
+export type issueTokenToMyselfToolExecParameter = { amount: string; feeRate?: number };
+export type issueTokenToReceiverToolExecParameter = { amount: string; receiverAddress: string; feeRate?: number };
+export type transferTokenToolExecParameter = { amount: string; receiverAddress: string; feeRate?: number };
+export interface myTokenBalanceToolExecParameter {}
 export interface AccountInfoToolExecParameter {}
 export interface ReadNostrEventsToolExecParameter {
   kind: string;
@@ -28,6 +32,19 @@ export interface PublishNostrProfileEventToolExecParameter {
 export type CKBBalanceToolBoxType = ToolBox<[CKBBalanceToolExecParameter], ReturnType<NosCKB['getBalance']>>;
 export type PublishNoteToolBoxType = ToolBox<[PublishNoteToolExecParameter], ReturnType<NosCKB['publishNote']>>;
 export type TransferCKBToolBoxType = ToolBox<[TransferCKBToolExecParameter], Promise<{ txHash: Hex }>>;
+export type IssueTokenToMyselfToolBoxType = ToolBox<
+  [issueTokenToMyselfToolExecParameter],
+  ReturnType<NosCKB['issueTokenToMyself']>
+>;
+export type IssueTokenToReceiverToolBoxType = ToolBox<
+  [issueTokenToReceiverToolExecParameter],
+  ReturnType<NosCKB['issueTokenToReceiver']>
+>;
+export type TransferTokenToolBoxType = ToolBox<[transferTokenToolExecParameter], ReturnType<NosCKB['transferToken']>>;
+export type MyTokenBalanceToolBoxType = ToolBox<
+  [myTokenBalanceToolExecParameter],
+  ReturnType<NosCKB['getMyUdtBalance']>
+>;
 export type AccountInfoToolBoxType = ToolBox<[AccountInfoToolExecParameter], ReturnType<NosCKB['getMyAccountInfo']>>;
 export type ReadNostrEventsToolBoxType = ToolBox<
   [ReadNostrEventsToolExecParameter],
@@ -128,6 +145,128 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     exec: async (opt: TransferOption) => {
       const txHash = await nosCKB.transfer(opt);
       return { txHash };
+    },
+  };
+
+  const issueTokenToMyselfToolBox: IssueTokenToMyselfToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'issue_token_to_myself',
+        description: 'Issue fungible tokens to myself',
+        parameters: {
+          type: 'object',
+          properties: {
+            amount: {
+              type: 'string',
+              description: 'the amount decimal number string of token to be issued',
+            },
+            feeRate: {
+              type: 'number',
+              description: 'the CKB fee rate for the token issue transaction, default to 1000',
+            },
+          },
+          required: ['amount'],
+        },
+      },
+    },
+    params: z.object({
+      amount: z.string().describe('the amount decimal number string of token to be issued'),
+      feeRate: z.number().optional().describe('the CKB fee rate for the token issue transaction, default to 1000'),
+    }),
+    exec: async ({ amount, feeRate }: issueTokenToMyselfToolExecParameter) => {
+      return await nosCKB.issueTokenToMyself({ udtAmount: amount, feeRate });
+    },
+  };
+
+  const issueTokenToReceiverToolBox: IssueTokenToReceiverToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'issue_token_to_receiver',
+        description: 'Issue token to receiver',
+        parameters: {
+          type: 'object',
+          properties: {
+            amount: {
+              type: 'string',
+              description: 'the amount decimal number string of token to be issued',
+            },
+            receiverAddress: {
+              type: 'string',
+              description: 'the receiver CKB address',
+            },
+            feeRate: {
+              type: 'number',
+              description: 'the fee rate for the token issue transaction, default to 1000',
+            },
+          },
+          required: ['amount', 'receiverAddress'],
+        },
+      },
+    },
+    params: z.object({
+      amount: z.string().describe('the amount decimal number string of token to be issued'),
+      receiverAddress: z.string().describe('the receiver CKB address'),
+      feeRate: z.number().optional().describe('the fee rate for the token issue transaction, default to 1000'),
+    }),
+    exec: async ({ amount, receiverAddress, feeRate }: issueTokenToReceiverToolExecParameter) => {
+      return await nosCKB.issueTokenToReceiver({ udtAmount: amount, receiptAddress: receiverAddress, feeRate });
+    },
+  };
+
+  const transferTokenToolBox: TransferTokenToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'transfer_my_issued_token',
+        description: 'Transfer the issued token to receiver',
+        parameters: {
+          type: 'object',
+          properties: {
+            amount: {
+              type: 'string',
+              description: 'the amount decimal number string of token to be transferred',
+            },
+            receiverAddress: {
+              type: 'string',
+              description: 'the receiver CKB address',
+            },
+            feeRate: {
+              type: 'number',
+              description: 'the CKB fee rate for the token issue transaction, default to 1000',
+            },
+          },
+          required: ['amount', 'receiverAddress'],
+        },
+      },
+    },
+    params: z.object({
+      amount: z.string().describe('the amount decimal number string of token to be transferred'),
+      receiverAddress: z.string().describe('the receiver CKB address'),
+      feeRate: z.number().optional().describe('the CKB fee rate for the token transfer transaction, default to 1000'),
+    }),
+    exec: async ({ amount, receiverAddress, feeRate }: transferTokenToolExecParameter) => {
+      return await nosCKB.transferToken({ udtAmount: amount, toAddress: receiverAddress, feeRate });
+    },
+  };
+
+  const myTokenBalanceToolBox: MyTokenBalanceToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'get_my_token_balance',
+        description: 'get the balance of the issued token in my account',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+    },
+    params: z.object({}),
+    exec: async (_p: myTokenBalanceToolExecParameter) => {
+      return await nosCKB.getMyUdtBalance();
     },
   };
 
@@ -282,6 +421,10 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     ckbBalanceToolBox,
     accountInfoToolBox,
     transferCKBToolBox,
+    issueTokenToMyselfToolBox,
+    issueTokenToReceiverToolBox,
+    transferTokenToolBox,
+    myTokenBalanceToolBox,
     publishNoteToolBox,
     readNostrEvents,
     readMentionNotesWithMe,
