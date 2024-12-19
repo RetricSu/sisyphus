@@ -97,6 +97,89 @@ export class NosCKB {
     return txHash;
   }
 
+  async getMyXUdtArgs() {
+    const lockScript = (await this.cccNostrSigner.getRecommendedAddressObj()).script;
+    const xudtArgs = lockScript.hash() + '00000000';
+    return xudtArgs;
+  }
+
+  async issueTokenToReceiver({
+    udtAmount,
+    receiptAddress,
+    feeRate = 1000,
+  }: {
+    udtAmount: string;
+    receiptAddress: string;
+    feeRate?: number;
+  }) {
+    const xudtArgs = await this.getMyXUdtArgs();
+
+    const typeScript = await ccc.Script.fromKnownScript(this.cccNostrSigner.client, ccc.KnownScript.XUdt, xudtArgs);
+    const receiver = await ccc.Address.fromString(receiptAddress, this.cccClient);
+
+    const tx = ccc.Transaction.from({
+      outputs: [
+        {
+          lock: receiver.script,
+          type: typeScript,
+        },
+      ],
+      outputsData: [ccc.numLeToBytes(udtAmount, 16)],
+    });
+    await tx.addCellDepsOfKnownScripts(this.cccClient, ccc.KnownScript.XUdt);
+    await tx.completeInputsByCapacity(this.cccNostrSigner);
+    await tx.completeFeeBy(this.cccNostrSigner, feeRate);
+    const txHash = await this.cccNostrSigner.sendTransaction(tx);
+    return txHash;
+  }
+
+  async issueTokenToMyself({ udtAmount, feeRate = 1000 }: { udtAmount: string; feeRate?: number }) {
+    return await this.issueTokenToReceiver({
+      udtAmount,
+      receiptAddress: (await this.cccNostrSigner.getRecommendedAddressObj()).toString(),
+      feeRate,
+    });
+  }
+
+  async getMyUdtBalance() {
+    const xudtArgs = await this.getMyXUdtArgs();
+    const typeScript = await ccc.Script.fromKnownScript(this.cccClient, ccc.KnownScript.XUdt, xudtArgs);
+
+    let udtBalance: ccc.Num = BigInt(0);
+    const collector = this.cccClient.findCellsByType(typeScript, true);
+    for await (const cell of collector) {
+      if (cell.cellOutput.lock.hash() === (await this.cccNostrSigner.getRecommendedAddressObj()).script.hash()) {
+        udtBalance += ccc.udtBalanceFrom(cell.outputData);
+      }
+    }
+    return udtBalance.toString(10);
+  }
+
+  async transferToken({
+    toAddress,
+    udtAmount,
+    feeRate = 1000,
+  }: {
+    toAddress: string;
+    udtAmount: string;
+    feeRate?: number;
+  }) {
+    const receiverLockScript = (await ccc.Address.fromString(toAddress, this.cccClient)).script;
+
+    const xudtArgs = await this.getMyXUdtArgs();
+    const xUdtType = await ccc.Script.fromKnownScript(this.cccClient, ccc.KnownScript.XUdt, xudtArgs);
+
+    const tx = ccc.Transaction.from({
+      outputs: [{ lock: receiverLockScript, type: xUdtType }],
+      outputsData: [ccc.numLeToBytes(udtAmount, 16)],
+    });
+    await tx.addCellDepsOfKnownScripts(this.cccClient, ccc.KnownScript.XUdt);
+    await tx.completeInputsByUdt(this.cccNostrSigner, xUdtType);
+    await tx.completeFeeBy(this.cccNostrSigner, feeRate);
+    const txHash = await this.cccNostrSigner.sendTransaction(tx);
+    return txHash;
+  }
+
   async getMyAccountInfo() {
     const addresses = await this.cccNostrSigner.getAddressObjs();
     const ckbAddress = addresses[0].toString();
