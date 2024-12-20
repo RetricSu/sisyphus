@@ -123,6 +123,7 @@ program
   .requiredOption('--memo-id <memoId>', 'Specific the memo-id of the Agent')
   .option('--port <port>', 'Specific the port number', undefined)
   .option('--limit <limit>', 'Specific the max limit number of chat history')
+  .option('--static-path <path>', 'Specific a static folder path to host')
   .action((opt) => runServer(opt));
 
 program.parse(process.argv);
