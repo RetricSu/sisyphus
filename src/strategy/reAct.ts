@@ -1,9 +1,9 @@
-import { CoreMessage } from 'ai';
-import { Strategy } from './base';
-import { AIInterface } from '../core/type';
-import { ToolBox } from '../tools/type';
-import { StrategyInterface } from './type';
-import { logger } from '../logger';
+import type { CoreMessage } from "ai";
+import type { AIInterface } from "../core/type";
+import { logger } from "../logger";
+import type { ToolBox } from "../tools/type";
+import { Strategy } from "./base";
+import type { StrategyInterface } from "./type";
 
 export class ReAct extends Strategy implements StrategyInterface {
   maxLoopSteps: number;
@@ -29,7 +29,7 @@ export class ReAct extends Strategy implements StrategyInterface {
       i++;
 
       if (msgs == null) {
-        logger.debug('done.');
+        logger.debug("done.");
         break;
       } else {
         strategyHistoryMsgs.push(...msgs);
@@ -44,14 +44,14 @@ export class ReAct extends Strategy implements StrategyInterface {
 
     return newMsgs.filter((m) => {
       // we filter all the tool related msgs to save context in the main thread
-      if (m.role === 'tool') {
+      if (m.role === "tool") {
         // filter toolResult msg
         return false;
       }
-      if (m.role === 'assistant') {
+      if (m.role === "assistant") {
         if (Array.isArray(m.content)) {
           for (const c of m.content) {
-            if (c.type === 'tool-call') return false;
+            if (c.type === "tool-call") return false;
           }
         }
       }
@@ -67,9 +67,14 @@ export class ReAct extends Strategy implements StrategyInterface {
       isSTream = false,
       tools,
       maxSteps = 7,
-    }: { model: string; isSTream: boolean; tools: ToolBox[]; maxSteps?: number },
+    }: {
+      model: string;
+      isSTream: boolean;
+      tools: ToolBox[];
+      maxSteps?: number;
+    },
   ): Promise<CoreMessage[] | null> {
-    const prompt: CoreMessage = { role: 'user', content: this.createPrompts() };
+    const prompt: CoreMessage = { role: "user", content: this.createPrompts() };
     const { msgs } = await this.ai.chat({
       model,
       msgs: [...history, prompt],
@@ -79,13 +84,13 @@ export class ReAct extends Strategy implements StrategyInterface {
     });
 
     const lastReply = msgs[msgs.length - 1];
-    console.log('current step: ', lastReply.content);
-    if (typeof lastReply.content === 'string' && lastReply.content === '-1') {
+    console.log("current step: ", lastReply.content);
+    if (typeof lastReply.content === "string" && lastReply.content === "-1") {
       return null;
     }
     if (Array.isArray(lastReply.content)) {
       for (const c of lastReply.content) {
-        if (c.type === 'text' && c.text === '-1') return null;
+        if (c.type === "text" && c.text === "-1") return null;
       }
     }
     return msgs;

@@ -1,5 +1,6 @@
-import { Tool as OllamaTool } from 'ollama';
-import z, { Schema } from 'zod';
+import type { Tool as OllamaTool } from "ollama";
+import type z from "zod";
+import type { Schema } from "zod";
 
 export interface ToolBox<T extends any[] = any[], R = any> {
   fi: ToolInterface;
@@ -18,7 +19,7 @@ export interface ToolCallRequest {
 }
 
 export interface ToolCallResponse {
-  status: 'failed' | 'success';
+  status: "failed" | "success";
   name: string;
   terminalCommand?: string;
   result?: unknown;

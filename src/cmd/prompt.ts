@@ -1,19 +1,19 @@
-import { readSettings } from '../config/setting';
-import { logger } from '../logger';
-import { sanitizeFullFilePath } from '../util/fs';
-import { Request } from '../util/request';
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
+import { readSettings } from "../config/setting";
+import { logger } from "../logger";
+import { sanitizeFullFilePath } from "../util/fs";
+import { Request } from "../util/request";
 
 export async function listLocalAvailablePrompts() {
   const settings = readSettings();
   const files = fs.readdirSync(settings.prompt.rootFolder);
-  console.log('Available Prompts: ');
+  console.log("Available Prompts: ");
   files.forEach((f) => {
-    console.log('  - ', f);
+    console.log("  - ", f);
   });
-  console.log('');
-  console.log('store at', settings.prompt.rootFolder);
+  console.log("");
+  console.log("store at", settings.prompt.rootFolder);
 }
 
 export async function createPrompt(memoId: string, folderPath?: string) {
@@ -85,8 +85,12 @@ export function storePromptConfigFile(fileName: string, content: string) {
   const filePath = path.resolve(settings.prompt.rootFolder, `${fileName}.toml`);
   fs.writeFileSync(filePath, content);
   logger.info(`Save successfully, ${filePath}`);
-  logger.info(`Please edit the file for ApiKey or any other required content before running the Agent.`);
-  logger.info(`You can list all the local available Prompt Config Files by running: `);
+  logger.info(
+    `Please edit the file for ApiKey or any other required content before running the Agent.`,
+  );
+  logger.info(
+    `You can list all the local available Prompt Config Files by running: `,
+  );
   logger.info(`  sisyphus prompt list`);
 }
 

@@ -1,28 +1,33 @@
-import express from 'express';
-import path from 'path';
-import { MessageView } from '../memory/message-view';
-import { logger } from '../logger';
-import { ALLOWED_EXTENSIONS, isPathSafe } from './static';
+import path from "path";
+import express from "express";
+import { logger } from "../logger";
+import { MessageView } from "../memory/message-view";
+import { ALLOWED_EXTENSIONS, isPathSafe } from "./static";
 
-export function buildHttpServer(memoId: string, limit: number = 20, port: number = 3000, staticPath?: string) {
+export function buildHttpServer(
+  memoId: string,
+  limit = 20,
+  port = 3000,
+  staticPath?: string,
+) {
   const app: express.Application = express();
 
-  app.set('view engine', 'ejs');
-  app.set('views', path.join(__dirname, './views'));
+  app.set("view engine", "ejs");
+  app.set("views", path.join(__dirname, "./views"));
 
   // Serve static files if path is provided
   if (staticPath) {
     const absolutePath = path.resolve(staticPath);
 
     if (!isPathSafe(absolutePath)) {
-      throw new Error('Static path is invalid or inaccessible');
+      throw new Error("Static path is invalid or inaccessible");
     }
 
     app.use(
-      '/static',
+      "/static",
       express.static(absolutePath, {
         // security options
-        dotfiles: 'deny', // forbidden to access dot files
+        dotfiles: "deny", // forbidden to access dot files
         index: false, // disable directory index
         setHeaders: (res, filePath) => {
           // check file extension
@@ -33,8 +38,8 @@ export function buildHttpServer(memoId: string, limit: number = 20, port: number
           }
 
           // security headers
-          res.set('X-Content-Type-Options', 'nosniff');
-          res.set('Cache-Control', 'no-store, max-age=0');
+          res.set("X-Content-Type-Options", "nosniff");
+          res.set("Cache-Control", "no-store, max-age=0");
         },
       }),
     );
@@ -42,13 +47,13 @@ export function buildHttpServer(memoId: string, limit: number = 20, port: number
     logger.debug(`Serving static files from: ${absolutePath}`);
   }
 
-  app.get('/history', (_req, res) => {
+  app.get("/history", (_req, res) => {
     const messages = MessageView.listAllMessages(memoId, limit);
-    res.render('chat', { messages });
+    res.render("chat", { messages });
   });
 
-  app.get('/', (_req, res) => {
-    res.redirect('/history');
+  app.get("/", (_req, res) => {
+    res.redirect("/history");
   });
 
   return {

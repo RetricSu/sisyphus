@@ -5,7 +5,7 @@ export async function stdOutWriteSync(buffer: Uint8Array | string) {
         console.error(err.message);
         return rejects(err);
       }
-      return resolve('');
+      return resolve("");
     };
     return process.stdout.write(buffer, cb);
   });

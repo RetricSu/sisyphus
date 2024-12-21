@@ -1,6 +1,9 @@
-import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from '@ai-sdk/google';
-import { AI } from './ai';
-import { AIInterface, AIChatProp, AIChatResponse } from './type';
+import {
+  type GoogleGenerativeAIProvider,
+  createGoogleGenerativeAI,
+} from "@ai-sdk/google";
+import { AI } from "./ai";
+import type { AIChatProp, AIChatResponse, AIInterface } from "./type";
 
 export class GoogleAdapter extends AI implements AIInterface {
   client: GoogleGenerativeAIProvider;
@@ -10,7 +13,20 @@ export class GoogleAdapter extends AI implements AIInterface {
     this.client = createGoogleGenerativeAI({ baseURL: apiUrl, apiKey });
   }
 
-  async chat({ isSTream, msgs, model, tools, maxSteps }: AIChatProp): Promise<AIChatResponse> {
-    return await this.genTextFromLLM({ client: this.client, isSTream, msgs, model, tools, maxSteps });
+  async chat({
+    isSTream,
+    msgs,
+    model,
+    tools,
+    maxSteps,
+  }: AIChatProp): Promise<AIChatResponse> {
+    return await this.genTextFromLLM({
+      client: this.client,
+      isSTream,
+      msgs,
+      model,
+      tools,
+      maxSteps,
+    });
   }
 }

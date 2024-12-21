@@ -1,11 +1,11 @@
-import { CoreMessage } from 'ai';
-import { ToolBox } from '../tools/type';
+import type { CoreMessage } from "ai";
+import type { ToolBox } from "../tools/type";
 
 export enum StrategyType {
-  cot = 'cot',
-  reAct = 'react',
-  tot = 'tot',
-  lats = 'lats',
+  cot = "cot",
+  reAct = "react",
+  tot = "tot",
+  lats = "lats",
 }
 
 export interface StrategyInterface {

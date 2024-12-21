@@ -1,4 +1,4 @@
-import { AIInterface } from '../core/type';
+import type { AIInterface } from "../core/type";
 
 export class Strategy {
   ai: AIInterface;

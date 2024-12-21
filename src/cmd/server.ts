@@ -1,4 +1,4 @@
-import { buildHttpServer } from '../server/http';
+import { buildHttpServer } from "../server/http";
 
 export interface RunServerProp {
   port?: number;

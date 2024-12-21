@@ -1,8 +1,8 @@
-import fs from 'fs';
-import { getDefaultPrivkeyFilePath } from '../config/setting';
-import path from 'path';
-import crypto from 'crypto';
-import { logger } from '../logger';
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { getDefaultPrivkeyFilePath } from "../config/setting";
+import { logger } from "../logger";
 
 export const Privkey = {
   load,
@@ -12,7 +12,9 @@ export const Privkey = {
 };
 
 export function load(memoId: string) {
-  return fs.readFileSync(getDefaultPrivkeyFilePath(memoId), 'utf8').trim() as string;
+  return fs
+    .readFileSync(getDefaultPrivkeyFilePath(memoId), "utf8")
+    .trim() as string;
 }
 
 export function isPrivkeyInitialized(memoId: string) {
@@ -25,7 +27,10 @@ export function isPrivkeyInitialized(memoId: string) {
 export function init(memoId: string) {
   if (!isPrivkeyInitialized(memoId)) {
     makeFolder(memoId);
-    fs.writeFileSync(getDefaultPrivkeyFilePath(memoId), crypto.randomBytes(32).toString('hex'));
+    fs.writeFileSync(
+      getDefaultPrivkeyFilePath(memoId),
+      crypto.randomBytes(32).toString("hex"),
+    );
     logger.debug(`Init a New Privkey for Agent ${memoId}`);
   }
 }

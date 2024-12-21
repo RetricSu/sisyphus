@@ -1,6 +1,6 @@
-import { Message, ToolCall } from 'ollama';
-import { db } from './database';
-import { MemoId } from './type';
+import type { Message, ToolCall } from "ollama";
+import { db } from "./database";
+import type { MemoId } from "./type";
 
 export class AMessage {
   public memoId: MemoId;
@@ -25,7 +25,9 @@ export class AMessage {
 
   // save Message to database
   save(): number {
-    const stmt = db.prepare('INSERT INTO messages (role, content, memo_id) VALUES (?, ?, ?)');
+    const stmt = db.prepare(
+      "INSERT INTO messages (role, content, memo_id) VALUES (?, ?, ?)",
+    );
     const result = stmt.run(this.msg.role, this.msg.content, this.memoId);
     this.dbId = result.lastInsertRowid as number;
 
@@ -38,10 +40,12 @@ export class AMessage {
 
   // save Images
   private saveImages(images: typeof this.msg.images): void {
-    if (!this.dbId) throw new Error('Message must be saved first.');
+    if (!this.dbId) throw new Error("Message must be saved first.");
     if (!images || images.length === 0) return;
 
-    const stmt = db.prepare('INSERT INTO images (message_id, image, image_url) VALUES (?, ?, ?)');
+    const stmt = db.prepare(
+      "INSERT INTO images (message_id, image, image_url) VALUES (?, ?, ?)",
+    );
     images.forEach((image) => {
       if (image instanceof Uint8Array) {
         stmt.run(this.dbId, image, null); // 存储 BLOB
@@ -53,12 +57,14 @@ export class AMessage {
 
   // save ToolCalls and Arguments
   private saveToolCalls(toolCalls: typeof this.msg.tool_calls): void {
-    if (!this.dbId) throw new Error('Message must be saved first.');
+    if (!this.dbId) throw new Error("Message must be saved first.");
     if (!toolCalls || toolCalls.length === 0) return;
 
-    const toolCallStmt = db.prepare('INSERT INTO tool_calls (message_id, function_name) VALUES (?, ?)');
+    const toolCallStmt = db.prepare(
+      "INSERT INTO tool_calls (message_id, function_name) VALUES (?, ?)",
+    );
     const argStmt = db.prepare(
-      'INSERT INTO tool_call_arguments (tool_call_id, argument_key, argument_value) VALUES (?, ?, ?)',
+      "INSERT INTO tool_call_arguments (tool_call_id, argument_key, argument_value) VALUES (?, ?, ?)",
     );
 
     toolCalls.forEach((toolCall) => {
