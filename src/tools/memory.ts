@@ -1,39 +1,35 @@
-import type { Message } from "ollama";
-import z from "zod";
-import { Memory, type MemoryMetadata } from "../memory/long-term";
-import type { ToolBox } from "./type";
+import type { Message } from 'ollama';
+import z from 'zod';
+import { Memory, type MemoryMetadata } from '../memory/long-term';
+import type { ToolBox } from './type';
 
 export interface MemoryToolExecParameter {
   text: string;
 }
 
-export type MemoryToolBoxType = ToolBox<
-  [MemoryToolExecParameter],
-  Promise<(Message & { created_at: string })[]>
->;
+export type MemoryToolBoxType = ToolBox<[MemoryToolExecParameter], Promise<(Message & { created_at: string })[]>>;
 
 export function buildMemoryToolBox(memoId: string) {
   const memoryToolBox: MemoryToolBoxType = {
     fi: {
-      type: "function",
+      type: 'function',
       function: {
-        name: "search_memory",
-        description:
-          "Search the remembered and maybe-related content from the persistent memory",
+        name: 'search_memory',
+        description: 'Search the remembered and maybe-related content from the persistent memory',
         parameters: {
-          type: "object",
+          type: 'object',
           properties: {
             text: {
-              type: "string",
-              description: "The text to search in the memory",
+              type: 'string',
+              description: 'The text to search in the memory',
             },
           },
-          required: ["text"],
+          required: ['text'],
         },
       },
     },
     params: z.object({
-      text: z.string().describe("The text to search in the memory"),
+      text: z.string().describe('The text to search in the memory'),
     }),
     exec: async ({ text }: MemoryToolExecParameter) => {
       const memory = new Memory(memoId);

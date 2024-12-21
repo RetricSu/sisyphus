@@ -1,19 +1,19 @@
-import fs from "fs";
+import fs from 'fs';
 
 // Allowed file extensions
 export const ALLOWED_EXTENSIONS = new Set([
-  ".txt",
-  ".pdf",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".html",
-  ".css",
-  ".js",
-  ".json",
-  ".svg",
-  ".ico",
+  '.txt',
+  '.pdf',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.html',
+  '.css',
+  '.js',
+  '.json',
+  '.svg',
+  '.ico',
 ]);
 
 export function isPathSafe(staticPath: string): boolean {
@@ -21,7 +21,7 @@ export function isPathSafe(staticPath: string): boolean {
     fs.accessSync(staticPath, fs.constants.R_OK);
     const stats = fs.statSync(staticPath);
     return stats.isDirectory();
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }

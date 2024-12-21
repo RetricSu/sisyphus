@@ -1,11 +1,11 @@
-import type { MemoId } from "../memory/type";
+import type { MemoId } from '../memory/type';
 
 // in the future the prompt should be share as a Nostr event across the network
 export interface PromptFile {
   name: string;
   description: string;
   memoId: MemoId;
-  ckbNetwork: "devnet" | "testnet" | "mainnet";
+  ckbNetwork: 'devnet' | 'testnet' | 'mainnet';
   tools: string[];
   maxSteps?: number;
   twitter?: {
@@ -13,17 +13,17 @@ export interface PromptFile {
     password: string;
   };
   strategy?: {
-    type: "cot" | "react" | "tot" | "lats";
+    type: 'cot' | 'react' | 'tot' | 'lats';
     maxLoop?: number;
   };
   llm: {
     apiUrl: string;
     model: string;
-    provider: "ollama" | "openai" | "anthropic" | "google";
+    provider: 'ollama' | 'openai' | 'anthropic' | 'google';
     apiKey?: string;
   };
   prompts: {
-    role: "system" | "user";
+    role: 'system' | 'user';
     content: string;
   }[];
   author?: string;

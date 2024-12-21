@@ -1,37 +1,33 @@
 #!/usr/bin/env node
-import { input } from "@inquirer/prompts";
-import { loadWasmSync } from "@rust-nostr/nostr-sdk";
-import { Command } from "commander";
-import { chat } from "./cmd/chat";
-import { Config, type ConfigItem } from "./cmd/config";
-import { buildIPCBot } from "./cmd/ipc";
-import {
-  createPrompt,
-  downloadPrompt,
-  listLocalAvailablePrompts,
-} from "./cmd/prompt";
-import { convertReadableTimeToMilSecs, runner } from "./cmd/runner";
-import { runServer } from "./cmd/server";
-import { getDefaultIPCSocketPath } from "./config/setting";
-import { logger } from "./logger";
-import { createTables } from "./memory/database";
-import { Prompt } from "./prompt";
+import { input } from '@inquirer/prompts';
+import { loadWasmSync } from '@rust-nostr/nostr-sdk';
+import { Command } from 'commander';
+import { chat } from './cmd/chat';
+import { Config, type ConfigItem } from './cmd/config';
+import { buildIPCBot } from './cmd/ipc';
+import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
+import { convertReadableTimeToMilSecs, runner } from './cmd/runner';
+import { runServer } from './cmd/server';
+import { getDefaultIPCSocketPath } from './config/setting';
+import { logger } from './logger';
+import { createTables } from './memory/database';
+import { Prompt } from './prompt';
 
 loadWasmSync();
 createTables();
 Prompt.init();
 
-const version = require("../package.json").version;
-const description = require("../package.json").description;
+const version = require('../package.json').version;
+const description = require('../package.json').description;
 
 const program = new Command();
-program.name("sisyphus").description(description).version(version);
+program.name('sisyphus').description(description).version(version);
 
 program
-  .command("chat")
-  .description("chat with AI Agent through the command line")
-  .option("-c, --clean", "clean chat without saving to memory")
-  .option("--prompt <prompt>", "Specific the prompt file name", undefined)
+  .command('chat')
+  .description('chat with AI Agent through the command line')
+  .option('-c, --clean', 'clean chat without saving to memory')
+  .option('--prompt <prompt>', 'Specific the prompt file name', undefined)
   .action(async (opt) => {
     const promptName = opt.prompt;
     const saveMemory = opt.clean != null ? !opt.clean : undefined;
@@ -40,39 +36,32 @@ program
   });
 
 program
-  .command("run")
-  .description("run AI Agent at interval")
-  .option("-c, --clean", "clean chat without saving to memory")
-  .option("--prompt <prompt>", "Specific the prompt file name", undefined)
-  .option("--hour <hour>", "Specific the interval hour time", "0")
-  .option("--minute <minute>", "Specific the interval minute time", "0")
-  .option("--second <hour>", "Specific the interval second time", "0")
+  .command('run')
+  .description('run AI Agent at interval')
+  .option('-c, --clean', 'clean chat without saving to memory')
+  .option('--prompt <prompt>', 'Specific the prompt file name', undefined)
+  .option('--hour <hour>', 'Specific the interval hour time', '0')
+  .option('--minute <minute>', 'Specific the interval minute time', '0')
+  .option('--second <hour>', 'Specific the interval second time', '0')
   .action(async (opt) => {
     const promptName = opt.prompt;
     const saveMemory = opt.clean != null ? !opt.clean : undefined;
-    const intervalMilSecs = convertReadableTimeToMilSecs(
-      +opt.hour,
-      +opt.minute,
-      +opt.second,
-    );
+    const intervalMilSecs = convertReadableTimeToMilSecs(+opt.hour, +opt.minute, +opt.second);
     return await runner({ promptName, saveMemory, intervalMilSecs });
   });
 
 const ipcCommand = program
-  .command("ipc")
-  .description("make two AI Agents talk to each other in the same computer")
+  .command('ipc')
+  .description('make two AI Agents talk to each other in the same computer')
   .action(() => {
     console.log('IPC command called. Use "ipc send" or "ipc listen".');
   });
 
 ipcCommand
-  .command("listen") // first sub command
-  .description("Start a IPC bot listening for message chatting")
-  .requiredOption("--prompt <prompt>", "Specific the prompt file name")
-  .option(
-    "--socket-path <socketPath>",
-    "Specific the socket path for the ICP bot",
-  )
+  .command('listen') // first sub command
+  .description('Start a IPC bot listening for message chatting')
+  .requiredOption('--prompt <prompt>', 'Specific the prompt file name')
+  .option('--socket-path <socketPath>', 'Specific the socket path for the ICP bot')
   .action(async (opt) => {
     const promptName = opt.prompt;
     const socketPath = opt.socketPath;
@@ -81,73 +70,63 @@ ipcCommand
   });
 
 ipcCommand
-  .command("send <message>") // second sub command
-  .description("Use a IPC bot to send a initial message to a target IPC bot")
-  .requiredOption("--prompt <prompt>", "Specific the prompt file name")
-  .option(
-    "--socket-path <socketPath>",
-    "Specific the socket path of the target ICP bot to connect",
-  )
-  .option(
-    "--memo-id <memoId>",
-    "Specific the memoId of the target ICP bot to connect",
-  )
+  .command('send <message>') // second sub command
+  .description('Use a IPC bot to send a initial message to a target IPC bot')
+  .requiredOption('--prompt <prompt>', 'Specific the prompt file name')
+  .option('--socket-path <socketPath>', 'Specific the socket path of the target ICP bot to connect')
+  .option('--memo-id <memoId>', 'Specific the memoId of the target ICP bot to connect')
   .action(async (message, opt) => {
     const promptName = opt.prompt;
     const memoId = opt.memoId;
     const socketPath = opt.socketPath || getDefaultIPCSocketPath(memoId);
     if (socketPath == null) {
-      throw new Error(
-        "Please provide a socketPath or memoId of the target IPC bot to connect",
-      );
+      throw new Error('Please provide a socketPath or memoId of the target IPC bot to connect');
     }
     const bot = await buildIPCBot({ promptName, saveMemory: false });
     bot.sendClientRequest(socketPath, message);
   });
 
 const promptCommand = program
-  .command("prompt")
-  .description("Manger prompt files")
+  .command('prompt')
+  .description('Manger prompt files')
   .action(() => {
-    console.log(
-      'prompt command called. Use "prompt get", "prompt create" or "prompt list".',
-    );
+    console.log('prompt command called. Use "prompt get", "prompt create" or "prompt list".');
   });
 
 promptCommand
-  .command("download <name>")
-  .description("Downloading Prompt Config File from Github")
+  .command('download <name>')
+  .description('Downloading Prompt Config File from Github')
   .action((name) => downloadPrompt(name));
 
 promptCommand
-  .command("create")
-  .description("Create a prompt file in prompts folder.")
-  .option("--folder <folder>", "Specific the prompt folder path", undefined)
+  .command('create')
+  .description('Create a prompt file in prompts folder.')
+  .option('--folder <folder>', 'Specific the prompt folder path', undefined)
   .action(async (opt) => {
     const name = await input({
-      message: "Enter a unique id for your Agent: ",
+      message: 'Enter a unique id for your Agent: ',
       required: true,
     });
     await createPrompt(name, opt.folder);
   });
 
 promptCommand
-  .command("list")
-  .description("List all local available Prompt Config Files")
+  .command('list')
+  .description('List all local available Prompt Config Files')
   .action(() => listLocalAvailablePrompts());
 
 program
-  .command("config <action> [item] [value]")
-  .description("do a configuration action")
+  .command('config <action> [item] [value]')
+  .description('do a configuration action')
   .action((action, item, value) => Config(action, item as ConfigItem, value));
 
 program
-  .command("server")
-  .description("Run a http server to host Agent chatting history")
-  .requiredOption("--memo-id <memoId>", "Specific the memo-id of the Agent")
-  .option("--port <port>", "Specific the port number", undefined)
-  .option("--limit <limit>", "Specific the max limit number of chat history")
-  .option("--static-path <path>", "Specific a static folder path to host")
+  .command('server')
+  .description('Run a http server to host Agent chatting history')
+  .requiredOption('--memo-id <memoId>', 'Specific the memo-id of the Agent')
+  .option('--port <port>', 'Specific the port number', undefined)
+  .option('--limit <limit>', 'Specific the max limit number of chat history')
+  .option('--static-path <path>', 'Specific a static folder path to host')
   .action((opt) => runServer(opt));
 
 program.parse(process.argv);
@@ -158,7 +137,7 @@ if (!process.argv.slice(2).length) {
 }
 
 // deal with program panic
-process.on("uncaughtException", (error) => {
+process.on('uncaughtException', (error) => {
   logger.error(`uncaughtException ${error?.message}`);
   process.exit(1);
 });

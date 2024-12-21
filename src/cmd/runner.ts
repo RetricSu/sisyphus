@@ -1,5 +1,5 @@
-import { RunnerBot } from "../agent/runner-bot";
-import { logger } from "../logger";
+import { RunnerBot } from '../agent/runner-bot';
+import { logger } from '../logger';
 
 export interface RunnerProp {
   intervalMilSecs: number;
@@ -7,11 +7,7 @@ export interface RunnerProp {
   saveMemory?: boolean;
 }
 
-export async function runner({
-  intervalMilSecs,
-  promptName,
-  saveMemory,
-}: RunnerProp) {
+export async function runner({ intervalMilSecs, promptName, saveMemory }: RunnerProp) {
   const exec = async () => {
     const bot = new RunnerBot({ promptName, saveMemory });
     try {
@@ -22,11 +18,9 @@ export async function runner({
       logger.debug(`Finished Executing.`);
       logger.debug(`===================`);
     } catch (error) {
-      logger.error("some thing went wrong...");
+      logger.error('some thing went wrong...');
       console.log(error);
-      logger.debug(
-        `waiting for another execution in ${convertMilSecsToReadableTime(intervalMilSecs)}..`,
-      );
+      logger.debug(`waiting for another execution in ${convertMilSecsToReadableTime(intervalMilSecs)}..`);
     }
   };
 
@@ -46,10 +40,6 @@ export function convertMilSecsToReadableTime(intervalMilSecs: number): string {
   return `${hours} hours, ${minutes} minutes, and ${seconds} seconds`;
 }
 
-export function convertReadableTimeToMilSecs(
-  hours: number,
-  minutes: number,
-  seconds: number,
-): number {
+export function convertReadableTimeToMilSecs(hours: number, minutes: number, seconds: number): number {
   return hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000;
 }

@@ -1,56 +1,48 @@
-import fs from "fs";
-import path from "path";
-import { Scraper } from "agent-twitter-client";
-import z from "zod";
-import { getDefaultTwitterFilePath } from "../config/setting";
-import { logger } from "../logger";
-import type { PromptFile } from "../prompt";
-import type { ToolBox } from "./type";
+import fs from 'fs';
+import path from 'path';
+import { Scraper } from 'agent-twitter-client';
+import z from 'zod';
+import { getDefaultTwitterFilePath } from '../config/setting';
+import { logger } from '../logger';
+import type { PromptFile } from '../prompt';
+import type { ToolBox } from './type';
 
 export interface SendTweetToolExecParameter {
   content: string;
 }
-export type SendTweetToolBoxType = ToolBox<
-  [SendTweetToolExecParameter],
-  ReturnType<typeof sendTweets>
->;
+export type SendTweetToolBoxType = ToolBox<[SendTweetToolExecParameter], ReturnType<typeof sendTweets>>;
 
 export interface ReplyTweetToolExecParameter {
   content: string;
   replyToTweetId: string;
 }
-export type ReplyTweetToolBoxType = ToolBox<
-  [ReplyTweetToolExecParameter],
-  ReturnType<typeof replyTweet>
->;
+export type ReplyTweetToolBoxType = ToolBox<[ReplyTweetToolExecParameter], ReturnType<typeof replyTweet>>;
 
 export function buildTwitterTools(promptFile: PromptFile) {
   const twitter = promptFile.twitter;
   if (twitter?.username == null || twitter.password == null)
-    throw new Error(
-      "Twitter tool required username and password in the prompt config file.",
-    );
+    throw new Error('Twitter tool required username and password in the prompt config file.');
 
   const sendTweetToolBox: SendTweetToolBoxType = {
     fi: {
-      type: "function",
+      type: 'function',
       function: {
-        name: "send_tweet",
-        description: "post a new tweet to Twitter",
+        name: 'send_tweet',
+        description: 'post a new tweet to Twitter',
         parameters: {
-          type: "object",
+          type: 'object',
           properties: {
             content: {
-              type: "string",
-              description: "the text content to tweet on twitter",
+              type: 'string',
+              description: 'the text content to tweet on twitter',
             },
           },
-          required: ["content"],
+          required: ['content'],
         },
       },
     },
     params: z.object({
-      content: z.string().describe("post a new tweet to Twitter"),
+      content: z.string().describe('post a new tweet to Twitter'),
     }),
     exec: async ({ content }: SendTweetToolExecParameter) => {
       return await sendTweets(twitter.username, twitter.password, content);
@@ -59,50 +51,39 @@ export function buildTwitterTools(promptFile: PromptFile) {
 
   const replyTweetToolBox: ReplyTweetToolBoxType = {
     fi: {
-      type: "function",
+      type: 'function',
       function: {
-        name: "reply_tweet",
-        description: "post a reply tweet to a tweet on Twitter",
+        name: 'reply_tweet',
+        description: 'post a reply tweet to a tweet on Twitter',
         parameters: {
-          type: "object",
+          type: 'object',
           properties: {
             content: {
-              type: "string",
-              description: "the reply text content",
+              type: 'string',
+              description: 'the reply text content',
             },
             replyToTweetId: {
-              type: "string",
-              description: "the tweet id to reply to",
+              type: 'string',
+              description: 'the tweet id to reply to',
             },
           },
-          required: ["content", "replyToTweetId"],
+          required: ['content', 'replyToTweetId'],
         },
       },
     },
     params: z.object({
-      content: z.string().describe("post a new tweet to Twitter"),
-      replyToTweetId: z
-        .string()
-        .describe("post a reply tweet to a tweet on Twitter"),
+      content: z.string().describe('post a new tweet to Twitter'),
+      replyToTweetId: z.string().describe('post a reply tweet to a tweet on Twitter'),
     }),
     exec: async ({ content, replyToTweetId }: ReplyTweetToolExecParameter) => {
-      return await replyTweet(
-        twitter.username,
-        twitter.password,
-        content,
-        replyToTweetId,
-      );
+      return await replyTweet(twitter.username, twitter.password, content, replyToTweetId);
     },
   };
 
   return [sendTweetToolBox, replyTweetToolBox];
 }
 
-export async function sendTweets(
-  username: string,
-  password: string,
-  text: string,
-) {
+export async function sendTweets(username: string, password: string, text: string) {
   const scraper = await buildScraper(username, password);
   const sendTweetResults = await scraper.sendTweet(text);
   const responseJson = await sendTweetResults.json();
@@ -114,12 +95,7 @@ export async function sendTweets(
   };
 }
 
-export async function replyTweet(
-  username: string,
-  password: string,
-  text: string,
-  replyToTweetId: string,
-) {
+export async function replyTweet(username: string, password: string, text: string, replyToTweetId: string) {
   const scraper = await buildScraper(username, password);
   const result = await scraper.sendTweet(text, replyToTweetId);
   const responseJson = await result.json();
@@ -152,12 +128,12 @@ export function saveCookies(username: string, cookies: any[]) {
   }
 
   const cookieStrings = cookies.map((cookie) => cookie.toString());
-  fs.writeFileSync(cookieFilePath, cookieStrings.join("\n"));
+  fs.writeFileSync(cookieFilePath, cookieStrings.join('\n'));
 }
 
 export function readCookies(username: string) {
   const cookieFilePath = getDefaultTwitterFilePath(username);
-  const cookieStrings = fs.readFileSync(cookieFilePath, "utf8").split("\n");
+  const cookieStrings = fs.readFileSync(cookieFilePath, 'utf8').split('\n');
   return cookieStrings;
 }
 

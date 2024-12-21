@@ -1,4 +1,4 @@
-import { IPCBot } from "../agent/ipc-bot";
+import { IPCBot } from '../agent/ipc-bot';
 
 export interface buildIPCBotProp {
   promptName: string;
@@ -6,11 +6,7 @@ export interface buildIPCBotProp {
   socketPath?: string;
 }
 
-export async function buildIPCBot({
-  promptName,
-  saveMemory,
-  socketPath,
-}: buildIPCBotProp) {
+export async function buildIPCBot({ promptName, saveMemory, socketPath }: buildIPCBotProp) {
   const bot = new IPCBot({ socketPath, promptName, saveMemory });
 
   try {

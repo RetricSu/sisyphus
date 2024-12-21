@@ -1,25 +1,21 @@
-import { configPath, readSettings, writeSettings } from "../config/setting";
-import { Request } from "../util/request";
+import { configPath, readSettings, writeSettings } from '../config/setting';
+import { Request } from '../util/request';
 
 export enum ConfigAction {
-  list = "list",
-  get = "get",
-  set = "set",
-  rm = "rm",
+  list = 'list',
+  get = 'get',
+  set = 'set',
+  rm = 'rm',
 }
 
 export enum ConfigItem {
-  proxy = "proxy",
-  ckbNetwork = "ckb-network",
+  proxy = 'proxy',
+  ckbNetwork = 'ckb-network',
 }
 
-export async function Config(
-  action: ConfigAction,
-  item: ConfigItem,
-  value?: string,
-) {
+export async function Config(action: ConfigAction, item: ConfigItem, value?: string) {
   if (action === ConfigAction.list) {
-    console.log("config file: ", configPath);
+    console.log('config file: ', configPath);
     return console.log(readSettings());
   }
 
@@ -43,7 +39,7 @@ export async function Config(
   if (action === ConfigAction.set) {
     switch (item) {
       case ConfigItem.proxy: {
-        if (value == null) throw new Error("No proxyUrl!");
+        if (value == null) throw new Error('No proxyUrl!');
 
         try {
           const proxy = Request.parseProxyUrl(value);
@@ -73,5 +69,5 @@ export async function Config(
     }
   }
 
-  throw new Error("invalid config action.");
+  throw new Error('invalid config action.');
 }

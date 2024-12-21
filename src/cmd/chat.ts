@@ -1,5 +1,5 @@
-import { TerminalBot } from "../agent/terminal-bot";
-import { logger } from "../logger";
+import { TerminalBot } from '../agent/terminal-bot';
+import { logger } from '../logger';
 
 export interface ChatProp {
   promptName?: string;
@@ -14,7 +14,7 @@ export async function chat({ promptName, saveMemory }: ChatProp) {
     }
     await bot.chat();
   } catch (error) {
-    logger.error("some thing went wrong...");
+    logger.error('some thing went wrong...');
     console.log(error);
     process.exit(1);
   }

@@ -1,18 +1,10 @@
-import { type Client, type NostrEvent, ccc } from "@ckb-ccc/core";
-import { Nip07 } from "@ckb-ccc/nip07";
-import {
-  Filter,
-  Keys,
-  Metadata,
-  Client as NostrClient,
-  NostrSigner,
-  Tag,
-  loadWasmSync,
-} from "@rust-nostr/nostr-sdk";
-import type { Network } from "../offckb/offckb.config";
-import { NostrProvider } from "./NostrProvider";
-import { buildCccClient } from "./cccClient";
-import type { HexNoPrefix, TransferOption } from "./type";
+import { type Client, type NostrEvent, ccc } from '@ckb-ccc/core';
+import { Nip07 } from '@ckb-ccc/nip07';
+import { Filter, Keys, Metadata, Client as NostrClient, NostrSigner, Tag, loadWasmSync } from '@rust-nostr/nostr-sdk';
+import type { Network } from '../offckb/offckb.config';
+import { NostrProvider } from './NostrProvider';
+import { buildCccClient } from './cccClient';
+import type { HexNoPrefix, TransferOption } from './type';
 
 // Nostr and CKB
 export class NosCKB {
@@ -24,11 +16,7 @@ export class NosCKB {
   private cccClient: Client;
   private cccNostrSigner: Nip07.Signer;
 
-  constructor({
-    nostrPrivkey,
-    network,
-    relays = [],
-  }: { nostrPrivkey: string; network: Network; relays?: string[] }) {
+  constructor({ nostrPrivkey, network, relays = [] }: { nostrPrivkey: string; network: Network; relays?: string[] }) {
     this.network = network;
     this.cccClient = buildCccClient(network);
 
@@ -55,10 +43,7 @@ export class NosCKB {
 
   async readNostrEvents(filters: Filter[]) {
     await this.nostrClient.connect();
-    const events = await this.nostrClient.getEventsFrom(
-      this.relayList,
-      filters,
-    );
+    const events = await this.nostrClient.getEventsFrom(this.relayList, filters);
     await this.nostrClient.disconnect();
     return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
   }
@@ -67,20 +52,18 @@ export class NosCKB {
     const filter = Filter.fromJson(
       JSON.stringify({
         kinds: [1],
-        "#p": [(await this.cccNostrSigner.getNostrPublicKey()).slice(2)],
+        '#p': [(await this.cccNostrSigner.getNostrPublicKey()).slice(2)],
       }),
     );
     await this.nostrClient.connect();
-    const events = await this.nostrClient.getEventsFrom(this.relayList, [
-      filter,
-    ]);
+    const events = await this.nostrClient.getEventsFrom(this.relayList, [filter]);
     await this.nostrClient.disconnect();
     return events.map((e) => JSON.parse(e.asJson()) as Required<NostrEvent>);
   }
 
   async publishReplyNotesToEvent(text: string, eventId: HexNoPrefix) {
     await this.nostrClient.connect();
-    const tag = Tag.parse(["e", eventId]);
+    const tag = Tag.parse(['e', eventId]);
     const res = await this.nostrClient.publishTextNote(text, [tag]);
     await this.nostrClient.disconnect();
     return { eventId: res.id.toBech32() };
@@ -89,13 +72,10 @@ export class NosCKB {
   async publishProfileEvent(
     name: string,
     about: string,
-    avatarPictureUrl = "https://image.nostr.build/13ee4c26a7b40da80fd7078cd12621ca072ce09cbd5f1ac081e3300c1639bbfb.jpg",
+    avatarPictureUrl = 'https://image.nostr.build/13ee4c26a7b40da80fd7078cd12621ca072ce09cbd5f1ac081e3300c1639bbfb.jpg',
   ) {
     await this.nostrClient.connect();
-    const metadata = new Metadata()
-      .name(name)
-      .about(about)
-      .picture(avatarPictureUrl);
+    const metadata = new Metadata().name(name).about(about).picture(avatarPictureUrl);
     const res = await this.nostrClient.setMetadata(metadata);
     await this.nostrClient.disconnect();
     return { eventId: res.id.toBech32() };
@@ -118,9 +98,8 @@ export class NosCKB {
   }
 
   async getMyXUdtArgs() {
-    const lockScript = (await this.cccNostrSigner.getRecommendedAddressObj())
-      .script;
-    const xudtArgs = lockScript.hash() + "00000000";
+    const lockScript = (await this.cccNostrSigner.getRecommendedAddressObj()).script;
+    const xudtArgs = lockScript.hash() + '00000000';
     return xudtArgs;
   }
 
@@ -135,15 +114,8 @@ export class NosCKB {
   }) {
     const xudtArgs = await this.getMyXUdtArgs();
 
-    const typeScript = await ccc.Script.fromKnownScript(
-      this.cccNostrSigner.client,
-      ccc.KnownScript.XUdt,
-      xudtArgs,
-    );
-    const receiver = await ccc.Address.fromString(
-      receiptAddress,
-      this.cccClient,
-    );
+    const typeScript = await ccc.Script.fromKnownScript(this.cccNostrSigner.client, ccc.KnownScript.XUdt, xudtArgs);
+    const receiver = await ccc.Address.fromString(receiptAddress, this.cccClient);
 
     const tx = ccc.Transaction.from({
       outputs: [
@@ -161,34 +133,22 @@ export class NosCKB {
     return txHash;
   }
 
-  async issueTokenToMyself({
-    udtAmount,
-    feeRate = 1000,
-  }: { udtAmount: string; feeRate?: number }) {
+  async issueTokenToMyself({ udtAmount, feeRate = 1000 }: { udtAmount: string; feeRate?: number }) {
     return await this.issueTokenToReceiver({
       udtAmount,
-      receiptAddress: (
-        await this.cccNostrSigner.getRecommendedAddressObj()
-      ).toString(),
+      receiptAddress: (await this.cccNostrSigner.getRecommendedAddressObj()).toString(),
       feeRate,
     });
   }
 
   async getMyUdtBalance() {
     const xudtArgs = await this.getMyXUdtArgs();
-    const typeScript = await ccc.Script.fromKnownScript(
-      this.cccClient,
-      ccc.KnownScript.XUdt,
-      xudtArgs,
-    );
+    const typeScript = await ccc.Script.fromKnownScript(this.cccClient, ccc.KnownScript.XUdt, xudtArgs);
 
     let udtBalance: ccc.Num = BigInt(0);
     const collector = this.cccClient.findCellsByType(typeScript, true);
     for await (const cell of collector) {
-      if (
-        cell.cellOutput.lock.hash() ===
-        (await this.cccNostrSigner.getRecommendedAddressObj()).script.hash()
-      ) {
+      if (cell.cellOutput.lock.hash() === (await this.cccNostrSigner.getRecommendedAddressObj()).script.hash()) {
         udtBalance += ccc.udtBalanceFrom(cell.outputData);
       }
     }
@@ -204,16 +164,10 @@ export class NosCKB {
     udtAmount: string;
     feeRate?: number;
   }) {
-    const receiverLockScript = (
-      await ccc.Address.fromString(toAddress, this.cccClient)
-    ).script;
+    const receiverLockScript = (await ccc.Address.fromString(toAddress, this.cccClient)).script;
 
     const xudtArgs = await this.getMyXUdtArgs();
-    const xUdtType = await ccc.Script.fromKnownScript(
-      this.cccClient,
-      ccc.KnownScript.XUdt,
-      xudtArgs,
-    );
+    const xUdtType = await ccc.Script.fromKnownScript(this.cccClient, ccc.KnownScript.XUdt, xudtArgs);
 
     const tx = ccc.Transaction.from({
       outputs: [{ lock: receiverLockScript, type: xUdtType }],

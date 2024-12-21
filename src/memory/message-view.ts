@@ -1,25 +1,18 @@
-import type { Message, ToolCall } from "ollama";
-import { db } from "./database";
-import type { DBImage, DBMessage } from "./model";
+import type { Message, ToolCall } from 'ollama';
+import { db } from './database';
+import type { DBImage, DBMessage } from './model';
 
 export class MessageView {
-  static loadMsgById(messageId: number, memoId = "chat"): Message | null {
-    const messageStmt = db.prepare(
-      "SELECT id, role, content FROM messages WHERE id = ? AND memo_id = ?",
-    );
-    const messageRow = messageStmt.get(messageId, memoId) as
-      | DBMessage
-      | null
-      | undefined;
+  static loadMsgById(messageId: number, memoId = 'chat'): Message | null {
+    const messageStmt = db.prepare('SELECT id, role, content FROM messages WHERE id = ? AND memo_id = ?');
+    const messageRow = messageStmt.get(messageId, memoId) as DBMessage | null | undefined;
 
     if (!messageRow) {
       return null; // 如果找不到 message，返回 null
     }
 
     // 加载关联的 images 和 tool_calls
-    const images = this.loadImagesByMessageId(messageId) as
-      | (Uint8Array[] | string[])
-      | undefined;
+    const images = this.loadImagesByMessageId(messageId) as (Uint8Array[] | string[]) | undefined;
     const toolCalls = this.loadToolCallsByMessageId(messageId);
 
     const message: Message = {
@@ -32,16 +25,9 @@ export class MessageView {
   }
 
   // 加载 Images
-  private static loadImagesByMessageId(
-    messageId: number,
-  ): Uint8Array[] | string[] | undefined {
-    const imageStmt = db.prepare(
-      "SELECT image, image_url FROM images WHERE message_id = ?",
-    );
-    const imageRows = imageStmt.all(messageId) as Pick<
-      DBImage,
-      "image" | "image_url"
-    >[];
+  private static loadImagesByMessageId(messageId: number): Uint8Array[] | string[] | undefined {
+    const imageStmt = db.prepare('SELECT image, image_url FROM images WHERE message_id = ?');
+    const imageRows = imageStmt.all(messageId) as Pick<DBImage, 'image' | 'image_url'>[];
 
     const value = imageRows.map((row: unknown) => {
       const data = row as DBImage;
@@ -55,9 +41,7 @@ export class MessageView {
 
   // 加载 ToolCalls 和 Arguments
   private static loadToolCallsByMessageId(messageId: number): ToolCall[] {
-    const toolCallStmt = db.prepare(
-      "SELECT id, function_name FROM tool_calls WHERE message_id = ?",
-    );
+    const toolCallStmt = db.prepare('SELECT id, function_name FROM tool_calls WHERE message_id = ?');
     const toolCallRows = toolCallStmt.all(messageId);
 
     return toolCallRows.map((row: unknown) => {
@@ -76,9 +60,7 @@ export class MessageView {
   private static loadToolCallArgumentsByToolCallId(toolCallId: number): {
     [key: string]: string;
   } {
-    const argStmt = db.prepare(
-      "SELECT argument_key, argument_value FROM tool_call_arguments WHERE tool_call_id = ?",
-    );
+    const argStmt = db.prepare('SELECT argument_key, argument_value FROM tool_call_arguments WHERE tool_call_id = ?');
     const argRows = argStmt.all(toolCallId);
 
     const argumentsObj: { [key: string]: string } = {};
@@ -94,10 +76,8 @@ export class MessageView {
     return argumentsObj;
   }
 
-  static listAllMessages(memoId = "chat", limit = 20): Message[] {
-    const stmt = db.prepare(
-      "SELECT * FROM messages WHERE memo_id = ? ORDER BY created_at DESC LIMIT ?",
-    );
+  static listAllMessages(memoId = 'chat', limit = 20): Message[] {
+    const stmt = db.prepare('SELECT * FROM messages WHERE memo_id = ? ORDER BY created_at DESC LIMIT ?');
     const rows = stmt.all(memoId, limit) as DBMessage[];
     return rows.reverse() as Message[];
   }

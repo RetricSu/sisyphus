@@ -1,6 +1,6 @@
-import { ChromaClient } from "chromadb";
-import { readSettings } from "../config/setting";
-import type { AMessage } from "./a-message";
+import { ChromaClient } from 'chromadb';
+import { readSettings } from '../config/setting';
+import type { AMessage } from './a-message';
 
 const settings = readSettings();
 
@@ -15,9 +15,7 @@ export class Memory {
 
   public async save(aMsg: AMessage) {
     if (aMsg.dbId == null) {
-      throw new Error(
-        "please save in the db first before saving in chroma memory",
-      );
+      throw new Error('please save in the db first before saving in chroma memory');
     }
     const collection = await this.client.getOrCreateCollection({
       name: this.collectionName,
@@ -35,10 +33,7 @@ export class Memory {
     });
   }
 
-  public async query({
-    searchString,
-    limit,
-  }: { searchString: string; limit?: number }) {
+  public async query({ searchString, limit }: { searchString: string; limit?: number }) {
     const collection = await this.client.getOrCreateCollection({
       name: this.collectionName,
     });
