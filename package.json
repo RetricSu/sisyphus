@@ -10,10 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/retricsu/sisyphus.git"
   },
-  "files": [
-    "dist",
-    "pnpm-lock.yaml"
-  ],
+  "files": ["dist", "pnpm-lock.yaml"],
   "private": false,
   "publishConfig": {
     "access": "public"
