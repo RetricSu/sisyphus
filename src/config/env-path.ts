@@ -1,6 +1,6 @@
+import os from 'os';
 // take and adapt from https://github.com/sindresorhus/env-paths/blob/main/index.js
 import path from 'path';
-import os from 'os';
 import process from 'process';
 
 const homedir = os.homedir();

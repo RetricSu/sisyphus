@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import { ToolCallRequest } from './type';
+import type { ToolCallRequest } from './type';
 
 export function checkIfToolCall(content: string) {
   if (content.includes('name') && content.includes('parameters')) {
@@ -12,7 +12,7 @@ export function checkIfToolCall(content: string) {
       try {
         JSON.parse(match[0]);
         return true;
-      } catch (error) {
+      } catch (_error) {
         return false;
       }
     }

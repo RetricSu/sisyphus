@@ -1,6 +1,6 @@
-import DatabaseConstructor, { type Database } from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
+import DatabaseConstructor, { type Database } from 'better-sqlite3';
 import { readSettings } from '../config/setting';
 
 const settings = readSettings();

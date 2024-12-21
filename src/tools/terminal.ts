@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
-import { ToolBox } from './type';
 import z from 'zod';
+import type { ToolBox } from './type';
 
 export interface TerminalToolExecParameter {
   command: string;

@@ -1,11 +1,11 @@
-import { Scraper } from 'agent-twitter-client';
 import fs from 'fs';
-import { getDefaultTwitterFilePath } from '../config/setting';
-import { PromptFile } from '../prompt';
-import { ToolBox } from './type';
-import z from 'zod';
-import { logger } from '../logger';
 import path from 'path';
+import { Scraper } from 'agent-twitter-client';
+import z from 'zod';
+import { getDefaultTwitterFilePath } from '../config/setting';
+import { logger } from '../logger';
+import type { PromptFile } from '../prompt';
+import type { ToolBox } from './type';
 
 export interface SendTweetToolExecParameter {
   content: string;
@@ -41,7 +41,9 @@ export function buildTwitterTools(promptFile: PromptFile) {
         },
       },
     },
-    params: z.object({ content: z.string().describe('post a new tweet to Twitter') }),
+    params: z.object({
+      content: z.string().describe('post a new tweet to Twitter'),
+    }),
     exec: async ({ content }: SendTweetToolExecParameter) => {
       return await sendTweets(twitter.username, twitter.password, content);
     },
@@ -86,7 +88,11 @@ export async function sendTweets(username: string, password: string, text: strin
   const sendTweetResults = await scraper.sendTweet(text);
   const responseJson = await sendTweetResults.json();
   const headers = await sendTweetResults.headers;
-  return { status: sendTweetResults.status, headers, responseJson: responseJson };
+  return {
+    status: sendTweetResults.status,
+    headers,
+    responseJson: responseJson,
+  };
 }
 
 export async function replyTweet(username: string, password: string, text: string, replyToTweetId: string) {

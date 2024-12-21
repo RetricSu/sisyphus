@@ -1,8 +1,8 @@
 import process from 'process';
 import Readline from 'readline/promises';
-import { stdOutWriteSync } from './util';
-import { Agent } from './base';
 import { AMessage } from '../memory/a-message';
+import { Agent } from './base';
+import { stdOutWriteSync } from './util';
 
 export class TerminalBot extends Agent {
   pipeResponse?: ((name: string, word: string) => any) | undefined;

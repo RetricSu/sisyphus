@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
-import { loadWasmSync } from '@rust-nostr/nostr-sdk';
-import { createTables } from './memory/database';
-import { Prompt } from './prompt';
-import { chat } from './cmd/chat';
-import { Config, ConfigItem } from './cmd/config';
-import { buildIPCBot } from './cmd/ipc';
-import { getDefaultIPCSocketPath } from './config/setting';
-import { logger } from './logger';
-import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
 import { input } from '@inquirer/prompts';
+import { loadWasmSync } from '@rust-nostr/nostr-sdk';
+import { Command } from 'commander';
+import { chat } from './cmd/chat';
+import { Config, type ConfigItem } from './cmd/config';
+import { buildIPCBot } from './cmd/ipc';
+import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
 import { convertReadableTimeToMilSecs, runner } from './cmd/runner';
 import { runServer } from './cmd/server';
+import { getDefaultIPCSocketPath } from './config/setting';
+import { logger } from './logger';
+import { createTables } from './memory/database';
+import { Prompt } from './prompt';
 
 loadWasmSync();
 createTables();
@@ -103,7 +103,10 @@ promptCommand
   .description('Create a prompt file in prompts folder.')
   .option('--folder <folder>', 'Specific the prompt folder path', undefined)
   .action(async (opt) => {
-    const name = await input({ message: 'Enter a unique id for your Agent: ', required: true });
+    const name = await input({
+      message: 'Enter a unique id for your Agent: ',
+      required: true,
+    });
     await createPrompt(name, opt.folder);
   });
 

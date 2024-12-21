@@ -1,6 +1,6 @@
 import { ChromaClient } from 'chromadb';
-import { AMessage } from './a-message';
 import { readSettings } from '../config/setting';
+import type { AMessage } from './a-message';
 
 const settings = readSettings();
 

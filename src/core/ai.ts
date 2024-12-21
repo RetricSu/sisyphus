@@ -1,11 +1,11 @@
-import { AIChatProp, AIChatResponse, ToolCallResponse } from './type';
-import { CoreTool, generateText, tool } from 'ai';
-import { ToolBox } from '../tools/type';
+import type { AnthropicProvider } from '@ai-sdk/anthropic';
+import type { GoogleGenerativeAIProvider } from '@ai-sdk/google';
+import type { OpenAIProvider } from '@ai-sdk/openai';
+import { type CoreTool, generateText, tool } from 'ai';
+import type { OllamaProvider } from 'ollama-ai-provider';
 import { logger } from '../logger';
-import { OpenAIProvider } from '@ai-sdk/openai';
-import { AnthropicProvider } from '@ai-sdk/anthropic';
-import { OllamaProvider } from 'ollama-ai-provider';
-import { GoogleGenerativeAIProvider } from '@ai-sdk/google';
+import type { ToolBox } from '../tools/type';
+import type { AIChatProp, AIChatResponse, ToolCallResponse } from './type';
 
 export class AI {
   role: string;

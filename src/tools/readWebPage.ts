@@ -1,9 +1,9 @@
-import { launch, Page } from 'puppeteer';
-import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
-import { ToolBox } from './type';
-import { logger } from '../logger';
+import { JSDOM } from 'jsdom';
+import { type Page, launch } from 'puppeteer';
 import z from 'zod';
+import { logger } from '../logger';
+import type { ToolBox } from './type';
 
 export interface ReadWebPageToolExecParameter {
   url: string;

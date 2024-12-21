@@ -1,6 +1,6 @@
+import fs from 'fs';
 import path from 'path';
 import { defaultPromptName, getPromptFilePath, packageSrcPath, readSettings } from '../config/setting';
-import fs from 'fs';
 
 export function init() {
   const settings = readSettings();

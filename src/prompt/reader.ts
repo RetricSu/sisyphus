@@ -1,7 +1,7 @@
+import fs from 'fs';
 import toml from '@iarna/toml';
 import { getPromptFilePath } from '../config/setting';
-import fs from 'fs';
-import { PromptFile } from './type';
+import type { PromptFile } from './type';
 
 export class Reader {
   static parseFrom(selectedPromptName: string) {

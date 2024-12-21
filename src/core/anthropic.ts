@@ -1,6 +1,6 @@
-import { AIInterface, AIChatProp, AIChatResponse } from './type';
-import { AnthropicProvider, createAnthropic } from '@ai-sdk/anthropic';
+import { type AnthropicProvider, createAnthropic } from '@ai-sdk/anthropic';
 import { AI } from './ai';
+import type { AIChatProp, AIChatResponse, AIInterface } from './type';
 
 export class AnthropicAdapter extends AI implements AIInterface {
   client: AnthropicProvider;
@@ -11,6 +11,13 @@ export class AnthropicAdapter extends AI implements AIInterface {
   }
 
   async chat({ isSTream, msgs, model, tools, maxSteps }: AIChatProp): Promise<AIChatResponse> {
-    return await this.genTextFromLLM({ client: this.client, isSTream, msgs, model, tools, maxSteps });
+    return await this.genTextFromLLM({
+      client: this.client,
+      isSTream,
+      msgs,
+      model,
+      tools,
+      maxSteps,
+    });
   }
 }

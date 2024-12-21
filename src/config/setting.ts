@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import envPaths from './env-path';
 import { logger } from '../logger';
+import envPaths from './env-path';
 
 const paths = envPaths('sisyphus');
 

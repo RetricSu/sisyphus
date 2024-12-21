@@ -1,6 +1,6 @@
-import { Message, ToolCall } from 'ollama';
+import type { Message, ToolCall } from 'ollama';
 import { db } from './database';
-import { DBImage, DBMessage } from './model';
+import type { DBImage, DBMessage } from './model';
 
 export class MessageView {
   static loadMsgById(messageId: number, memoId = 'chat'): Message | null {

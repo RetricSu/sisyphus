@@ -1,27 +1,27 @@
-import { readSettings } from '../config/setting';
 import { spawn } from 'child_process';
-import { Prompt, PromptFile } from '../prompt';
+import fs from 'fs';
+import type { CoreMessage } from 'ai';
+import { readSettings } from '../config/setting';
+import { AnthropicAdapter } from '../core/anthropic';
+import { GoogleAdapter } from '../core/gemini';
+import { OllamaAdapter } from '../core/ollama';
+import { OpenAIAdapter } from '../core/open-ai';
+import type { AIInterface, Message } from '../core/type';
+import { logger } from '../logger';
 import { AMessage } from '../memory/a-message';
 import { Memory } from '../memory/long-term';
-import { Network } from '../offckb/offckb.config';
+import type { Network } from '../offckb/offckb.config';
+import { Privkey } from '../privkey';
+import { Prompt, type PromptFile } from '../prompt';
+import { ReAct } from '../strategy/reAct';
+import { StrategyType } from '../strategy/type';
+import { buildMemoryToolBox } from '../tools/memory';
 import { buildNosCKBToolBox } from '../tools/nosCKB';
 import { readWebPageToolBox } from '../tools/readWebPage';
 import { terminalToolBox } from '../tools/terminal';
 import { timeToolBox } from '../tools/time';
-import { Privkey } from '../privkey';
-import { buildMemoryToolBox } from '../tools/memory';
-import fs from 'fs';
-import { AIInterface, Message } from '../core/type';
-import { OllamaAdapter } from '../core/ollama';
-import { ToolBox } from '../tools/type';
-import { OpenAIAdapter } from '../core/open-ai';
-import { AnthropicAdapter } from '../core/anthropic';
-import { CoreMessage } from 'ai';
-import { ReAct } from '../strategy/reAct';
 import { buildTwitterTools } from '../tools/twitter';
-import { StrategyType } from '../strategy/type';
-import { logger } from '../logger';
-import { GoogleAdapter } from '../core/gemini';
+import type { ToolBox } from '../tools/type';
 
 const settings = readSettings();
 
@@ -238,7 +238,7 @@ export class Agent {
 
       // todo: handle details of the msgs
       const msg = msgs[i].content;
-      let answer: string = '';
+      let answer = '';
       if (typeof msg === 'string') {
         answer = msg;
       } else {

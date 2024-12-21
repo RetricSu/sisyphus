@@ -21,7 +21,7 @@ export function isPathSafe(staticPath: string): boolean {
     fs.accessSync(staticPath, fs.constants.R_OK);
     const stats = fs.statSync(staticPath);
     return stats.isDirectory();
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }

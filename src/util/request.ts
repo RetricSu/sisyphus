@@ -1,6 +1,6 @@
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import fetch, { RequestInit } from 'node-fetch';
-import { ProxyConfig, readSettings } from '../config/setting';
+import fetch, { type RequestInit } from 'node-fetch';
+import { type ProxyConfig, readSettings } from '../config/setting';
 
 export class Request {
   static proxy = readSettings().proxy;
@@ -24,7 +24,7 @@ export class Request {
 
     const proxyConfig: ProxyConfig = {
       host: parsedUrl.hostname,
-      port: parseInt(parsedUrl.port, 10),
+      port: Number.parseInt(parsedUrl.port, 10),
     };
 
     if (parsedUrl.username || parsedUrl.password) {

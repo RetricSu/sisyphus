@@ -1,24 +1,35 @@
-import { ToolBox } from './type';
-import { HexNoPrefix, NosCKB, TransferOption } from '../sdk';
-import { Hex } from '@ckb-ccc/core';
+import type { Hex } from '@ckb-ccc/core';
 import { EventId, Filter } from '@rust-nostr/nostr-sdk';
-import { Network } from '../offckb/offckb.config';
 import z from 'zod';
+import type { Network } from '../offckb/offckb.config';
+import { type HexNoPrefix, NosCKB, type TransferOption } from '../sdk';
+import type { ToolBox } from './type';
 
-export interface CKBBalanceToolExecParameter {}
+export type CKBBalanceToolExecParameter = void;
 export interface PublishNoteToolExecParameter {
   text: string;
 }
 export type TransferCKBToolExecParameter = TransferOption;
-export type issueTokenToMyselfToolExecParameter = { amount: string; feeRate?: number };
-export type issueTokenToReceiverToolExecParameter = { amount: string; receiverAddress: string; feeRate?: number };
-export type transferTokenToolExecParameter = { amount: string; receiverAddress: string; feeRate?: number };
-export interface myTokenBalanceToolExecParameter {}
-export interface AccountInfoToolExecParameter {}
+export type issueTokenToMyselfToolExecParameter = {
+  amount: string;
+  feeRate?: number;
+};
+export type issueTokenToReceiverToolExecParameter = {
+  amount: string;
+  receiverAddress: string;
+  feeRate?: number;
+};
+export type transferTokenToolExecParameter = {
+  amount: string;
+  receiverAddress: string;
+  feeRate?: number;
+};
+export type myTokenBalanceToolExecParameter = void;
+export type AccountInfoToolExecParameter = void;
 export interface ReadNostrEventsToolExecParameter {
   kind: string;
 }
-export interface ReadNostrMentionNotesToolExecParameter {}
+export type ReadNostrMentionNotesToolExecParameter = void;
 export interface PublishNostrReplyNotesToEventToolExecParameter {
   text: string;
   eventId: HexNoPrefix;
@@ -211,7 +222,11 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
       feeRate: z.number().optional().describe('the fee rate for the token issue transaction, default to 1000'),
     }),
     exec: async ({ amount, receiverAddress, feeRate }: issueTokenToReceiverToolExecParameter) => {
-      return await nosCKB.issueTokenToReceiver({ udtAmount: amount, receiptAddress: receiverAddress, feeRate });
+      return await nosCKB.issueTokenToReceiver({
+        udtAmount: amount,
+        receiptAddress: receiverAddress,
+        feeRate,
+      });
     },
   };
 
@@ -247,7 +262,11 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
       feeRate: z.number().optional().describe('the CKB fee rate for the token transfer transaction, default to 1000'),
     }),
     exec: async ({ amount, receiverAddress, feeRate }: transferTokenToolExecParameter) => {
-      return await nosCKB.transferToken({ udtAmount: amount, toAddress: receiverAddress, feeRate });
+      return await nosCKB.transferToken({
+        udtAmount: amount,
+        toAddress: receiverAddress,
+        feeRate,
+      });
     },
   };
 

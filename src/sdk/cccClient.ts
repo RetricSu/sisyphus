@@ -1,5 +1,5 @@
-import { ccc, CellDepInfoLike, KnownScript, Script } from '@ckb-ccc/core';
-import offCKBConfig, { Network } from '../offckb/offckb.config';
+import { type CellDepInfoLike, KnownScript, type Script, ccc } from '@ckb-ccc/core';
+import offCKBConfig, { type Network } from '../offckb/offckb.config';
 
 export const DEVNET_SCRIPTS: Record<string, Pick<Script, 'codeHash' | 'hashType'> & { cellDeps: CellDepInfoLike[] }> = {
   [KnownScript.Secp256k1Blake160]: offCKBConfig.systemScripts.secp256k1_blake160_sighash_all!.script,
@@ -16,7 +16,10 @@ export function buildCccClient(network: Network) {
       ? new ccc.ClientPublicMainnet()
       : network === 'testnet'
         ? new ccc.ClientPublicTestnet()
-        : new ccc.ClientPublicTestnet({ url: offCKBConfig.rpcUrl, scripts: DEVNET_SCRIPTS });
+        : new ccc.ClientPublicTestnet({
+            url: offCKBConfig.rpcUrl,
+            scripts: DEVNET_SCRIPTS,
+          });
 
   return client;
 }

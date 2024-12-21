@@ -1,7 +1,7 @@
-import { ToolBox } from './type';
-import { Memory, MemoryMetadata } from '../memory/long-term';
-import { Message } from 'ollama';
+import type { Message } from 'ollama';
 import z from 'zod';
+import { Memory, type MemoryMetadata } from '../memory/long-term';
+import type { ToolBox } from './type';
 
 export interface MemoryToolExecParameter {
   text: string;

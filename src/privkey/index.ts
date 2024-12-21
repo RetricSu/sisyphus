@@ -1,7 +1,7 @@
-import fs from 'fs';
-import { getDefaultPrivkeyFilePath } from '../config/setting';
-import path from 'path';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { getDefaultPrivkeyFilePath } from '../config/setting';
 import { logger } from '../logger';
 
 export const Privkey = {

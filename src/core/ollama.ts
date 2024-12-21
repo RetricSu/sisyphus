@@ -1,6 +1,6 @@
-import { AIInterface, AIChatProp, AIChatResponse } from './type';
-import { createOllama, OllamaProvider } from 'ollama-ai-provider';
+import { type OllamaProvider, createOllama } from 'ollama-ai-provider';
 import { AI } from './ai';
+import type { AIChatProp, AIChatResponse, AIInterface } from './type';
 
 export class OllamaAdapter extends AI implements AIInterface {
   client: OllamaProvider;
@@ -11,6 +11,13 @@ export class OllamaAdapter extends AI implements AIInterface {
   }
 
   async chat({ isSTream, msgs, model, tools, maxSteps }: AIChatProp): Promise<AIChatResponse> {
-    return await this.genTextFromLLM({ client: this.client, isSTream, msgs, model, tools, maxSteps });
+    return await this.genTextFromLLM({
+      client: this.client,
+      isSTream,
+      msgs,
+      model,
+      tools,
+      maxSteps,
+    });
   }
 }

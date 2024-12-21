@@ -1,5 +1,5 @@
-import { ToolBox } from '../tools/type';
-import { CoreMessage } from 'ai';
+import type { CoreMessage } from 'ai';
+import type { ToolBox } from '../tools/type';
 
 export interface AIInterface {
   chat: (props: AIChatProp) => Promise<AIChatResponse>;

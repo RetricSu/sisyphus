@@ -1,6 +1,6 @@
-import { Message, ToolCall } from 'ollama';
+import type { Message, ToolCall } from 'ollama';
 import { db } from './database';
-import { MemoId } from './type';
+import type { MemoId } from './type';
 
 export class AMessage {
   public memoId: MemoId;

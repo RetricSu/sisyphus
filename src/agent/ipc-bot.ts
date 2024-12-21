@@ -1,10 +1,10 @@
+import fs from 'fs';
+import net from 'net';
+import path from 'path';
+import { getDefaultIPCSocketPath } from '../config/setting';
+import { logger } from '../logger';
 import { AMessage } from '../memory/a-message';
 import { Agent } from './base';
-import { getDefaultIPCSocketPath } from '../config/setting';
-import net from 'net';
-import fs from 'fs';
-import path from 'path';
-import { logger } from '../logger';
 
 export class IPCBot extends Agent {
   socketPath: string;

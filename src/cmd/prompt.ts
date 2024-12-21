@@ -1,9 +1,9 @@
+import fs from 'fs';
+import path from 'path';
 import { readSettings } from '../config/setting';
 import { logger } from '../logger';
 import { sanitizeFullFilePath } from '../util/fs';
 import { Request } from '../util/request';
-import fs from 'fs';
-import path from 'path';
 
 export async function listLocalAvailablePrompts() {
   const settings = readSettings();

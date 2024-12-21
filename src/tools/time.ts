@@ -1,7 +1,7 @@
 import z from 'zod';
-import { ToolBox } from './type';
+import type { ToolBox } from './type';
 
-export interface TimeToolExecParameter {}
+export type TimeToolExecParameter = void;
 
 export type TimeToolBoxType = ToolBox<[TimeToolExecParameter], string>;
 

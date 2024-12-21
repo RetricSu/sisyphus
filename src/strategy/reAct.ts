@@ -1,9 +1,9 @@
-import { CoreMessage } from 'ai';
-import { Strategy } from './base';
-import { AIInterface } from '../core/type';
-import { ToolBox } from '../tools/type';
-import { StrategyInterface } from './type';
+import type { CoreMessage } from 'ai';
+import type { AIInterface } from '../core/type';
 import { logger } from '../logger';
+import type { ToolBox } from '../tools/type';
+import { Strategy } from './base';
+import type { StrategyInterface } from './type';
 
 export class ReAct extends Strategy implements StrategyInterface {
   maxLoopSteps: number;
@@ -67,7 +67,12 @@ export class ReAct extends Strategy implements StrategyInterface {
       isSTream = false,
       tools,
       maxSteps = 7,
-    }: { model: string; isSTream: boolean; tools: ToolBox[]; maxSteps?: number },
+    }: {
+      model: string;
+      isSTream: boolean;
+      tools: ToolBox[];
+      maxSteps?: number;
+    },
   ): Promise<CoreMessage[] | null> {
     const prompt: CoreMessage = { role: 'user', content: this.createPrompts() };
     const { msgs } = await this.ai.chat({

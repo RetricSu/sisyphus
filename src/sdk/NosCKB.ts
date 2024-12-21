@@ -1,10 +1,10 @@
-import { ccc, Client, NostrEvent } from '@ckb-ccc/core';
-import { Network } from '../offckb/offckb.config';
+import { type Client, type NostrEvent, ccc } from '@ckb-ccc/core';
 import { Nip07 } from '@ckb-ccc/nip07';
+import { Filter, Keys, Metadata, Client as NostrClient, NostrSigner, Tag, loadWasmSync } from '@rust-nostr/nostr-sdk';
+import type { Network } from '../offckb/offckb.config';
 import { NostrProvider } from './NostrProvider';
-import { NostrSigner, Keys, loadWasmSync, Client as NostrClient, Filter, Tag, Metadata } from '@rust-nostr/nostr-sdk';
 import { buildCccClient } from './cccClient';
-import { HexNoPrefix, TransferOption } from './type';
+import type { HexNoPrefix, TransferOption } from './type';
 
 // Nostr and CKB
 export class NosCKB {
@@ -72,7 +72,7 @@ export class NosCKB {
   async publishProfileEvent(
     name: string,
     about: string,
-    avatarPictureUrl: string = 'https://image.nostr.build/13ee4c26a7b40da80fd7078cd12621ca072ce09cbd5f1ac081e3300c1639bbfb.jpg',
+    avatarPictureUrl = 'https://image.nostr.build/13ee4c26a7b40da80fd7078cd12621ca072ce09cbd5f1ac081e3300c1639bbfb.jpg',
   ) {
     await this.nostrClient.connect();
     const metadata = new Metadata().name(name).about(about).picture(avatarPictureUrl);
