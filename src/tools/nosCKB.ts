@@ -436,7 +436,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     },
   };
 
-  return {
+  return [
     ckbBalanceToolBox,
     accountInfoToolBox,
     transferCKBToolBox,
@@ -449,5 +449,5 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     readMentionNotesWithMe,
     publishReplyNotesToEvent,
     publishProfileEvent,
-  };
+  ];
 }

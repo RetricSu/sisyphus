@@ -22,6 +22,7 @@ import { terminalToolBox } from '../tools/terminal';
 import { timeToolBox } from '../tools/time';
 import { buildTwitterTools } from '../tools/twitter';
 import type { ToolBox } from '../tools/type';
+import { buildFileEditToolBox } from '../tools/file-edit';
 
 const settings = readSettings();
 
@@ -123,40 +124,17 @@ export class Agent {
     const privkey = Privkey.load(this.memoId);
 
     const toolNames = promptFile.tools;
-    const {
-      ckbBalanceToolBox,
-      accountInfoToolBox,
-      transferCKBToolBox,
-      issueTokenToMyselfToolBox,
-      issueTokenToReceiverToolBox,
-      transferTokenToolBox,
-      myTokenBalanceToolBox,
-      publishNoteToolBox,
-      readNostrEvents,
-      readMentionNotesWithMe,
-      publishProfileEvent,
-      publishReplyNotesToEvent,
-    } = buildNosCKBToolBox(this.ckbNetwork, privkey, promptFile.nostr?.relays);
-
+    const nosCKBTools = buildNosCKBToolBox(this.ckbNetwork, privkey, promptFile.nostr?.relays);
     const memoryToolBox = buildMemoryToolBox(this.memoId);
+    const fileEditToolBox = buildFileEditToolBox();
 
     const toolBoxes: ToolBox[] = [
       timeToolBox,
       terminalToolBox,
       readWebPageToolBox,
-      ckbBalanceToolBox,
-      accountInfoToolBox,
-      transferCKBToolBox,
-      issueTokenToMyselfToolBox,
-      issueTokenToReceiverToolBox,
-      transferTokenToolBox,
-      myTokenBalanceToolBox,
-      publishNoteToolBox,
-      readNostrEvents,
-      readMentionNotesWithMe,
-      publishProfileEvent,
-      publishReplyNotesToEvent,
       memoryToolBox,
+      ...nosCKBTools,
+      ...fileEditToolBox,
     ].filter((t) => toolNames.includes(t.fi.function.name));
 
     if (toolNames.includes('send_tweet') || toolNames.includes('reply_tweet')) {
