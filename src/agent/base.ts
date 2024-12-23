@@ -15,6 +15,7 @@ import { Privkey } from '../privkey';
 import { Prompt, type PromptFile } from '../prompt';
 import { ReAct } from '../strategy/reAct';
 import { StrategyType } from '../strategy/type';
+import { buildFileEditToolBox } from '../tools/file-edit';
 import { buildMemoryToolBox } from '../tools/memory';
 import { buildNosCKBToolBox } from '../tools/nosCKB';
 import { readWebPageToolBox } from '../tools/readWebPage';
@@ -22,7 +23,6 @@ import { terminalToolBox } from '../tools/terminal';
 import { timeToolBox } from '../tools/time';
 import { buildTwitterTools } from '../tools/twitter';
 import type { ToolBox } from '../tools/type';
-import { buildFileEditToolBox } from '../tools/file-edit';
 
 const settings = readSettings();
 
