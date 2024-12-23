@@ -1,5 +1,6 @@
 import z from 'zod';
-import type { ToolBox } from './type';
+import { PromptFile } from '../prompt';
+import type { Tool, ToolBox } from './type';
 
 export type TimeToolExecParameter = void;
 
@@ -24,3 +25,12 @@ export const timeToolBox: TimeToolBoxType = {
     return date.toISOString();
   },
 };
+
+const tool: Tool = {
+  names: ['get_current_time_from_os'],
+  build: (_p: PromptFile) => {
+    return [timeToolBox];
+  },
+};
+
+export default tool;

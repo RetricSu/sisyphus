@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import z from 'zod';
-import type { ToolBox } from './type';
+import { PromptFile } from '../prompt';
+import type { Tool, ToolBox } from './type';
 
 export interface TerminalToolExecParameter {
   command: string;
@@ -34,3 +35,12 @@ export const terminalToolBox: TerminalToolBoxType = {
     return result.toString('utf-8');
   },
 };
+
+const tool: Tool = {
+  names: ['call_terminal_simulator'],
+  build: (_p: PromptFile) => {
+    return [terminalToolBox];
+  },
+};
+
+export default tool;

@@ -1,7 +1,8 @@
 import type { Message } from 'ollama';
 import z from 'zod';
 import { Memory, type MemoryMetadata } from '../memory/long-term';
-import type { ToolBox } from './type';
+import { PromptFile } from '../prompt';
+import type { Tool, ToolBox } from './type';
 
 export interface MemoryToolExecParameter {
   text: string;
@@ -51,3 +52,13 @@ export function buildMemoryToolBox(memoId: string) {
   };
   return memoryToolBox;
 }
+
+const tool: Tool = {
+  names: ['search_memory'],
+  build: (p: PromptFile) => {
+    const memoId = p.memoId;
+    return [buildMemoryToolBox(memoId)];
+  },
+};
+
+export default tool;

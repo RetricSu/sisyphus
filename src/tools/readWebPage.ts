@@ -3,7 +3,8 @@ import { JSDOM } from 'jsdom';
 import { type Page, launch } from 'puppeteer';
 import z from 'zod';
 import { logger } from '../logger';
-import type { ToolBox } from './type';
+import { PromptFile } from '../prompt';
+import type { Tool, ToolBox } from './type';
 
 export interface ReadWebPageToolExecParameter {
   url: string;
@@ -70,12 +71,15 @@ async function waitTillHTMLRendered(page: Page, timeout = 30000) {
   }
 }
 
-function _cleanWebPageToText(input: string): string {
-  const window = new JSDOM('').window;
-  const DOMPurify = createDOMPurify(window);
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });
-}
-
 function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
+
+const tool: Tool = {
+  names: ['read_webpage_content'],
+  build: (_p: PromptFile) => {
+    return [readWebPageToolBox];
+  },
+};
+
+export default tool;

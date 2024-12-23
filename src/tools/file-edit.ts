@@ -1,7 +1,8 @@
 import fs from 'fs';
 import z from 'zod';
+import { PromptFile } from '../prompt';
 import { sanitizeFullFilePath } from '../util/fs';
-import type { ToolBox } from './type';
+import type { Tool, ToolBox } from './type';
 
 export type FileEditToolExecParameter = {
   filePath: string;
@@ -149,7 +150,7 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
   exec: (p: FileInsertLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    
+
     // Validate and safely insert the new line
     if (!Array.isArray(data)) {
       throw new Error('Data must be an array');
@@ -163,7 +164,7 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
 
     // Insert the new line, pushing existing content down
     data.splice(targetLine, 0, textToInsert);
-    
+
     fs.writeFileSync(filePath, data.join('\n'));
     return 'Line inserted successfully';
   },
@@ -238,6 +239,17 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   },
 };
 
-export function buildFileEditToolBox() {
-  return [fileEditToolBox, fileReadAllToolBox];
-}
+const tool: Tool = {
+  names: [
+    'edit_file_with_line_number',
+    'delete_line_from_file',
+    'insert_line_to_file',
+    'read_full_file_with_line_numbers',
+    'read_part_of_file_with_line_numbers',
+  ],
+  build: (_p: PromptFile) => {
+    return [fileEditToolBox, fileDeleteLineToolBox, fileInsertLineToolBox, fileReadAllToolBox, fileReadPartToolBox];
+  },
+};
+
+export default tool;
