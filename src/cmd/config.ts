@@ -11,7 +11,7 @@ export enum ConfigAction {
 export enum ConfigItem {
   proxy = 'proxy',
   ckbNetwork = 'ckb-network',
-  memoryFilePath = 'memoryFilePath',
+  memoryFolderPath = 'memoryFolderPath',
 }
 
 export async function Config(action: ConfigAction, item: ConfigItem, value?: string) {
@@ -32,10 +32,10 @@ export async function Config(action: ConfigAction, item: ConfigItem, value?: str
         return console.log(`${Request.proxyConfigToUrl(proxy)}`);
       }
 
-      case ConfigItem.memoryFilePath:
+      case ConfigItem.memoryFolderPath:
         {
           const settings = readSettings();
-          const memoryFilePath = settings.memory.memoryFilePath;
+          const memoryFilePath = settings.memory.memoryFolderPath;
           if (memoryFilePath == null) {
             console.log(`No memoryFilePath.`);
             process.exit(0);
@@ -63,10 +63,10 @@ export async function Config(action: ConfigAction, item: ConfigItem, value?: str
           return console.error(`invalid proxyURL, `, (error as Error).message);
         }
       }
-      case ConfigItem.memoryFilePath: {
+      case ConfigItem.memoryFolderPath: {
         if (value == null) throw new Error('No memoryFilePath!');
         const settings = readSettings();
-        settings.memory.memoryFilePath = value;
+        settings.memory.memoryFolderPath = value;
         return writeSettings(settings);
       }
 

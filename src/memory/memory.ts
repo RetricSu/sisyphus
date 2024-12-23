@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { readSettings } from '../config/setting';
 
@@ -14,12 +15,12 @@ export class Memory {
 export class MemoryManager {
   private memoryFilePath: string;
   private memories: Memory[] = [];
-  constructor() {
-    this.memoryFilePath = readSettings().memory.memoryFilePath;
+  constructor(memoId: string) {
+    this.memoryFilePath = path.join(readSettings().memory.memoryFolderPath, `${memoId}.txt`);
     this.load();
   }
 
-  private load() {
+  load() {
     try {
       if (fs.existsSync(this.memoryFilePath)) {
         const data = fs.readFileSync(this.memoryFilePath, 'utf-8');
