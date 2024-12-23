@@ -42,8 +42,8 @@ importers:
         specifier: ^11.2.1
         version: 11.5.0
       chalk:
-        specifier: ^5.4.1
-        version: 5.4.1
+        specifier: ^4
+        version: 4.1.2
       chromadb:
         specifier: ^1.9.2
         version: 1.9.2(openai@4.72.0(zod@3.23.8))

@@ -1,10 +1,9 @@
+import chalk from 'chalk';
 import process from 'process';
 import Readline from 'readline/promises';
 import { AMessage } from '../memory/a-message';
 import { Agent } from './base';
 import { stdOutWriteSync } from './util';
-
-const chalk = require('chalk');
 
 export class TerminalBot extends Agent {
   pipeResponse?: ((name: string, word: string) => any) | undefined;

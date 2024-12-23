@@ -55,7 +55,7 @@
     "agent-twitter-client": "^0.0.16",
     "ai": "^4.0.9",
     "better-sqlite3": "^11.2.1",
-    "chalk": "^5.4.1",
+    "chalk": "^4",
     "chromadb": "^1.9.2",
     "chromadb-default-embed": "^2.13.2",
     "commander": "^12.1.0",
