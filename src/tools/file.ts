@@ -80,7 +80,8 @@ export const fileEditToolBox: FileEditToolBoxType = {
   exec: (p: FileEditToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    data[p.lineNumber] = p.text;
+    // Adjust for 1-based line numbers
+    data[p.lineNumber - 1] = p.text;
     fs.writeFileSync(filePath, data.join('\n'));
     return 'File edited successfully';
   },
@@ -115,7 +116,8 @@ export const fileDeleteLineToolBox: FileDeleteLineToolBoxType = {
   exec: (p: FileDeleteLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    data.splice(p.lineNumber, 1);
+    // Adjust for 1-based line numbers
+    data.splice(p.lineNumber - 1, 1);
     fs.writeFileSync(filePath, data.join('\n'));
     return 'Line deleted successfully';
   },
@@ -161,8 +163,8 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
       throw new Error('Data must be an array');
     }
 
-    // Ensure line number is within bounds
-    const targetLine = Math.max(0, Math.min(p.lineNumber, data.length));
+    // Adjust for 1-based line numbers
+    const targetLine = Math.max(0, Math.min(p.lineNumber - 1, data.length));
 
     // Ensure text is a string
     const textToInsert = p.text ?? '';

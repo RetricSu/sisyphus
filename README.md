@@ -1,6 +1,6 @@
 # Sisyphus
 
-one-line command to run Crypto AI Agent.
+Sisyphus is a CLI tool that allows you to run a Crypto AI Agent with built-in function tools, Nostr/CKB blockchain support, and memory.
 
 - [Sisyphus](#sisyphus)
   - [Install](#install)
