@@ -1,6 +1,6 @@
 import process from 'process';
 import Readline from 'readline/promises';
-const chalk = require('chalk');
+import { AMessage } from '../memory/a-message';
 import { Agent } from './base';
 import { stdOutWriteSync } from './util';
 
