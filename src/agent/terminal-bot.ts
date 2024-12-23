@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import process from 'process';
 import Readline from 'readline/promises';
 import { AMessage } from '../memory/a-message';
@@ -20,13 +21,17 @@ export class TerminalBot extends Agent {
   async chat() {
     await this.loadPromptMessage();
 
+    // call the model first to get the first message
+    await stdOutWriteSync(`>>> ${this.name}: `);
+    await this.call({ requestMsg: { role: 'user', content: 'start' } });
+
     while (true) {
       // if the last message is not a toolCall Response, let user input
       const readline = Readline.createInterface({
         input: process.stdin,
         output: process.stdout,
       });
-      const input = await readline.question('>>> You: ');
+      const input = await readline.question(chalk.green('>>> You: '));
       readline.close();
       console.log('----');
 
