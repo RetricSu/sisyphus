@@ -1,8 +1,8 @@
 import fileTools from './file';
-import memoryTools from './memory';
 import memoryManagerTools from './memoryManager'; // Import the new memoryManager tool
 import nosCKBTools from './nosCKB';
 import readWebPageTools from './readWebPage';
+import memoryTools from './searchChatMsg';
 import terminalTools from './terminal';
 import timeTools from './time';
 import twitterTools from './twitter';

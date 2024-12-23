@@ -1,7 +1,9 @@
 import z from 'zod';
-import { MemoryManager } from '../memory/memory';
+import { Memory, MemoryManager } from '../memory/memory';
 import { PromptFile } from '../prompt';
 import type { Tool, ToolBox } from './type';
+
+export type MemoryToolLoadParameter = void;
 
 export interface MemoryToolReadParameter {
   id: string;
@@ -20,6 +22,7 @@ export interface MemoryToolDeleteParameter {
   id: string;
 }
 
+export type MemoryToolLoadToolBoxType = ToolBox<[MemoryToolLoadParameter], Promise<Memory[]>>;
 export type MemoryToolReadToolBoxType = ToolBox<[MemoryToolReadParameter], Promise<string>>;
 export type MemoryToolCreateToolBoxType = ToolBox<[MemoryToolCreateParameter], Promise<string>>;
 export type MemoryToolUpdateToolBoxType = ToolBox<[MemoryToolUpdateParameter], Promise<string>>;
@@ -27,6 +30,27 @@ export type MemoryToolDeleteToolBoxType = ToolBox<[MemoryToolDeleteParameter], P
 
 export function buildMemoryManagerToolBox(memoId: string) {
   const memoryManager = new MemoryManager(memoId);
+
+  const memoryToolLoadToolBoxType: MemoryToolLoadToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'load_memory',
+        description: 'load all memory entries',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+    },
+    params: z.object({}),
+    exec: async (_p: MemoryToolLoadParameter) => {
+      memoryManager.load();
+      const memories = memoryManager.read();
+      return memories;
+    },
+  };
 
   const memoryReadToolBox: MemoryToolReadToolBoxType = {
     fi: {
@@ -150,7 +174,7 @@ export function buildMemoryManagerToolBox(memoId: string) {
     },
   };
 
-  return [memoryReadToolBox, memoryCreateToolBox, memoryUpdateToolBox, memoryDeleteToolBox];
+  return [memoryToolLoadToolBoxType, memoryReadToolBox, memoryCreateToolBox, memoryUpdateToolBox, memoryDeleteToolBox];
 }
 
 const tool: Tool = {
