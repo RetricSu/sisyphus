@@ -226,7 +226,7 @@ maxSteps = 20
 tools = [
 	'get_current_time_from_os',
 	'call_terminal_simulator',
-	'search_memory',
+	'search_chat_messages',
 	'get_my_account_info',
 	'read_webpage_content',
 	'get_ckb_balance',
@@ -292,7 +292,7 @@ Boom! They will talk to each other on and on without any interruption.
 
 - [x] get_current_time_from_os
 - [x] call_terminal_simulator
-- [x] search_memory
+- [x] search_chat_messages
 - [x] get_my_account_info
 - [x] read_webpage_content
 - [x] get_ckb_balance

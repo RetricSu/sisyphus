@@ -14,7 +14,7 @@ ckbNetwork = 'testnet'
 maxSteps = 100
 tools = [
 	'get_current_time_from_os',
-	'search_memory',
+	'search_chat_messages',
 	'get_my_account_info',
 	'read_webpage_content',
 	'get_ckb_balance',
