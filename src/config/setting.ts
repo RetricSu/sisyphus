@@ -47,6 +47,7 @@ export interface Settings {
     database: {
       folderPath: string;
     };
+    memoryFilePath: string;
   };
 }
 
@@ -71,6 +72,7 @@ export const defaultSettings: Settings = {
     database: {
       folderPath: path.resolve(dataPath, 'memory/chroma'),
     },
+    memoryFilePath: path.resolve(dataPath, 'memory/memory.txt'),
   },
 };
 
