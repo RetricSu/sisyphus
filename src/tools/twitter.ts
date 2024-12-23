@@ -5,7 +5,7 @@ import z from 'zod';
 import { getDefaultTwitterFilePath } from '../config/setting';
 import { logger } from '../logger';
 import type { PromptFile } from '../prompt';
-import type { ToolBox } from './type';
+import type { Tool, ToolBox } from './type';
 
 export interface SendTweetToolExecParameter {
   content: string;
@@ -141,3 +141,12 @@ export function isCookiesExits(username: string) {
   const cookieFilePath = getDefaultTwitterFilePath(username);
   return fs.existsSync(cookieFilePath);
 }
+
+const tool: Tool = {
+  names: ['send_tweet', 'reply_tweet'],
+  build: (p: PromptFile) => {
+    return buildTwitterTools(p);
+  },
+};
+
+export default tool;

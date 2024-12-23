@@ -4,7 +4,7 @@ import { logger } from '../logger';
 import { MessageView } from '../memory/message-view';
 import { ALLOWED_EXTENSIONS, isPathSafe } from './static';
 
-export function buildHttpServer(memoId: string, limit = 20, port = 3000, staticPath?: string) {
+export function buildHttpServer(memoId: string, limit: number = 20, port: number = 3000, staticPath?: string) {
   const app: express.Application = express();
 
   app.set('view engine', 'ejs');

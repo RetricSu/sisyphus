@@ -2,8 +2,10 @@ import type { Hex } from '@ckb-ccc/core';
 import { EventId, Filter } from '@rust-nostr/nostr-sdk';
 import z from 'zod';
 import type { Network } from '../offckb/offckb.config';
+import { Privkey } from '../privkey';
+import { PromptFile } from '../prompt';
 import { type HexNoPrefix, NosCKB, type TransferOption } from '../sdk';
-import type { ToolBox } from './type';
+import type { Tool, ToolBox } from './type';
 
 export type CKBBalanceToolExecParameter = void;
 export interface PublishNoteToolExecParameter {
@@ -74,7 +76,7 @@ export type PublishNostrProfileEventToolBoxType = ToolBox<
   ReturnType<NosCKB['publishProfileEvent']>
 >;
 
-export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relays: string[] = []) {
+export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relays: string[] = []): ToolBox[] {
   const nosCKB = new NosCKB({ network, nostrPrivkey, relays });
 
   const ckbBalanceToolBox: CKBBalanceToolBoxType = {
@@ -436,7 +438,7 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     },
   };
 
-  return {
+  return [
     ckbBalanceToolBox,
     accountInfoToolBox,
     transferCKBToolBox,
@@ -449,5 +451,28 @@ export function buildNosCKBToolBox(network: Network, nostrPrivkey: string, relay
     readMentionNotesWithMe,
     publishReplyNotesToEvent,
     publishProfileEvent,
-  };
+  ];
 }
+
+const tool: Tool = {
+  names: [
+    'get_ckb_balance',
+    'get_my_account_info',
+    'transfer_ckb',
+    'issue_token_to_myself',
+    'issue_token_to_receiver',
+    'transfer_my_issued_token',
+    'get_my_token_balance',
+    'publish_nostr_social_post',
+    'read_social_post_on_nostr_with_filters',
+    'read_social_notification_message_on_nostr',
+    'publish_reply_post_to_other_on_nostr',
+    'update_social_profile_on_nostr',
+  ],
+  build: (p: PromptFile) => {
+    const privkey = Privkey.load(p.memoId);
+    return buildNosCKBToolBox(p.ckbNetwork, privkey, p.nostr?.relays);
+  },
+};
+
+export default tool;

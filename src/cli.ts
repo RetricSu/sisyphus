@@ -5,6 +5,7 @@ import { Command } from 'commander';
 import { chat } from './cmd/chat';
 import { Config, type ConfigItem } from './cmd/config';
 import { buildIPCBot } from './cmd/ipc';
+import { listTool } from './cmd/listTool';
 import { createPrompt, downloadPrompt, listLocalAvailablePrompts } from './cmd/prompt';
 import { convertReadableTimeToMilSecs, runner } from './cmd/runner';
 import { runServer } from './cmd/server';
@@ -128,6 +129,8 @@ program
   .option('--limit <limit>', 'Specific the max limit number of chat history')
   .option('--static-path <path>', 'Specific a static folder path to host')
   .action((opt) => runServer(opt));
+
+program.command('list-tool').description('List all available function tools').action(listTool);
 
 program.parse(process.argv);
 

@@ -59,8 +59,7 @@ make sure `chroma` binary is available in your computer command line.
 ```sh
 Usage: sisyphus [options] [command]
 
-Sisyphus is a project that explores the idea of Web5 Crypto AI Agent. It is ported as a CLI tool that
-can be run in the terminal.
+Sisyphus is a project that explores the idea of Web5 Crypto AI Agent. It is ported as a CLI tool that can be run in the terminal.
 
 Options:
   -V, --version                   output the version number
@@ -73,6 +72,7 @@ Commands:
   prompt                          Manger prompt files
   config <action> [item] [value]  do a configuration action
   server [options]                Run a http server to host Agent chatting history
+  list-tool                       List all available function tools
   help [command]                  display help for command
 ```
 

@@ -15,12 +15,7 @@ import { Privkey } from '../privkey';
 import { Prompt, type PromptFile } from '../prompt';
 import { ReAct } from '../strategy/reAct';
 import { StrategyType } from '../strategy/type';
-import { buildMemoryToolBox } from '../tools/memory';
-import { buildNosCKBToolBox } from '../tools/nosCKB';
-import { readWebPageToolBox } from '../tools/readWebPage';
-import { terminalToolBox } from '../tools/terminal';
-import { timeToolBox } from '../tools/time';
-import { buildTwitterTools } from '../tools/twitter';
+import AvailableTools from '../tools';
 import type { ToolBox } from '../tools/type';
 
 const settings = readSettings();
@@ -120,50 +115,21 @@ export class Agent {
     }
 
     Privkey.init(this.memoId);
-    const privkey = Privkey.load(this.memoId);
 
-    const toolNames = promptFile.tools;
-    const {
-      ckbBalanceToolBox,
-      accountInfoToolBox,
-      transferCKBToolBox,
-      issueTokenToMyselfToolBox,
-      issueTokenToReceiverToolBox,
-      transferTokenToolBox,
-      myTokenBalanceToolBox,
-      publishNoteToolBox,
-      readNostrEvents,
-      readMentionNotesWithMe,
-      publishProfileEvent,
-      publishReplyNotesToEvent,
-    } = buildNosCKBToolBox(this.ckbNetwork, privkey, promptFile.nostr?.relays);
-
-    const memoryToolBox = buildMemoryToolBox(this.memoId);
-
-    const toolBoxes: ToolBox[] = [
-      timeToolBox,
-      terminalToolBox,
-      readWebPageToolBox,
-      ckbBalanceToolBox,
-      accountInfoToolBox,
-      transferCKBToolBox,
-      issueTokenToMyselfToolBox,
-      issueTokenToReceiverToolBox,
-      transferTokenToolBox,
-      myTokenBalanceToolBox,
-      publishNoteToolBox,
-      readNostrEvents,
-      readMentionNotesWithMe,
-      publishProfileEvent,
-      publishReplyNotesToEvent,
-      memoryToolBox,
-    ].filter((t) => toolNames.includes(t.fi.function.name));
-
-    if (toolNames.includes('send_tweet') || toolNames.includes('reply_tweet')) {
-      const twitterTools = buildTwitterTools(this.promptFile);
-      toolBoxes.push(...twitterTools.filter((t) => toolNames.includes(t.fi.function.name)));
-    }
-
+    const selectedToolNames = promptFile.tools;
+    const toolBoxes: ToolBox[] = Array.from(
+      new Set(
+        selectedToolNames.flatMap((name) => {
+          const tool = AvailableTools.find((t) => t.names.includes(name));
+          if (tool) {
+            return tool.build(this.promptFile);
+          } else {
+            logger.warn(`Tool with name ${name} not found.`);
+            return [];
+          }
+        }),
+      ),
+    );
     this.tools = toolBoxes;
   }
 
