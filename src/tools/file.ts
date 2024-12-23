@@ -4,6 +4,11 @@ import { PromptFile } from '../prompt';
 import { sanitizeFullFilePath } from '../util/fs';
 import type { Tool, ToolBox } from './type';
 
+export interface ReadFileLineResult {
+  lineNumber: number;
+  text: string;
+}
+
 export type FileEditToolExecParameter = {
   filePath: string;
   lineNumber: number;
@@ -37,9 +42,9 @@ export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter
 
 export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter], string>;
 
-export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], string>;
+export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult[]>;
 
-export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], string>;
+export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult[]>;
 
 export const fileEditToolBox: FileEditToolBoxType = {
   fi: {
@@ -194,7 +199,10 @@ export const fileReadAllToolBox: FileReadAllToolBoxType = {
   exec: (p: FileReadAllToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.map((line, index) => `${index + 1}: ${line}`).join('\n');
+    return data.map((line, index) => ({
+      lineNumber: index + 1,
+      text: line,
+    }));
   },
 };
 
@@ -232,10 +240,10 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   exec: (p: FileReadPartToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data
-      .slice(p.startLine - 1, p.endLine)
-      .map((line, index) => `${index + p.startLine}: ${line}`)
-      .join('\n');
+    return data.slice(p.startLine - 1, p.endLine).map((line, index) => ({
+      lineNumber: p.startLine + index,
+      text: line,
+    }));
   },
 };
 
