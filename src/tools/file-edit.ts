@@ -120,7 +120,7 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
     type: 'function',
     function: {
       name: 'insert_line_to_file',
-      description: 'insert a line to the file with a specific line number',
+      description: 'insert a line to the file with a specific line number, the original line will be pushed down',
       parameters: {
         type: 'object',
         properties: {
@@ -149,7 +149,21 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
   exec: (p: FileInsertLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    data.splice(p.lineNumber, 0, p.text);
+    
+    // Validate and safely insert the new line
+    if (!Array.isArray(data)) {
+      throw new Error('Data must be an array');
+    }
+
+    // Ensure line number is within bounds
+    const targetLine = Math.max(0, Math.min(p.lineNumber, data.length));
+
+    // Ensure text is a string
+    const textToInsert = p.text ?? '';
+
+    // Insert the new line, pushing existing content down
+    data.splice(targetLine, 0, textToInsert);
+    
     fs.writeFileSync(filePath, data.join('\n'));
     return 'Line inserted successfully';
   },
