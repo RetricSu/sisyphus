@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import { v4 as uuidv4 } from "uuid";
-import { readSettings } from "../config/setting";
+import * as fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import { readSettings } from '../config/setting';
 
 export class Memory {
   id: string;
@@ -22,17 +22,17 @@ export class MemoryManager {
   private load() {
     try {
       if (fs.existsSync(this.memoryFilePath)) {
-        const data = fs.readFileSync(this.memoryFilePath, "utf-8");
+        const data = fs.readFileSync(this.memoryFilePath, 'utf-8');
         this.memories = data
           .split('\n')
-          .filter((line) => line.trim() !== "")
+          .filter((line) => line.trim() !== '')
           .map((line) => {
-            const [id, ...textParts] = line.split("|||");
-            return new Memory(textParts.join("|||"), id);
+            const [id, ...textParts] = line.split('|||');
+            return new Memory(textParts.join('|||'), id);
           });
       }
     } catch (error) {
-      console.error("Error loading memory:", error);
+      console.error('Error loading memory:', error);
     }
   }
 
@@ -63,9 +63,7 @@ export class MemoryManager {
   }
 
   private async save(): Promise<void> {
-    const lines = this.memories
-      .map((mem) => `${mem.id}|||${mem.text}`)
-      .join("\n");
+    const lines = this.memories.map((mem) => `${mem.id}|||${mem.text}`).join('\n');
     fs.writeFileSync(this.memoryFilePath, lines);
   }
 }

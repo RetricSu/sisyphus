@@ -1,4 +1,4 @@
-import z from "zod";
+import z from 'zod';
 import { MemoryManager } from '../memory/memory';
 import { PromptFile } from '../prompt';
 import type { Tool, ToolBox } from './type';
@@ -147,17 +147,11 @@ export const memoryDeleteToolBox: MemoryToolDeleteToolBoxType = {
   },
 };
 
-
 const tool: Tool = {
-    names: [
-        'read_memory',
-        'create_memory',
-        'update_memory',
-        'delete_memory',
-    ],
-    build: (_p: PromptFile) => {
-        return [memoryReadToolBox, memoryCreateToolBox, memoryUpdateToolBox, memoryDeleteToolBox];
-    }
-}
+  names: ['read_memory', 'create_memory', 'update_memory', 'delete_memory'],
+  build: (_p: PromptFile) => {
+    return [memoryReadToolBox, memoryCreateToolBox, memoryUpdateToolBox, memoryDeleteToolBox];
+  },
+};
 
 export default tool;
