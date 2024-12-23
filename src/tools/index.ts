@@ -1,23 +1,20 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { Tool, Tools } from './type';
+import { Tools } from "./type";
+import fileTools from "./file";
+import twitterTools from "./twitter";
+import nosCKBTools from "./nosCKB";
+import memoryTools from "./memory";
+import terminalTools from "./terminal";
+import readWebPageTools from "./readWebPage";
+import timeTools from "./time";
 
-const excludeFiles = ['index.ts', 'type.ts', 'util.ts'];
-
-const tools: Tools = [];
-
-const files = fs.readdirSync(__dirname).filter((file) => file.endsWith('.ts') && !excludeFiles.includes(file));
-
-files.forEach(async (file) => {
-  const modulePath = path.join(__dirname, file);
-  const module = await import(modulePath);
-  if (module.default) {
-    const tool: Tool = {
-      names: module.default().names,
-      build: module.default().build,
-    };
-    tools.push(tool);
-  }
-});
+const tools: Tools = [
+  fileTools,
+  twitterTools,
+  nosCKBTools,
+  memoryTools,
+  terminalTools,
+  readWebPageTools,
+  timeTools,
+];
 
 export default tools;
