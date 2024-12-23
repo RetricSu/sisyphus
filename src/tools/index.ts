@@ -1,20 +1,12 @@
-import { Tools } from "./type";
-import fileTools from "./file";
-import twitterTools from "./twitter";
-import nosCKBTools from "./nosCKB";
-import memoryTools from "./memory";
-import terminalTools from "./terminal";
-import readWebPageTools from "./readWebPage";
-import timeTools from "./time";
+import fileTools from './file';
+import memoryTools from './memory';
+import nosCKBTools from './nosCKB';
+import readWebPageTools from './readWebPage';
+import terminalTools from './terminal';
+import timeTools from './time';
+import twitterTools from './twitter';
+import { Tools } from './type';
 
-const tools: Tools = [
-  fileTools,
-  twitterTools,
-  nosCKBTools,
-  memoryTools,
-  terminalTools,
-  readWebPageTools,
-  timeTools,
-];
+const tools: Tools = [fileTools, twitterTools, nosCKBTools, memoryTools, terminalTools, readWebPageTools, timeTools];
 
 export default tools;

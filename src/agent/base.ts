@@ -117,17 +117,19 @@ export class Agent {
     Privkey.init(this.memoId);
 
     const selectedToolNames = promptFile.tools;
-    const toolBoxes: ToolBox[] = Array.from(new Set(
-      selectedToolNames.flatMap((name) => {
-      const tool = AvailableTools.find((t) => t.names.includes(name));
-      if (tool) {
-        return tool.build(this.promptFile);
-      } else {
-        logger.warn(`Tool with name ${name} not found.`);
-        return [];
-      }
-      })
-    ));
+    const toolBoxes: ToolBox[] = Array.from(
+      new Set(
+        selectedToolNames.flatMap((name) => {
+          const tool = AvailableTools.find((t) => t.names.includes(name));
+          if (tool) {
+            return tool.build(this.promptFile);
+          } else {
+            logger.warn(`Tool with name ${name} not found.`);
+            return [];
+          }
+        }),
+      ),
+    );
     this.tools = toolBoxes;
   }
 
