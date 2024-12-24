@@ -36,6 +36,11 @@ export type FileReadPartToolExecParameter = {
   endLine: number;
 };
 
+export type FileReadLastServalLinesToolExecParameter = {
+  filePath: string;
+  lines: number;
+};
+
 export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
 
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
@@ -45,6 +50,11 @@ export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter
 export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult[]>;
 
 export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult[]>;
+
+export type FileReadLastServalLinesToolBoxType = ToolBox<
+  [FileReadLastServalLinesToolExecParameter],
+  ReadFileLineResult[]
+>;
 
 export const fileEditToolBox: FileEditToolBoxType = {
   fi: {
@@ -249,6 +259,42 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   },
 };
 
+export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'read_last_several_lines_of_file_with_line_numbers',
+      description: 'read the last several lines of a file, return the file content with line numbers',
+      parameters: {
+        type: 'object',
+        properties: {
+          filePath: {
+            type: 'string',
+            description: 'the file path to read',
+          },
+          lines: {
+            type: 'number',
+            description: 'the number of lines to read from the end of the file',
+          },
+        },
+        required: ['filePath', 'lines'],
+      },
+    },
+  },
+  params: z.object({
+    filePath: z.string().describe('the file path to read'),
+    lines: z.number().describe('the number of lines to read from the end of the file'),
+  }),
+  exec: (p: FileReadLastServalLinesToolExecParameter) => {
+    const filePath = sanitizeFullFilePath(p.filePath);
+    const data = fs.readFileSync(filePath, 'utf8').split('\n');
+    return data.slice(-p.lines).map((line, index) => ({
+      lineNumber: data.length - p.lines + index + 1,
+      text: line,
+    }));
+  },
+};
+
 const tool: Tool = {
   names: [
     'edit_file_with_line_number',
@@ -258,7 +304,14 @@ const tool: Tool = {
     'read_part_of_file_with_line_numbers',
   ],
   build: (_p: PromptFile) => {
-    return [fileEditToolBox, fileDeleteLineToolBox, fileInsertLineToolBox, fileReadAllToolBox, fileReadPartToolBox];
+    return [
+      fileEditToolBox,
+      fileDeleteLineToolBox,
+      fileInsertLineToolBox,
+      fileReadAllToolBox,
+      fileReadPartToolBox,
+      fileReadLastServalLinesToolBox,
+    ];
   },
 };
 

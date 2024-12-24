@@ -3,7 +3,9 @@ import { Memory, MemoryManager } from '../memory/memory';
 import { PromptFile } from '../prompt';
 import type { Tool, ToolBox } from './type';
 
-export type MemoryToolLoadParameter = void;
+export interface MemoryToolLoadParameter {
+  limit?: number;
+}
 
 export interface MemoryToolReadParameter {
   id: string;
@@ -36,19 +38,28 @@ export function buildMemoryManagerToolBox(memoId: string) {
       type: 'function',
       function: {
         name: 'load_memory',
-        description: 'load all memory entries',
+        description: 'load memory entries with entry limit, if the limit is not set, load all entries',
         parameters: {
           type: 'object',
-          properties: {},
+          properties: {
+            limit: {
+              type: 'number',
+              description: 'the limit of the memory entries to load',
+            },
+          },
           required: [],
         },
       },
     },
     params: z.object({}),
-    exec: async (_p: MemoryToolLoadParameter) => {
+    exec: async (p: MemoryToolLoadParameter) => {
       memoryManager.load();
       const memories = memoryManager.read();
-      return memories;
+      if (p.limit && p.limit > memories.length) {
+        return memories;
+      }
+
+      return memories.slice(memories.length - (p.limit ?? memories.length));
     },
   };
 

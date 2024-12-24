@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { readSettings } from '../config/setting';
+import { logger } from '../logger';
 
 export class Memory {
   id: string;
@@ -33,7 +34,7 @@ export class MemoryManager {
           });
       }
     } catch (error) {
-      console.error('Error loading memory:', error);
+      logger.error(`Error loading memory: ${error}`);
     }
   }
 
