@@ -41,6 +41,12 @@ export type FileReadLastServalLinesToolExecParameter = {
   lines: number;
 };
 
+export type FileInsertMultipleLinesToolExecParameter = {
+  filePath: string;
+  lineNumber: number;
+  lines: string; // string with new line characters "\n"
+};
+
 export type FileSearchToolExecParameter = {
   filePath: string;
   query: string;
@@ -50,6 +56,7 @@ export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
 
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
 
+export type FileInsertMultipleLinesToolBoxType = ToolBox<[FileInsertMultipleLinesToolExecParameter], string>;
 export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter], string>;
 
 export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult[]>;
@@ -302,6 +309,63 @@ export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType 
   },
 };
 
+export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'insert_multiple_lines_to_file',
+      description:
+        'insert multiple lines to the file with a specific line number, the original line will be pushed down',
+      parameters: {
+        type: 'object',
+        properties: {
+          filePath: {
+            type: 'string',
+            description: 'the file path to insert a line',
+          },
+          lineNumber: {
+            type: 'number',
+            description: 'the line number to insert',
+          },
+          lines: {
+            type: 'string',
+            description:
+              'the text of multiple lines to insert, each line should be separated by a new line character "\n"',
+          },
+        },
+        required: ['filePath', 'lineNumber', 'lines'],
+      },
+    },
+  },
+  params: z.object({
+    filePath: z.string().describe('the file path to insert a line'),
+    lineNumber: z.number().describe('the line number to insert'),
+    lines: z
+      .string()
+      .describe('the text of multiple lines to insert, each line should be separated by a new line character "\n"'),
+  }),
+  exec: (p: FileInsertMultipleLinesToolExecParameter) => {
+    const filePath = sanitizeFullFilePath(p.filePath);
+    const data = fs.readFileSync(filePath, 'utf8').split('\n');
+
+    // Validate and safely insert the new line
+    if (!Array.isArray(data)) {
+      throw new Error('Data must be an array');
+    }
+
+    // Adjust for 1-based line numbers
+    const targetLine = Math.max(0, Math.min(p.lineNumber - 1, data.length));
+
+    const lines = p.lines.split('\n');
+
+    // Insert the new lines, pushing existing content down
+    data.splice(targetLine, 0, ...lines);
+
+    fs.writeFileSync(filePath, data.join('\n'));
+    return `${lines.length} Lines inserted successfully`;
+  },
+};
+
 export const fileSearchToolBox: FileSearchToolBoxType = {
   fi: {
     type: 'function',
@@ -342,6 +406,7 @@ export const fileSearchToolBox: FileSearchToolBoxType = {
 
 const tool: Tool = {
   names: [
+    'insert_multiple_lines_to_file',
     'search_file_content',
     'edit_file_with_line_number',
     'delete_line_from_file',
@@ -352,6 +417,7 @@ const tool: Tool = {
   ],
   build: (_p: PromptFile) => {
     return [
+      fileInsertLineToolBox,
       fileSearchToolBox,
       fileEditToolBox,
       fileDeleteLineToolBox,
