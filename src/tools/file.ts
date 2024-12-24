@@ -417,7 +417,7 @@ const tool: Tool = {
   ],
   build: (_p: PromptFile) => {
     return [
-      fileInsertLineToolBox,
+      fileInsertMultipleLinesToolBox,
       fileSearchToolBox,
       fileEditToolBox,
       fileDeleteLineToolBox,
