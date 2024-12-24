@@ -69,6 +69,7 @@
         "noUnsafeOptionalChaining": "error",
         "noUnusedLabels": "error",
         "noUnusedVariables": "error",
+        "noUnusedImports": "error",
         "useArrayLiterals": "off",
         "useIsNan": "error",
         "useValidForDirection": "error",
@@ -132,7 +133,8 @@
             "noInvalidConstructorSuper": "off",
             "noNewSymbol": "off",
             "noSetterReturn": "off",
-            "noUndeclaredVariables": "off",
+            "noUndeclaredVariables": "error",
+            "noUnusedImports": "error",
             "noUnreachable": "off",
             "noUnreachableSuper": "off"
           },

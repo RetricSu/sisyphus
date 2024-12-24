@@ -1,5 +1,3 @@
-import createDOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
 import { type Page, launch } from 'puppeteer';
 import z from 'zod';
 import { logger } from '../logger';
