@@ -302,6 +302,7 @@ const tool: Tool = {
     'insert_line_to_file',
     'read_full_file_with_line_numbers',
     'read_part_of_file_with_line_numbers',
+    'read_last_several_lines_of_file_with_line_numbers',
   ],
   build: (_p: PromptFile) => {
     return [
