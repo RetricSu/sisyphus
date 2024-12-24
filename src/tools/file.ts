@@ -330,7 +330,7 @@ export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType 
           lines: {
             type: 'string',
             description:
-              'the text of multiple lines to insert, each line should be separated by a new line character "\n"',
+              'the text of multiple lines to insert, each line should be separated by a special character "<=*=>"',
           },
         },
         required: ['filePath', 'lineNumber', 'lines'],
@@ -342,7 +342,7 @@ export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType 
     lineNumber: z.number().describe('the line number to insert'),
     lines: z
       .string()
-      .describe('the text of multiple lines to insert, each line should be separated by a new line character "\n"'),
+      .describe('the text of multiple lines to insert, each line should be separated by a new line character "<=*=>"'),
   }),
   exec: (p: FileInsertMultipleLinesToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
@@ -356,7 +356,9 @@ export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType 
     // Adjust for 1-based line numbers
     const targetLine = Math.max(0, Math.min(p.lineNumber - 1, data.length));
 
-    const lines = p.lines.split('\n');
+    const lines = p.lines.split('<=*=>');
+
+    console.log(lines);
 
     // Insert the new lines, pushing existing content down
     data.splice(targetLine, 0, ...lines);
