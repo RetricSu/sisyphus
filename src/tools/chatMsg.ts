@@ -1,6 +1,7 @@
 import type { Message } from 'ollama';
 import z from 'zod';
 import { Memory, type MemoryMetadata } from '../memory/long-term';
+import { MessageView } from '../memory/message-view';
 import { PromptFile } from '../prompt';
 import type { Tool, ToolBox } from './type';
 
@@ -8,8 +9,17 @@ export interface SearchChatMsgToolExecParameter {
   text: string;
 }
 
+export interface LoadNewestChatMsgToolExecParameter {
+  limit: number;
+}
+
 export type SearchChatMsgToolBoxType = ToolBox<
   [SearchChatMsgToolExecParameter],
+  Promise<(Message & { created_at: string })[]>
+>;
+
+export type LoadNewestChatMsgToolBoxType = ToolBox<
+  [LoadNewestChatMsgToolExecParameter],
   Promise<(Message & { created_at: string })[]>
 >;
 
@@ -53,14 +63,40 @@ export function buildChatMessageSearchToolBox(memoId: string) {
       return msg;
     },
   };
-  return searchChatMsgToolBox;
+  const loadNewestChatMsgToolBox: LoadNewestChatMsgToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'load_newest_chat_messages',
+        description: 'Load the newest chat messages',
+        parameters: {
+          type: 'object',
+          properties: {
+            limit: {
+              type: 'number',
+              description: 'The limit of the newest chat messages to load',
+            },
+          },
+          required: ['limit'],
+        },
+      },
+    },
+    params: z.object({
+      limit: z.number().describe('The limit of the newest chat messages to load'),
+    }),
+    exec: async ({ limit }: LoadNewestChatMsgToolExecParameter) => {
+      const result = MessageView.listLastMessages(memoId, limit);
+      return result.map((m) => ({ ...m, created_at: new Date(m.created_at).toISOString() }));
+    },
+  };
+  return [searchChatMsgToolBox, loadNewestChatMsgToolBox];
 }
 
 const tool: Tool = {
-  names: ['search_chat_messages'],
+  names: ['search_chat_messages', 'load_newest_chat_messages'],
   build: (p: PromptFile) => {
     const memoId = p.memoId;
-    return [buildChatMessageSearchToolBox(memoId)];
+    return buildChatMessageSearchToolBox(memoId);
   },
 };
 
