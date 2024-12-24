@@ -228,7 +228,7 @@ export function buildMemoryManagerToolBox(memoId: string) {
 }
 
 const tool: Tool = {
-  names: ['read_memory', 'create_memory', 'update_memory', 'delete_memory'],
+  names: ['search_memory', 'read_memory', 'create_memory', 'update_memory', 'delete_memory'],
   build: (p: PromptFile) => {
     return buildMemoryManagerToolBox(p.memoId);
   },
