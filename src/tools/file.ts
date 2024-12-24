@@ -152,7 +152,7 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
     type: 'function',
     function: {
       name: 'insert_line_to_file',
-      description: 'insert a line to the file with a specific line number, the original line will be pushed down',
+      description: 'insert a line to the file at a specific line number, moving original line up',
       parameters: {
         type: 'object',
         properties: {
@@ -190,11 +190,14 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
     // Adjust for 1-based line numbers
     const targetLine = Math.max(0, Math.min(p.lineNumber - 1, data.length));
 
-    // Ensure text is a string
-    const textToInsert = p.text ?? '';
-
-    // Insert the new line, pushing existing content down
-    data.splice(targetLine, 0, textToInsert);
+    // Replace the line at target position, moving original line up
+    const originalLine = data[targetLine];
+    data[targetLine] = p.text;
+    if (targetLine > 0) {
+      data.splice(targetLine - 1, 0, originalLine);
+    } else {
+      data.unshift(originalLine);
+    }
 
     fs.writeFileSync(filePath, data.join('\n'));
     return 'Line inserted successfully';
@@ -314,8 +317,7 @@ export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType 
     type: 'function',
     function: {
       name: 'insert_multiple_lines_to_file',
-      description:
-        'insert multiple lines to the file with a specific line number, the original line will be pushed down',
+      description: 'insert multiple lines to the file with a specific line number, moving original line up',
       parameters: {
         type: 'object',
         properties: {
@@ -358,8 +360,10 @@ export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType 
 
     const lines = p.lines.split('\n');
 
-    // Insert the new lines, pushing existing content down
-    data.splice(targetLine, 0, ...lines);
+    // Insert the new lines, moving original lines up
+    const originalLines = data.splice(targetLine);
+    data.push(...lines);
+    data.push(...originalLines);
 
     fs.writeFileSync(filePath, data.join('\n'));
     return `${lines.length} Lines inserted successfully`;
