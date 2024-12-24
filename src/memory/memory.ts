@@ -64,6 +64,11 @@ export class MemoryManager {
     await this.save();
   }
 
+  async search(query: string): Promise<Memory[]> {
+    const results = this.memories.filter((mem) => mem.text.toLowerCase().includes(query.toLowerCase()));
+    return results;
+  }
+
   private async save(): Promise<void> {
     const lines = this.memories.map((mem) => `${mem.id}|||${mem.text}`).join('\n');
     fs.writeFileSync(this.memoryFilePath, lines);

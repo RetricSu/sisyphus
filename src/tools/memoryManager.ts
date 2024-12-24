@@ -23,8 +23,12 @@ export interface MemoryToolUpdateParameter {
 export interface MemoryToolDeleteParameter {
   id: string;
 }
+export interface MemoryToolSearchParameter {
+  text: string;
+}
 
 export type MemoryToolLoadToolBoxType = ToolBox<[MemoryToolLoadParameter], Promise<Memory[]>>;
+export type MemoryToolSearchToolBoxType = ToolBox<[MemoryToolSearchParameter], Promise<Memory[]>>;
 export type MemoryToolReadToolBoxType = ToolBox<[MemoryToolReadParameter], Promise<string>>;
 export type MemoryToolCreateToolBoxType = ToolBox<[MemoryToolCreateParameter], Promise<string>>;
 export type MemoryToolUpdateToolBoxType = ToolBox<[MemoryToolUpdateParameter], Promise<string>>;
@@ -185,7 +189,42 @@ export function buildMemoryManagerToolBox(memoId: string) {
     },
   };
 
-  return [memoryToolLoadToolBoxType, memoryReadToolBox, memoryCreateToolBox, memoryUpdateToolBox, memoryDeleteToolBox];
+  const memorySearchToolBox: MemoryToolSearchToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'search_memory',
+        description: 'search a memory entry by text',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'the text of the memory entry to search',
+            },
+          },
+          required: ['text'],
+        },
+      },
+    },
+    params: z.object({
+      text: z.string().describe('the text of the memory entry to search'),
+    }),
+    exec: async (parameter: MemoryToolSearchParameter) => {
+      memoryManager.load();
+      const memories = await memoryManager.search(parameter.text);
+      return memories;
+    },
+  };
+
+  return [
+    memorySearchToolBox,
+    memoryToolLoadToolBoxType,
+    memoryReadToolBox,
+    memoryCreateToolBox,
+    memoryUpdateToolBox,
+    memoryDeleteToolBox,
+  ];
 }
 
 const tool: Tool = {
