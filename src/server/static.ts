@@ -14,6 +14,7 @@ export const ALLOWED_EXTENSIONS = new Set([
   '.json',
   '.svg',
   '.ico',
+  '.md',
 ]);
 
 export function isPathSafe(staticPath: string): boolean {

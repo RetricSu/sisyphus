@@ -358,8 +358,6 @@ export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType 
 
     const lines = p.lines.split('<=*=>');
 
-    console.log(lines);
-
     // Insert the new lines, pushing existing content down
     data.splice(targetLine, 0, ...lines);
 

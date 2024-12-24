@@ -1,6 +1,6 @@
 import type { Message } from 'ollama';
 import z from 'zod';
-import { Memory, type MemoryMetadata } from '../memory/long-term';
+import { EmbeddingMessageManager, type EmbeddingMessageMetadata } from '../memory/embedding-message';
 import { MessageView } from '../memory/message-view';
 import { PromptFile } from '../prompt';
 import type { Tool, ToolBox } from './type';
@@ -46,14 +46,14 @@ export function buildChatMessageSearchToolBox(memoId: string) {
       text: z.string().describe('The text to search in the chat-messages'),
     }),
     exec: async ({ text }: SearchChatMsgToolExecParameter) => {
-      const memory = new Memory(memoId);
+      const memory = new EmbeddingMessageManager(memoId);
       const results = await memory.query({ searchString: text, limit: 5 });
       const msg: (Message & { created_at: string })[] = [];
       const documents = results.documents[0];
       const metadatas = results.metadatas[0];
       for (let index = 0; index < documents.length; index++) {
         const content = documents[index]!;
-        const metadata = metadatas[index] as unknown as MemoryMetadata;
+        const metadata = metadatas[index] as unknown as EmbeddingMessageMetadata;
         msg.push({
           role: metadata.role,
           content,

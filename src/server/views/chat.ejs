@@ -16,9 +16,20 @@
             font-size: smaller;
             color: gray;
         }
+        header {
+            text-align: center;
+            padding: 1em;
+            background-color: #f0f0f0;
+        }
+        .message-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1em;
+        }
     </style>
-    <h1>Sisyphus AI Agent Brain</h1>
-    <ul
+    <header><h1>Sisyphus AI Agent Brain</h1></header>
+    <div class="message-container">
+    <ul>
         <% messages.forEach(message => { %>
             <div>
                 <div><strong><%= message.role.toUpperCase() %>:</strong></div>

@@ -4,7 +4,7 @@ import type { AMessage } from './a-message';
 
 const settings = readSettings();
 
-export class Memory {
+export class EmbeddingMessageManager {
   private client: ChromaClient;
   public collectionName: string;
 
@@ -21,7 +21,7 @@ export class Memory {
       name: this.collectionName,
     });
 
-    const metadata: MemoryMetadata = {
+    const metadata: EmbeddingMessageMetadata = {
       role: aMsg.msg.role,
       created_at: Date.now(),
     };
@@ -45,7 +45,7 @@ export class Memory {
   }
 }
 
-export interface MemoryMetadata {
+export interface EmbeddingMessageMetadata {
   role: string;
   created_at: number; // milsecs timestamp
 }

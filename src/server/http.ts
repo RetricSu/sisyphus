@@ -4,7 +4,7 @@ import { logger } from '../logger';
 import { MessageView } from '../memory/message-view';
 import { ALLOWED_EXTENSIONS, isPathSafe } from './static';
 
-export function buildHttpServer(memoId: string, limit: number = 20, port: number = 3000, staticPath?: string) {
+export function buildHttpServer(memoId: string, limit: number = 50, port: number = 3000, staticPath?: string) {
   const app: express.Application = express();
 
   app.set('view engine', 'ejs');
@@ -20,26 +20,23 @@ export function buildHttpServer(memoId: string, limit: number = 20, port: number
 
     app.use(
       '/static',
+      (req, res, next) => {
+        const ext = path.extname(req.path).toLowerCase();
+        if (!ALLOWED_EXTENSIONS.has(ext)) {
+          res.status(403).send('Forbidden');
+          return;
+        }
+        next();
+      },
       express.static(absolutePath, {
-        // security options
-        dotfiles: 'deny', // forbidden to access dot files
-        index: false, // disable directory index
-        setHeaders: (res, filePath) => {
-          // check file extension
-          const ext = path.extname(filePath).toLowerCase();
-          if (!ALLOWED_EXTENSIONS.has(ext)) {
-            res.status(403).end();
-            return;
-          }
-
-          // security headers
-          res.set('X-Content-Type-Options', 'nosniff');
-          res.set('Cache-Control', 'no-store, max-age=0');
+        dotfiles: 'deny',
+        index: false,
+        setHeaders: (res) => {
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+          res.setHeader('Cache-Control', 'no-store, max-age=0');
         },
       }),
     );
-
-    logger.debug(`Serving static files from: ${absolutePath}`);
   }
 
   app.get('/history', (_req, res) => {

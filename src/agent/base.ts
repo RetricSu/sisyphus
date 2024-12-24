@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import fs from 'fs';
-import type { CoreMessage } from 'ai';
+import type { AssistantContent, CoreMessage, ToolContent } from 'ai';
 import { readSettings } from '../config/setting';
 import { AnthropicAdapter } from '../core/anthropic';
 import { GoogleAdapter } from '../core/gemini';
@@ -9,7 +9,7 @@ import { OpenAIAdapter } from '../core/open-ai';
 import type { AIInterface, Message } from '../core/type';
 import { logger } from '../logger';
 import { AMessage } from '../memory/a-message';
-import { Memory } from '../memory/long-term';
+import { EmbeddingMessageManager } from '../memory/embedding-message';
 import type { Network } from '../offckb/offckb.config';
 import { Privkey } from '../privkey';
 import { Prompt, type PromptFile } from '../prompt';
@@ -44,7 +44,7 @@ export class Agent {
   ai: AIInterface;
   messages: Message[];
   pipeResponse?: (name: string, word: string) => any;
-  memory: Memory;
+  memory: EmbeddingMessageManager;
 
   constructor({ saveMemory = true, pipeResponse, promptName = readSettings().prompt.selectedPromptName }: AgentProp) {
     this.role = 'assistant';
@@ -63,7 +63,7 @@ export class Agent {
     this.ckbNetwork = promptFile.ckbNetwork;
     this.maxSteps = promptFile.maxSteps || 7;
     this.memoId = promptFile.memoId;
-    this.memory = new Memory(this.memoId);
+    this.memory = new EmbeddingMessageManager(this.memoId);
 
     if (promptFile.strategy) {
       const maxLoop = promptFile.strategy.maxLoop;
@@ -203,21 +203,45 @@ export class Agent {
       this.messages.push(msgs[i]);
 
       // todo: handle details of the msgs
-      const msg = msgs[i].content;
-      let answer = '';
-      if (typeof msg === 'string') {
-        answer = msg;
-      } else {
-        if (Array.isArray(msg)) {
-          answer += msg.filter((c) => c.type === 'text').map((c) => c.text);
+      const role = msgs[i].role;
+      const content = msgs[i].content;
+
+      let storeContent = ''; // things that will stored in the db
+      let pipeContent = ''; // things that will be display to users
+
+      if (role === 'tool') {
+        const toolMsgContent = content as ToolContent;
+        storeContent = JSON.stringify(toolMsgContent);
+      } else if (role == 'assistant') {
+        const assistantMsgContent = content as AssistantContent;
+        if (typeof assistantMsgContent === 'string' && assistantMsgContent !== '') {
+          storeContent = assistantMsgContent;
+          pipeContent = assistantMsgContent;
         } else {
-          answer = JSON.stringify(msg);
+          if (Array.isArray(assistantMsgContent)) {
+            storeContent += assistantMsgContent.filter((c) => c.type === 'text').map((c) => c.text);
+            pipeContent += assistantMsgContent.filter((c) => c.type === 'text').map((c) => c.text);
+
+            const toolCalls = assistantMsgContent
+              .filter((c) => c.type === 'tool-call')
+              .map((c) => {
+                return {
+                  toolName: c.toolName,
+                  arguments: c.args,
+                };
+              });
+            storeContent += JSON.stringify({ toolCalls });
+          } else {
+            pipeContent = JSON.stringify(assistantMsgContent);
+            storeContent = JSON.stringify(assistantMsgContent);
+          }
         }
       }
+
       if (this.pipeResponse) {
-        await this.pipeResponse(this.name, answer);
+        await this.pipeResponse(this.name, pipeContent);
       }
-      const resMessage = new AMessage(this.memoId, msgs[i].role, answer);
+      const resMessage = new AMessage(this.memoId, role, storeContent);
       await this.saveMessageIntoMemoryIfEnable(resMessage);
     }
   }
