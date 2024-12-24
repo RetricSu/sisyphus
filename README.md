@@ -21,6 +21,11 @@ Sisyphus is a CLI tool that allows you to run a Crypto AI Agent with built-in fu
     - [Update Prompts](#update-prompts)
   - [Run IPC Bot](#run-ipc-bot)
   - [Function Tool](#function-tool)
+    - [System](#system)
+    - [Chat](#chat)
+    - [Web](#web)
+    - [Blockchain](#blockchain)
+    - [Nostr](#nostr)
   - [Privkey](#privkey)
   - [Config Setting](#config-setting)
     - [List All Settings](#list-all-settings)
@@ -290,21 +295,34 @@ Boom! They will talk to each other on and on without any interruption.
 
 ## Function Tool
 
-- [x] get_current_time_from_os
-- [x] call_terminal_simulator
-- [x] search_chat_messages
-- [x] get_my_account_info
-- [x] read_webpage_content
-- [x] get_ckb_balance
-- [x] transfer_ckb
-- [x] publish_nostr_social_post
-- [x] read_social_post_on_nostr_with_filters
-- [x] read_social_notification_message_on_nostr
-- [x] publish_reply_post_to_other_on_nostr
-- [x] update_social_profile_on_nostr
-- [x] send_tweet
+### System
 
-You can config `tools` in `.toml` to allow AI to access specific function tools.
+- `get_current_time_from_os`: Get the current time from the operating system.
+- `call_terminal_simulator`: Execute commands in the terminal.
+
+### Chat
+
+- `search_chat_messages`: Search previous chat messages.
+
+### Web
+
+- `read_webpage_content`: Read the content of a web page.
+
+### Blockchain
+
+- `get_my_account_info`: Get the current account info.
+- `get_ckb_balance`: Get the CKB balance of the current account.
+- `transfer_ckb`: Transfer CKB to another account.
+
+### Nostr
+
+- `publish_nostr_social_post`: Publish a social post on Nostr.
+- `read_social_post_on_nostr_with_filters`: Read social posts on Nostr with filters.
+- `read_social_notification_message_on_nostr`: Read social notification messages on Nostr.
+- `publish_reply_post_to_other_on_nostr`: Publish a reply post to another user on Nostr.
+- `update_social_profile_on_nostr`: Update the social profile on Nostr.
+
+You can use the `sisyphus list-tool` command to list all available function tools. You can config `tools` in `.toml` to allow AI to access specific function tools.
 
 > [!WARNING]
 > Please Note that running Sisyphus on your computer with `call_terminal_simulator` function tool might cause unexpected behavior(think like LLM agent can delete your files)

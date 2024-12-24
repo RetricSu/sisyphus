@@ -1,8 +1,8 @@
+import chatMsgTool from './chatMsg';
 import fileTools from './file';
-import memoryManagerTools from './memoryManager'; // Import the new memoryManager tool
+import memoryManagerTools from './memoryManager';
 import nosCKBTools from './nosCKB';
 import readWebPageTools from './readWebPage';
-import memoryTools from './searchChatMsg';
 import terminalTools from './terminal';
 import timeTools from './time';
 import twitterTools from './twitter';
@@ -11,11 +11,11 @@ const tools: Tools = [
   fileTools,
   twitterTools,
   nosCKBTools,
-  memoryTools,
+  chatMsgTool,
   terminalTools,
   readWebPageTools,
   timeTools,
   memoryManagerTools,
-]; // Add the new memoryManager tool to the array
+];
 
 export default tools;

@@ -81,4 +81,10 @@ export class MessageView {
     const rows = stmt.all(memoId, limit) as DBMessage[];
     return rows.reverse() as Message[];
   }
+
+  static listLastMessages(memoId = 'chat', limit = 20) {
+    const stmt = db.prepare('SELECT * FROM messages WHERE memo_id = ? ORDER BY created_at DESC LIMIT ?');
+    const rows = stmt.all(memoId, limit) as DBMessage[];
+    return rows.reverse() as (Message & { created_at: number })[];
+  }
 }
