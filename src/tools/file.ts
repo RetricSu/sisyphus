@@ -41,6 +41,11 @@ export type FileReadLastServalLinesToolExecParameter = {
   lines: number;
 };
 
+export type FileSearchToolExecParameter = {
+  filePath: string;
+  query: string;
+};
+
 export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
 
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
@@ -50,6 +55,8 @@ export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter
 export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult[]>;
 
 export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult[]>;
+
+export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], ReadFileLineResult[]>;
 
 export type FileReadLastServalLinesToolBoxType = ToolBox<
   [FileReadLastServalLinesToolExecParameter],
@@ -295,8 +302,47 @@ export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType 
   },
 };
 
+export const fileSearchToolBox: FileSearchToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'search_file_content',
+      description: 'search the content of a file with a query, return the file content with line numbers',
+      parameters: {
+        type: 'object',
+        properties: {
+          filePath: {
+            type: 'string',
+            description: 'the file path to search',
+          },
+          query: {
+            type: 'string',
+            description: 'the query to search in the file content',
+          },
+        },
+        required: ['filePath', 'query'],
+      },
+    },
+  },
+  params: z.object({
+    filePath: z.string().describe('the file path to search'),
+    query: z.string().describe('the query to search in the file content'),
+  }),
+  exec: (p: FileSearchToolExecParameter) => {
+    const filePath = sanitizeFullFilePath(p.filePath);
+    const data = fs.readFileSync(filePath, 'utf8').split('\n');
+    return data
+      .map((line, index) => ({
+        lineNumber: index + 1,
+        text: line,
+      }))
+      .filter((line) => line.text.includes(p.query));
+  },
+};
+
 const tool: Tool = {
   names: [
+    'search_file_content',
     'edit_file_with_line_number',
     'delete_line_from_file',
     'insert_line_to_file',
@@ -306,6 +352,7 @@ const tool: Tool = {
   ],
   build: (_p: PromptFile) => {
     return [
+      fileSearchToolBox,
       fileEditToolBox,
       fileDeleteLineToolBox,
       fileInsertLineToolBox,
