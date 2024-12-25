@@ -20,7 +20,7 @@ export type FileEditMultiplePatchesToolExecParameter = {
   patches: {
     startLineNumber: number;
     endLineNumber: number;
-    text: string;
+    textArray: string[];
   }[];
 };
 
@@ -151,10 +151,11 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
           endLineNumber: z
             .number()
             .describe('Ending line number where the patch should end (1-based indexing, inclusive)'),
-          text: z
+          textArray: z
             .string()
+            .array()
             .describe(
-              'New content to replace the lines between start and end. Multiple lines should be separated by "<=*=>"',
+              'Array of strings, each string representing a line to insert. Each string should not contain any escaping characters.',
             ),
         }),
       )
@@ -171,8 +172,15 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
       // Adjust for 1-based line numbers
       const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
       const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
-      const lines = patch.text.split(/<=\*=>|\n/);
-      data.splice(startLine, endLine - startLine, ...lines);
+
+      // each text line should not contain any escaping characters
+      // detect if there is any escaping characters, throws out an error
+      const hasEscapingCharacters = patch.textArray.some((line) => line.match(/\\n|\\t|\\r/g));
+      if (hasEscapingCharacters) {
+        throw new Error('Text lines should not contain any escaping characters');
+      }
+
+      data.splice(startLine, endLine - startLine, ...patch.textArray);
       fs.writeFileSync(filePath, data.join('\n'));
     }
 
