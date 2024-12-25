@@ -18,6 +18,7 @@ export class ReAct extends Strategy implements StrategyInterface {
     isSTream: boolean;
     tools: ToolBox[];
     maxSteps?: number;
+    idleTime?: number; // in ms
   }): Promise<CoreMessage[]> {
     const history = opt.msgs;
     const strategyHistoryMsgs: CoreMessage[] = [...history];
@@ -39,6 +40,10 @@ export class ReAct extends Strategy implements StrategyInterface {
       if (i >= this.maxLoopSteps) {
         logger.debug(`max loop step exceed: ${i}, terminated now.`);
         break;
+      }
+
+      if (opt.idleTime) {
+        await new Promise((resolve) => setTimeout(resolve, opt.idleTime));
       }
     }
 
