@@ -143,18 +143,24 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
     },
   },
   params: z.object({
-    filePath: z.string().describe('the file path to edit'),
+    filePath: z.string().describe('Absolute or relative path to the file that needs to be edited'),
     patches: z
       .array(
         z.object({
-          startLineNumber: z.number().describe('the start line number to edit'),
-          endLineNumber: z.number().describe('the end line number to edit'),
+          startLineNumber: z.number().describe('Starting line number where the patch should begin (1-based indexing)'),
+          endLineNumber: z
+            .number()
+            .describe('Ending line number where the patch should end (1-based indexing, inclusive)'),
           text: z
             .string()
-            .describe('the new text to replace, each line should be separated by a special character "<=*=>"'),
+            .describe(
+              'New content to replace the lines between start and end. Multiple lines should be separated by "<=*=>"',
+            ),
         }),
       )
-      .describe('the patches to edit, each patch should be placed in the asc order of start line number'),
+      .describe(
+        'Array of patches to apply, must be sorted by startLineNumber in ascending order to ensure correct application',
+      ),
   }),
   exec: (p: FileEditMultiplePatchesToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
