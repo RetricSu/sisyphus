@@ -167,8 +167,8 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
 
-    for (const patch of p.patches.reverse()) {
-      // reverse to avoid index shift
+    for (const patch of p.patches.sort((a, b) => b.startLineNumber - a.startLineNumber)) {
+      // sort in desc order to avoid index shift
       // Adjust for 1-based line numbers
       const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
       const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
