@@ -5,6 +5,12 @@ import { sanitizeFullFilePath } from '../util/fs';
 import type { Tool, ToolBox } from './type';
 
 export interface ReadFileLineResult {
+  startLineNumber: number;
+  endLineNumber: number;
+  text: string;
+}
+
+export interface FileTextSearchResult {
   lineNumber: number;
   text: string;
 }
@@ -68,15 +74,15 @@ export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter
 export type FileInsertMultipleLinesToolBoxType = ToolBox<[FileInsertMultipleLinesToolExecParameter], string>;
 export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter], string>;
 
-export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult[]>;
+export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult>;
 
-export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult[]>;
+export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult>;
 
-export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], ReadFileLineResult[]>;
+export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], FileTextSearchResult[]>;
 
 export type FileReadLastServalLinesToolBoxType = ToolBox<
   [FileReadLastServalLinesToolExecParameter],
-  ReadFileLineResult[]
+  ReadFileLineResult
 >;
 
 export const fileEditToolBox: FileEditToolBoxType = {
@@ -302,10 +308,11 @@ export const fileReadAllToolBox: FileReadAllToolBoxType = {
   exec: (p: FileReadAllToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.map((line, index) => ({
-      lineNumber: index + 1,
-      text: line,
-    }));
+    return {
+      startLineNumber: 1,
+      endLineNumber: data.length,
+      text: data.join('\n'),
+    };
   },
 };
 
@@ -343,10 +350,11 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   exec: (p: FileReadPartToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.slice(p.startLine - 1, p.endLine).map((line, index) => ({
-      lineNumber: p.startLine + index,
-      text: line,
-    }));
+    return {
+      startLineNumber: p.startLine,
+      endLineNumber: p.endLine,
+      text: data.slice(p.startLine - 1, p.endLine).join('\n'),
+    };
   },
 };
 
@@ -379,10 +387,11 @@ export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType 
   exec: (p: FileReadLastServalLinesToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.slice(-p.lines).map((line, index) => ({
-      lineNumber: data.length - p.lines + index + 1,
-      text: line,
-    }));
+    return {
+      startLineNumber: data.length - p.lines + 1,
+      endLineNumber: data.length,
+      text: data.slice(-p.lines).join('\n'),
+    };
   },
 };
 
