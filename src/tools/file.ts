@@ -151,9 +151,7 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
           endLineNumber: z.number().describe('the end line number to edit'),
           text: z
             .string()
-            .describe(
-              'the text of multiple lines to replace, each line should be separated by a special character "<=*=>"',
-            ),
+            .describe('the new text to replace, each line should be separated by a special character "<=*=>"'),
         }),
       )
       .describe('the patches to edit, each patch should be placed in the asc order of start line number'),
@@ -167,7 +165,7 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
       // Adjust for 1-based line numbers
       const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
       const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
-      const lines = patch.text.split('<=*=>');
+      const lines = patch.text.split(/<=\*=>|\n/);
       data.splice(startLine, endLine - startLine, ...lines);
       fs.writeFileSync(filePath, data.join('\n'));
     }
