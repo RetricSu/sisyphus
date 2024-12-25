@@ -15,6 +15,15 @@ export type FileEditToolExecParameter = {
   text: string;
 };
 
+export type FileEditMultiplePatchesToolExecParameter = {
+  filePath: string;
+  patches: {
+    startLineNumber: number;
+    endLineNumber: number;
+    text: string;
+  }[];
+};
+
 export type FileDeleteLineToolExecParameter = {
   filePath: string;
   lineNumber: number;
@@ -53,7 +62,7 @@ export type FileSearchToolExecParameter = {
 };
 
 export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
-
+export type FileEditMultiplePatchesToolBoxType = ToolBox<[FileEditMultiplePatchesToolExecParameter], string>;
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
 
 export type FileInsertMultipleLinesToolBoxType = ToolBox<[FileInsertMultipleLinesToolExecParameter], string>;
@@ -108,6 +117,62 @@ export const fileEditToolBox: FileEditToolBoxType = {
     data[p.lineNumber - 1] = p.text;
     fs.writeFileSync(filePath, data.join('\n'));
     return 'File edited successfully';
+  },
+};
+
+export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'edit_multiple_patches_in_file',
+      description: 'edit text in the file with a set of patches across multiple lines',
+      parameters: {
+        type: 'object',
+        properties: {
+          filePath: {
+            type: 'string',
+            description: 'the file path to edit',
+          },
+          patches: {
+            type: 'array',
+            description: 'the patches to edit',
+          },
+        },
+        required: ['filePath', 'patches'],
+      },
+    },
+  },
+  params: z.object({
+    filePath: z.string().describe('the file path to edit'),
+    patches: z
+      .array(
+        z.object({
+          startLineNumber: z.number().describe('the start line number to edit'),
+          endLineNumber: z.number().describe('the end line number to edit'),
+          text: z
+            .string()
+            .describe(
+              'the text of multiple lines to replace, each line should be separated by a special character "<=*=>"',
+            ),
+        }),
+      )
+      .describe('the patches to edit, each patch should be placed in the asc order of start line number'),
+  }),
+  exec: (p: FileEditMultiplePatchesToolExecParameter) => {
+    const filePath = sanitizeFullFilePath(p.filePath);
+    const data = fs.readFileSync(filePath, 'utf8').split('\n');
+
+    for (const patch of p.patches.reverse()) {
+      // reverse to avoid index shift
+      // Adjust for 1-based line numbers
+      const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
+      const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
+      const lines = patch.text.split('<=*=>');
+      data.splice(startLine, endLine - startLine, ...lines);
+      fs.writeFileSync(filePath, data.join('\n'));
+    }
+
+    return `${p.patches.length} Patches applied successfully`;
   },
 };
 
@@ -414,6 +479,7 @@ const tool: Tool = {
     'read_full_file_with_line_numbers',
     'read_part_of_file_with_line_numbers',
     'read_last_several_lines_of_file_with_line_numbers',
+    'edit_multiple_patches_in_file',
   ],
   build: (_p: PromptFile) => {
     return [
@@ -425,6 +491,7 @@ const tool: Tool = {
       fileReadAllToolBox,
       fileReadPartToolBox,
       fileReadLastServalLinesToolBox,
+      fileEditMultiplePatchesToolBox,
     ];
   },
 };
