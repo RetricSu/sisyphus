@@ -129,7 +129,7 @@ export class Agent {
           }
         }),
       ),
-    );
+    ).filter((t) => selectedToolNames.includes(t.fi.function.name)) as ToolBox[];
     this.tools = toolBoxes;
   }
 
