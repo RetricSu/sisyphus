@@ -179,13 +179,6 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
       const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
       const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
 
-      // each text line should not contain any escaping characters
-      // detect if there is any escaping characters, throws out an error
-      const hasEscapingCharacters = patch.textArray.some((line) => line.match(/\\n|\\t|\\r/g));
-      if (hasEscapingCharacters) {
-        throw new Error('Text lines should not contain any escaping characters');
-      }
-
       data.splice(startLine, endLine - startLine, ...patch.textArray);
       fs.writeFileSync(filePath, data.join('\n'));
     }
