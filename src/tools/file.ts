@@ -5,6 +5,12 @@ import { sanitizeFullFilePath } from '../util/fs';
 import type { Tool, ToolBox } from './type';
 
 export interface ReadFileLineResult {
+  startLineNumber: number;
+  endLineNumber: number;
+  text: string;
+}
+
+export interface FileTextSearchResult {
   lineNumber: number;
   text: string;
 }
@@ -13,6 +19,15 @@ export type FileEditToolExecParameter = {
   filePath: string;
   lineNumber: number;
   text: string;
+};
+
+export type FileEditMultiplePatchesToolExecParameter = {
+  filePath: string;
+  patches: {
+    startLineNumber: number;
+    endLineNumber: number;
+    textArray: string[];
+  }[];
 };
 
 export type FileDeleteLineToolExecParameter = {
@@ -53,21 +68,21 @@ export type FileSearchToolExecParameter = {
 };
 
 export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
-
+export type FileEditMultiplePatchesToolBoxType = ToolBox<[FileEditMultiplePatchesToolExecParameter], string>;
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
 
 export type FileInsertMultipleLinesToolBoxType = ToolBox<[FileInsertMultipleLinesToolExecParameter], string>;
 export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter], string>;
 
-export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult[]>;
+export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult>;
 
-export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult[]>;
+export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult>;
 
-export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], ReadFileLineResult[]>;
+export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], FileTextSearchResult[]>;
 
 export type FileReadLastServalLinesToolBoxType = ToolBox<
   [FileReadLastServalLinesToolExecParameter],
-  ReadFileLineResult[]
+  ReadFileLineResult
 >;
 
 export const fileEditToolBox: FileEditToolBoxType = {
@@ -108,6 +123,74 @@ export const fileEditToolBox: FileEditToolBoxType = {
     data[p.lineNumber - 1] = p.text;
     fs.writeFileSync(filePath, data.join('\n'));
     return 'File edited successfully';
+  },
+};
+
+export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'edit_multiple_patches_in_file',
+      description: 'edit text in the file with a set of patches across multiple lines',
+      parameters: {
+        type: 'object',
+        properties: {
+          filePath: {
+            type: 'string',
+            description: 'the file path to edit',
+          },
+          patches: {
+            type: 'array',
+            description: 'the patches to edit',
+          },
+        },
+        required: ['filePath', 'patches'],
+      },
+    },
+  },
+  params: z.object({
+    filePath: z.string().describe('Absolute or relative path to the file that needs to be edited'),
+    patches: z
+      .array(
+        z.object({
+          startLineNumber: z.number().describe('Starting line number where the patch should begin (1-based indexing)'),
+          endLineNumber: z
+            .number()
+            .describe('Ending line number where the patch should end (1-based indexing, inclusive)'),
+          textArray: z
+            .string()
+            .array()
+            .describe(
+              'Array of strings, each string representing a line to insert. Each string should not contain any escaping characters.',
+            ),
+        }),
+      )
+      .describe(
+        'Array of patches to apply, must be sorted by startLineNumber in ascending order to ensure correct application',
+      ),
+  }),
+  exec: (p: FileEditMultiplePatchesToolExecParameter) => {
+    const filePath = sanitizeFullFilePath(p.filePath);
+    const data = fs.readFileSync(filePath, 'utf8').split('\n');
+
+    for (const patch of p.patches.sort((a, b) => b.startLineNumber - a.startLineNumber)) {
+      // sort in desc order to avoid index shift
+      // Adjust for 1-based line numbers
+      const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
+      const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
+
+      // each text line should not contain any escaping characters
+      // detect if there is any escaping characters, throws out an error
+      const hasEscapingCharacters = patch.textArray.some((line) => line.match(/\\n|\\t|\\r/g));
+      if (hasEscapingCharacters) {
+        throw new Error('Text lines should not contain any escaping characters');
+      }
+
+      data.splice(startLine, endLine - startLine, ...patch.textArray);
+      fs.writeFileSync(filePath, data.join('\n'));
+    }
+
+    return `${p.patches.length} Patches applied successfully`;
   },
 };
 
@@ -225,10 +308,11 @@ export const fileReadAllToolBox: FileReadAllToolBoxType = {
   exec: (p: FileReadAllToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.map((line, index) => ({
-      lineNumber: index + 1,
-      text: line,
-    }));
+    return {
+      startLineNumber: 1,
+      endLineNumber: data.length,
+      text: data.join('\n'),
+    };
   },
 };
 
@@ -266,10 +350,11 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   exec: (p: FileReadPartToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.slice(p.startLine - 1, p.endLine).map((line, index) => ({
-      lineNumber: p.startLine + index,
-      text: line,
-    }));
+    return {
+      startLineNumber: p.startLine,
+      endLineNumber: p.endLine,
+      text: data.slice(p.startLine - 1, p.endLine).join('\n'),
+    };
   },
 };
 
@@ -302,10 +387,11 @@ export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType 
   exec: (p: FileReadLastServalLinesToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    return data.slice(-p.lines).map((line, index) => ({
-      lineNumber: data.length - p.lines + index + 1,
-      text: line,
-    }));
+    return {
+      startLineNumber: data.length - p.lines + 1,
+      endLineNumber: data.length,
+      text: data.slice(-p.lines).join('\n'),
+    };
   },
 };
 
@@ -414,6 +500,7 @@ const tool: Tool = {
     'read_full_file_with_line_numbers',
     'read_part_of_file_with_line_numbers',
     'read_last_several_lines_of_file_with_line_numbers',
+    'edit_multiple_patches_in_file',
   ],
   build: (_p: PromptFile) => {
     return [
@@ -425,6 +512,7 @@ const tool: Tool = {
       fileReadAllToolBox,
       fileReadPartToolBox,
       fileReadLastServalLinesToolBox,
+      fileEditMultiplePatchesToolBox,
     ];
   },
 };
