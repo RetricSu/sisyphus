@@ -57,9 +57,6 @@ export class TerminalBot extends Agent {
   async chat() {
     await this.loadPromptMessage();
 
-    // call the model first to get the first message
-    await this.reqMsgsFromAI({ role: 'user', content: 'start' });
-
     while (true) {
       const readline = Readline.createInterface({
         input: process.stdin,
