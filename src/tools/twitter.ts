@@ -18,6 +18,16 @@ export interface ReplyTweetToolExecParameter {
 }
 export type ReplyTweetToolBoxType = ToolBox<[ReplyTweetToolExecParameter], ReturnType<typeof replyTweet>>;
 
+export interface GetMentionsToolExecParameter {
+  count?: number;
+}
+export type GetMentionsToolBoxType = ToolBox<[GetMentionsToolExecParameter], ReturnType<typeof getMentions>>;
+
+export interface GetTimelineToolExecParameter {
+  count?: number;
+}
+export type GetTimelineToolBoxType = ToolBox<[GetTimelineToolExecParameter], ReturnType<typeof getTimeline>>;
+
 export function buildTwitterTools(promptFile: PromptFile) {
   const twitter = promptFile.twitter;
   if (twitter?.username == null || twitter.password == null)
@@ -80,7 +90,59 @@ export function buildTwitterTools(promptFile: PromptFile) {
     },
   };
 
-  return [sendTweetToolBox, replyTweetToolBox];
+  const getMentionsToolBox: GetMentionsToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'get_tweet_mentions',
+        description: 'fetch tweets that mention the user',
+        parameters: {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number',
+              description: 'the number of mentions to fetch',
+            },
+          },
+          required: ['count'],
+        },
+      },
+    },
+    params: z.object({
+      count: z.number().optional().describe('the number of mentions to fetch'),
+    }),
+    exec: async ({ count }: GetMentionsToolExecParameter) => {
+      return await getMentions(twitter.username, twitter.password, count);
+    },
+  };
+
+  const getTimelineToolBox: GetTimelineToolBoxType = {
+    fi: {
+      type: 'function',
+      function: {
+        name: 'get_tweet_timeline',
+        description: "fetch the user's timeline tweets",
+        parameters: {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number',
+              description: 'the number of tweets to fetch',
+            },
+          },
+          required: ['count'],
+        },
+      },
+    },
+    params: z.object({
+      count: z.number().optional().describe('the number of tweets to fetch'),
+    }),
+    exec: async ({ count }: GetTimelineToolExecParameter) => {
+      return await getTimeline(twitter.username, twitter.password, count);
+    },
+  };
+
+  return [sendTweetToolBox, replyTweetToolBox, getMentionsToolBox, getTimelineToolBox];
 }
 
 export async function sendTweets(username: string, password: string, text: string) {
@@ -101,6 +163,24 @@ export async function replyTweet(username: string, password: string, text: strin
   const responseJson = await result.json();
   const headers = await result.headers;
   return { status: result.status, headers, responseJson: responseJson };
+}
+
+export async function getMentions(username: string, password: string, count: number = 20) {
+  const scraper = await buildScraper(username, password);
+  const mentions = await scraper.searchTweets(`@${username}`, count);
+  return {
+    status: 200,
+    responseJson: mentions,
+  };
+}
+
+export async function getTimeline(username: string, password: string, count: number = 20) {
+  const scraper = await buildScraper(username, password);
+  const timeline = await scraper.getTweets(username, count);
+  return {
+    status: 200,
+    responseJson: timeline,
+  };
 }
 
 export async function buildScraper(username: string, password: string) {
@@ -143,7 +223,7 @@ export function isCookiesExits(username: string) {
 }
 
 const tool: Tool = {
-  names: ['send_tweet', 'reply_tweet'],
+  names: ['send_tweet', 'reply_tweet', 'get_tweet_mentions', 'get_tweet_timeline'],
   build: (p: PromptFile) => {
     return buildTwitterTools(p);
   },
