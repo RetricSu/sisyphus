@@ -27,7 +27,21 @@
             padding: 1em;
         }
     </style>
-    <header><h1>Sisyphus AI Agent Brain</h1></header>
+    <div class="message-container">
+    <ul>
+        <% messages.forEach(message => { %>
+            <% if (message.role == 'tool') { %>
+                <div class="collapsible-content" onclick="toggleContent(this)"><strong><%= message.role.toUpperCase() %>:</strong> (Click to expand)</div>
+                <div class="message-content collapsed"><%= message.content %></div>
+            <% } else { %>
+                <div><strong><%= message.role.toUpperCase() %>:</strong></div>
+                <div  class="message-content"><%= message.content %></div>
+            <% } %>
+            <div class="time"><%= new Date(message.created_at * 1000).toLocaleString('zh-CN') %></div>
+        <% }) %>
+    </ul>
+</div>
+
     <div class="message-container">
     <ul>
         <% messages.forEach(message => { %>
@@ -39,5 +53,12 @@
             </div>
         <% }) %>
     </ul>
+    <script>
+        function toggleContent(element) {
+            console.log("dddd");
+            const content = element.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+    </script>
 </body>
 </html>
