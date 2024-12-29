@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Scraper } from 'agent-twitter-client';
+import { Scraper, Tweet } from 'agent-twitter-client';
 import z from 'zod';
 import { getDefaultTwitterFilePath } from '../config/setting';
 import { logger } from '../logger';
@@ -168,18 +168,26 @@ export async function replyTweet(username: string, password: string, text: strin
 export async function getMentions(username: string, password: string, count: number = 20) {
   const scraper = await buildScraper(username, password);
   const mentions = await scraper.searchTweets(`@${username}`, count);
+  const results: Tweet[] = [];
+  for await (const men of mentions) {
+    results.push(men);
+  }
   return {
     status: 200,
-    responseJson: mentions,
+    responseJson: results,
   };
 }
 
 export async function getTimeline(username: string, password: string, count: number = 20) {
   const scraper = await buildScraper(username, password);
   const timeline = await scraper.getTweets(username, count);
+  const results: Tweet[] = [];
+  for await (const t of timeline) {
+    results.push(t);
+  }
   return {
     status: 200,
-    responseJson: timeline,
+    responseJson: results,
   };
 }
 
