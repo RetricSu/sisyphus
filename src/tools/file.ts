@@ -67,8 +67,15 @@ export type FileSearchToolExecParameter = {
   query: string;
 };
 
+export type WriteFileToolExecParameter = {
+  filePath: string;
+  fullText: string;
+};
+
 export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
+
 export type FileEditMultiplePatchesToolBoxType = ToolBox<[FileEditMultiplePatchesToolExecParameter], string>;
+
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
 
 export type FileInsertMultipleLinesToolBoxType = ToolBox<[FileInsertMultipleLinesToolExecParameter], string>;
@@ -84,6 +91,8 @@ export type FileReadLastServalLinesToolBoxType = ToolBox<
   [FileReadLastServalLinesToolExecParameter],
   ReadFileLineResult
 >;
+
+export type WriteFileToolBoxType = ToolBox<[WriteFileToolExecParameter], string>;
 
 export const fileEditToolBox: FileEditToolBoxType = {
   fi: {
@@ -483,30 +492,63 @@ export const fileSearchToolBox: FileSearchToolBoxType = {
   },
 };
 
+export const writeFileToolBox: WriteFileToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'write_file',
+      description: 'write full text to a file',
+      parameters: {
+        type: 'object',
+        properties: {
+          filePath: {
+            type: 'string',
+            description: 'the file path to write',
+          },
+          fullText: {
+            type: 'string',
+            description:
+              'the full text to write to the file, must be surrounded by markdown code block, eg: ```js ... ```',
+          },
+        },
+        required: ['filePath', 'fullText'],
+      },
+    },
+  },
+  params: z.object({
+    filePath: z.string().describe('the file path to write'),
+    fullText: z.string().describe('the full text to write to the file'),
+  }),
+  exec: (p: WriteFileToolExecParameter) => {
+    const filePath = sanitizeFullFilePath(p.filePath);
+    const codeBlockRegex = /```(?:\w+)?\n?([\s\S]+?)\n?```/g;
+    const match = codeBlockRegex.exec(p.fullText);
+    if (!match) {
+      throw new Error('Full text must be surrounded by markdown code block, eg: ```js ... ```');
+    }
+    const content = match[1];
+    fs.writeFileSync(filePath, content);
+    return 'File written successfully';
+  },
+};
+
+const toolList = [
+  fileInsertMultipleLinesToolBox,
+  fileSearchToolBox,
+  fileEditToolBox,
+  fileDeleteLineToolBox,
+  fileInsertLineToolBox,
+  fileReadAllToolBox,
+  fileReadPartToolBox,
+  fileReadLastServalLinesToolBox,
+  fileEditMultiplePatchesToolBox,
+  writeFileToolBox,
+];
+
 const tool: Tool = {
-  names: [
-    'insert_multiple_lines_to_file',
-    'search_file_content',
-    'edit_file_with_line_number',
-    'delete_line_from_file',
-    'insert_line_to_file',
-    'read_full_file_with_line_numbers',
-    'read_part_of_file_with_line_numbers',
-    'read_last_several_lines_of_file_with_line_numbers',
-    'edit_multiple_patches_in_file',
-  ],
+  names: toolList.map((t) => t.fi.function.name),
   build: (_p: PromptFile) => {
-    return [
-      fileInsertMultipleLinesToolBox,
-      fileSearchToolBox,
-      fileEditToolBox,
-      fileDeleteLineToolBox,
-      fileInsertLineToolBox,
-      fileReadAllToolBox,
-      fileReadPartToolBox,
-      fileReadLastServalLinesToolBox,
-      fileEditMultiplePatchesToolBox,
-    ];
+    return toolList;
   },
 };
 
