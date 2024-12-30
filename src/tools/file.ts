@@ -26,7 +26,7 @@ export type FileEditMultiplePatchesToolExecParameter = {
   patches: {
     startLineNumber: number;
     endLineNumber: number;
-    textArray: string[];
+    text: string;
   }[];
 };
 
@@ -166,11 +166,10 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
           endLineNumber: z
             .number()
             .describe('Ending line number where the patch should end (1-based indexing, inclusive)'),
-          textArray: z
+          text: z
             .string()
-            .array()
             .describe(
-              'Array of strings, each string representing a line to insert. Each string should not contain any escaping characters.',
+              'text to replace the lines, new line characters should be used to separate lines, eg: "line1\nline2\nline3"',
             ),
         }),
       )
@@ -188,7 +187,7 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
       const startLine = Math.max(0, Math.min(patch.startLineNumber - 1, data.length));
       const endLine = Math.max(0, Math.min(patch.endLineNumber, data.length));
 
-      data.splice(startLine, endLine - startLine, ...patch.textArray);
+      data.splice(startLine, endLine - startLine, ...patch.text.split('\n'));
       fs.writeFileSync(filePath, data.join('\n'));
     }
 
