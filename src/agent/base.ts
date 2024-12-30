@@ -8,7 +8,7 @@ import { OllamaAdapter } from '../core/ollama';
 import { OpenAIAdapter } from '../core/open-ai';
 import type { AIInterface, Message } from '../core/type';
 import { logger } from '../logger';
-import { AMessage } from '../memory/a-message';
+import { DBMessage } from '../memory/db-message';
 import { EmbeddingMessageManager } from '../memory/embedding-message';
 import type { Network } from '../offckb/offckb.config';
 import { Privkey } from '../privkey';
@@ -191,7 +191,7 @@ export class Agent {
     return messages;
   }
 
-  async saveMessageIntoMemoryIfEnable(message: AMessage) {
+  async saveMessageIntoMemoryIfEnable(message: DBMessage) {
     if (this.saveMemory) {
       message.save();
       await this.memory.save(message);
@@ -241,7 +241,7 @@ export class Agent {
       if (this.pipeResponse) {
         await this.pipeResponse(this.name, pipeContent);
       }
-      const resMessage = new AMessage(this.memoId, role, storeContent);
+      const resMessage = new DBMessage(this.memoId, role, storeContent);
       await this.saveMessageIntoMemoryIfEnable(resMessage);
     }
   }
@@ -254,7 +254,7 @@ export class Agent {
     isSTream?: boolean;
   }): Promise<CoreMessage[]> {
     if (requestMsg) {
-      const message = new AMessage(this.memoId, requestMsg.role, requestMsg.content as string);
+      const message = new DBMessage(this.memoId, requestMsg.role, requestMsg.content as string);
       await this.saveMessageIntoMemoryIfEnable(message);
       this.messages.push(message.msg as Message);
     }

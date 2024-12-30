@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import process from 'process';
 import Readline from 'readline/promises';
-import { AMessage } from '../memory/a-message';
+import { DBMessage } from '../memory/db-message';
 import { Agent } from './base';
 
 export class TerminalBot extends Agent {
@@ -66,7 +66,7 @@ export class TerminalBot extends Agent {
       readline.close();
       console.log('----');
 
-      const amsg = new AMessage(this.memoId, 'user', input);
+      const amsg = new DBMessage(this.memoId, 'user', input);
       await this.reqMsgsFromAI(amsg.msg);
     }
   }

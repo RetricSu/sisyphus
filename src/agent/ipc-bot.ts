@@ -3,7 +3,7 @@ import net from 'net';
 import path from 'path';
 import { getDefaultIPCSocketPath } from '../config/setting';
 import { logger } from '../logger';
-import { AMessage } from '../memory/a-message';
+import { DBMessage } from '../memory/db-message';
 import { Agent } from './base';
 
 export class IPCBot extends Agent {
@@ -33,7 +33,7 @@ export class IPCBot extends Agent {
     const server = net.createServer((socket) => {
       socket.on('data', async (data) => {
         const requestText = data.toString();
-        const amsg = new AMessage(this.memoId, 'user', requestText);
+        const amsg = new DBMessage(this.memoId, 'user', requestText);
         const newMsgs = await this.call({ requestMsg: amsg.msg });
         let answer = '';
         for (let i = 0; i < newMsgs.length; i++) {
@@ -100,7 +100,7 @@ export class IPCBot extends Agent {
 
     client.on('data', async (data) => {
       const requestText = data.toString();
-      const amsg = new AMessage(this.memoId, 'user', requestText);
+      const amsg = new DBMessage(this.memoId, 'user', requestText);
       const newMsgs = await this.call({ requestMsg: amsg.msg });
       let answer = '';
       for (let i = 0; i < this.messages.length; i++) {

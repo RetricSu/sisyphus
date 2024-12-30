@@ -1,6 +1,6 @@
 import { ChromaClient } from 'chromadb';
 import { readSettings } from '../config/setting';
-import type { AMessage } from './a-message';
+import type { DBMessage } from './db-message';
 
 const settings = readSettings();
 
@@ -13,7 +13,7 @@ export class EmbeddingMessageManager {
     this.collectionName = collectionName;
   }
 
-  public async save(aMsg: AMessage) {
+  public async save(aMsg: DBMessage) {
     if (aMsg.dbId == null) {
       throw new Error('please save in the db first before saving in chroma memory');
     }
