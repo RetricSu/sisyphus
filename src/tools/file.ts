@@ -10,24 +10,29 @@ export interface ReadFileLineResult {
   text: string;
 }
 
-export interface FileTextSearchResult {
+export interface SingleFileTextSearchResult {
   lineNumber: number;
   text: string;
 }
 
-export type FileEditToolExecParameter = {
+export interface CodebaseTextSearchResult {
   filePath: string;
-  lineNumber: number;
-  text: string;
-};
+  results: SingleFileTextSearchResult[];
+}
 
-export type FileEditMultiplePatchesToolExecParameter = {
+export type FileEditPatchesToolExecParameter = {
   filePath: string;
   patches: {
     startLineNumber: number;
     endLineNumber: number;
     text: string;
   }[];
+};
+
+export type FileReplaceLineToolExecParameter = {
+  filePath: string;
+  lineNumber: number;
+  text: string;
 };
 
 export type FileDeleteLineToolExecParameter = {
@@ -72,9 +77,21 @@ export type WriteFileToolExecParameter = {
   fullText: string;
 };
 
-export type FileEditToolBoxType = ToolBox<[FileEditToolExecParameter], string>;
+export type SearchCodeInCodebaseToolExecParameter = {
+  codeBaseFolder: string;
+  query: string;
+  filePatterns: string[];
+  fileExcludePatterns?: string[];
+};
 
-export type FileEditMultiplePatchesToolBoxType = ToolBox<[FileEditMultiplePatchesToolExecParameter], string>;
+export type SearchCodeInCodebaseToolBoxType = ToolBox<
+  [SearchCodeInCodebaseToolExecParameter],
+  CodebaseTextSearchResult[]
+>;
+
+export type FileEditToolBoxType = ToolBox<[FileReplaceLineToolExecParameter], string>;
+
+export type FileEditMultiplePatchesToolBoxType = ToolBox<[FileEditPatchesToolExecParameter], string>;
 
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
 
@@ -85,7 +102,7 @@ export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], Rea
 
 export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult>;
 
-export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], FileTextSearchResult[]>;
+export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], SingleFileTextSearchResult[]>;
 
 export type FileReadLastServalLinesToolBoxType = ToolBox<
   [FileReadLastServalLinesToolExecParameter],
@@ -125,7 +142,7 @@ export const fileEditToolBox: FileEditToolBoxType = {
     lineNumber: z.number().describe('the line number to edit'),
     text: z.string().describe('the text to replace the line'),
   }),
-  exec: (p: FileEditToolExecParameter) => {
+  exec: (p: FileReplaceLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
     // Adjust for 1-based line numbers
@@ -177,7 +194,7 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
         'Array of patches to apply, must be sorted by startLineNumber in ascending order to ensure correct application',
       ),
   }),
-  exec: (p: FileEditMultiplePatchesToolExecParameter) => {
+  exec: (p: FileEditPatchesToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
 
@@ -531,6 +548,71 @@ export const writeFileToolBox: WriteFileToolBoxType = {
   },
 };
 
+export const searchCodeInCodebaseToolBox: SearchCodeInCodebaseToolBoxType = {
+  fi: {
+    type: 'function',
+    function: {
+      name: 'search_code_in_codebase',
+      description: 'search for specific code patterns across files in the codebase',
+      parameters: {
+        type: 'object',
+        properties: {
+          codeBaseFolder: {
+            type: 'string',
+            description: 'the codebase folder to search within',
+          },
+          query: {
+            type: 'string',
+            description: 'the search query',
+          },
+          filePatterns: {
+            type: 'array',
+            description: 'the file patterns to search within',
+          },
+          fileExcludePatterns: {
+            type: 'array',
+            description: 'the file patterns to exclude from search',
+          },
+        },
+        required: ['codeBaseFolder', 'query', 'filePatterns'],
+      },
+    },
+  },
+  params: z.object({
+    codeBaseFolder: z.string().describe('the codebase folder to search within'),
+    query: z.string().describe('the search query'),
+    filePatterns: z.array(z.string()).describe('the file patterns to search within'),
+    fileExcludePatterns: z.array(z.string()).optional().describe('the file patterns to exclude from search'),
+  }),
+  exec: (p: SearchCodeInCodebaseToolExecParameter) => {
+    const results: CodebaseTextSearchResult[] = [];
+    const fileExcludePatterns = p.fileExcludePatterns ?? [];
+    const files = p.filePatterns.flatMap((pattern) => {
+      return fs
+        .readdirSync(sanitizeFullFilePath(p.codeBaseFolder))
+        .filter((file) => file.match(new RegExp(pattern)) && !fileExcludePatterns.includes(file))
+        .map((file) => `${p.codeBaseFolder}/${file}`);
+    });
+    files.forEach((file) => {
+      const data = fs.readFileSync(file, 'utf8').split('\n');
+      data.forEach((line, index) => {
+        if (line.includes(p.query)) {
+          results.push({
+            filePath: file,
+            results: [
+              {
+                lineNumber: index + 1,
+                text: line,
+              },
+            ],
+          });
+        }
+      });
+    });
+    return results;
+  },
+};
+
 const toolList = [
   fileInsertMultipleLinesToolBox,
   fileSearchToolBox,
@@ -542,6 +624,7 @@ const toolList = [
   fileReadLastServalLinesToolBox,
   fileEditMultiplePatchesToolBox,
   writeFileToolBox,
+  searchCodeInCodebaseToolBox,
 ];
 
 const tool: Tool = {
