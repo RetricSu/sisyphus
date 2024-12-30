@@ -31,19 +31,23 @@ export type FileEditPatchesToolExecParameter = {
 
 export type FileReplaceLineToolExecParameter = {
   filePath: string;
-  lineNumber: number;
-  text: string;
+  replaces: {
+    lineNumber: number;
+    text: string;
+  }[];
 };
 
 export type FileDeleteLineToolExecParameter = {
   filePath: string;
-  lineNumber: number;
+  lineNumbers: number[];
 };
 
 export type FileInsertLineToolExecParameter = {
   filePath: string;
-  lineNumber: number;
-  text: string;
+  inserts: {
+    lineNumber: number;
+    text: string;
+  }[];
 };
 
 export type FileReadAllToolExecParameter = {
@@ -56,67 +60,44 @@ export type FileReadPartToolExecParameter = {
   endLine: number;
 };
 
-export type FileReadLastServalLinesToolExecParameter = {
+export type FileReadLastPartToolExecParameter = {
   filePath: string;
   lines: number;
 };
-
-export type FileInsertMultipleLinesToolExecParameter = {
-  filePath: string;
-  lineNumber: number;
-  lines: string; // string with new line characters "\n"
-};
-
-export type FileSearchToolExecParameter = {
-  filePath: string;
-  query: string;
-};
-
-export type WriteFileToolExecParameter = {
+export type FileWriteAllToolExecParameter = {
   filePath: string;
   fullText: string;
 };
 
-export type SearchCodeInCodebaseToolExecParameter = {
+export type FileTextSearchToolExecParameter = {
+  filePath: string;
+  query: string;
+};
+
+export type CodebaseTextSearchToolExecParameter = {
   codeBaseFolder: string;
   query: string;
   filePatterns: string[];
   fileExcludePatterns?: string[];
 };
 
-export type SearchCodeInCodebaseToolBoxType = ToolBox<
-  [SearchCodeInCodebaseToolExecParameter],
-  CodebaseTextSearchResult[]
->;
-
-export type FileEditToolBoxType = ToolBox<[FileReplaceLineToolExecParameter], string>;
-
-export type FileEditMultiplePatchesToolBoxType = ToolBox<[FileEditPatchesToolExecParameter], string>;
-
+export type FileReplaceLineToolBoxType = ToolBox<[FileReplaceLineToolExecParameter], string>;
+export type FileEditPatchesToolBoxType = ToolBox<[FileEditPatchesToolExecParameter], string>;
 export type FileDeleteLineToolBoxType = ToolBox<[FileDeleteLineToolExecParameter], string>;
-
-export type FileInsertMultipleLinesToolBoxType = ToolBox<[FileInsertMultipleLinesToolExecParameter], string>;
 export type FileInsertLineToolBoxType = ToolBox<[FileInsertLineToolExecParameter], string>;
-
 export type FileReadAllToolBoxType = ToolBox<[FileReadAllToolExecParameter], ReadFileLineResult>;
-
 export type FileReadPartToolBoxType = ToolBox<[FileReadPartToolExecParameter], ReadFileLineResult>;
+export type FileReadLastPartToolBoxType = ToolBox<[FileReadLastPartToolExecParameter], ReadFileLineResult>;
+export type FileWriteAllToolBoxType = ToolBox<[FileWriteAllToolExecParameter], string>;
+export type FileTextSearchToolBoxType = ToolBox<[FileTextSearchToolExecParameter], SingleFileTextSearchResult[]>;
+export type CodebaseTextSearchToolBoxType = ToolBox<[CodebaseTextSearchToolExecParameter], CodebaseTextSearchResult[]>;
 
-export type FileSearchToolBoxType = ToolBox<[FileSearchToolExecParameter], SingleFileTextSearchResult[]>;
-
-export type FileReadLastServalLinesToolBoxType = ToolBox<
-  [FileReadLastServalLinesToolExecParameter],
-  ReadFileLineResult
->;
-
-export type WriteFileToolBoxType = ToolBox<[WriteFileToolExecParameter], string>;
-
-export const fileEditToolBox: FileEditToolBoxType = {
+export const fileReplaceLineToolBox: FileReplaceLineToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'edit_file_with_line_number',
-      description: 'edit text in the file with a specific single line number',
+      name: 'replace_line_in_file',
+      description: 'replace lines in the file with specific line numbers',
       parameters: {
         type: 'object',
         properties: {
@@ -124,39 +105,44 @@ export const fileEditToolBox: FileEditToolBoxType = {
             type: 'string',
             description: 'the file path to edit',
           },
-          lineNumber: {
-            type: 'number',
-            description: 'the line number to edit',
-          },
-          text: {
-            type: 'string',
-            description: 'the text to replace the line',
+          // array type not supported for now
+          replaces: {
+            type: 'array',
+            description: 'the lines to replace',
           },
         },
-        required: ['filePath', 'lineNumber', 'text'],
+        required: ['filePath', 'replaces'],
       },
     },
   },
   params: z.object({
     filePath: z.string().describe('the file path to edit'),
-    lineNumber: z.number().describe('the line number to edit'),
-    text: z.string().describe('the text to replace the line'),
+    replaces: z
+      .array(
+        z.object({
+          lineNumber: z.number().describe('the line number to replace'),
+          text: z.string().describe('the text to replace the line'),
+        }),
+      )
+      .describe('Array of lines to replace'),
   }),
   exec: (p: FileReplaceLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    // Adjust for 1-based line numbers
-    data[p.lineNumber - 1] = p.text;
+    for (const replace of p.replaces) {
+      // Adjust for 1-based line numbers
+      data[replace.lineNumber - 1] = replace.text;
+    }
     fs.writeFileSync(filePath, data.join('\n'));
-    return 'File edited successfully';
+    return `${p.replaces.length} Line(s) replaced.`;
   },
 };
 
-export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType = {
+export const fileEditPatchesToolBox: FileEditPatchesToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'edit_multiple_patches_in_file',
+      name: 'edit_text_in_file_with_patches',
       description: 'edit text in the file with a set of patches across multiple lines',
       parameters: {
         type: 'object',
@@ -208,7 +194,7 @@ export const fileEditMultiplePatchesToolBox: FileEditMultiplePatchesToolBoxType 
       fs.writeFileSync(filePath, data.join('\n'));
     }
 
-    return `${p.patches.length} Patches applied successfully`;
+    return `${p.patches.length} Patches applied.`;
   },
 };
 
@@ -216,8 +202,8 @@ export const fileDeleteLineToolBox: FileDeleteLineToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'delete_line_from_file',
-      description: 'delete a line from the file with a specific line number',
+      name: 'delete_line_in_file',
+      description: 'delete lines in the file with specific line numbers',
       parameters: {
         type: 'object',
         properties: {
@@ -225,26 +211,28 @@ export const fileDeleteLineToolBox: FileDeleteLineToolBoxType = {
             type: 'string',
             description: 'the file path to delete a line',
           },
-          lineNumber: {
-            type: 'number',
-            description: 'the line number to delete',
+          lineNumbers: {
+            type: 'array',
+            description: 'the lines to delete',
           },
         },
-        required: ['filePath', 'lineNumber'],
+        required: ['filePath', 'lineNumbers'],
       },
     },
   },
   params: z.object({
     filePath: z.string().describe('the file path to delete a line'),
-    lineNumber: z.number().describe('the line number to delete'),
+    lineNumbers: z.array(z.number()).describe('the lines to delete'),
   }),
   exec: (p: FileDeleteLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
-    // Adjust for 1-based line numbers
-    data.splice(p.lineNumber - 1, 1);
+    for (const lineNumber of p.lineNumbers) {
+      // Adjust for 1-based line numbers
+      data.splice(lineNumber - 1, 1);
+    }
     fs.writeFileSync(filePath, data.join('\n'));
-    return 'Line deleted successfully';
+    return `${p.lineNumbers.length} Line(s) deleted.`;
   },
 };
 
@@ -253,7 +241,7 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
     type: 'function',
     function: {
       name: 'insert_line_to_file',
-      description: 'insert a line to the file with a specific line number, the original line will be pushed down',
+      description: 'insert lines to a file, the original line will be pushed down',
       parameters: {
         type: 'object',
         properties: {
@@ -261,23 +249,25 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
             type: 'string',
             description: 'the file path to insert a line',
           },
-          lineNumber: {
-            type: 'number',
-            description: 'the line number to insert',
-          },
-          text: {
-            type: 'string',
-            description: 'the text to insert',
+          inserts: {
+            type: 'array',
+            description: 'the new lines to insert',
           },
         },
-        required: ['filePath', 'lineNumber', 'text'],
+        required: ['filePath', 'inserts'],
       },
     },
   },
   params: z.object({
     filePath: z.string().describe('the file path to insert a line'),
-    lineNumber: z.number().describe('the line number to insert'),
-    text: z.string().describe('the text to insert'),
+    inserts: z
+      .array(
+        z.object({
+          lineNumber: z.number().describe('the line number to insert'),
+          text: z.string().describe('the text to insert'),
+        }),
+      )
+      .describe('Array of lines to insert'),
   }),
   exec: (p: FileInsertLineToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
@@ -288,17 +278,19 @@ export const fileInsertLineToolBox: FileInsertLineToolBoxType = {
       throw new Error('Data must be an array');
     }
 
-    // Adjust for 1-based line numbers
-    const targetLine = Math.max(0, Math.min(p.lineNumber - 1, data.length));
+    for (const insert of p.inserts) {
+      // Adjust for 1-based line numbers
+      const targetLine = Math.max(0, Math.min(insert.lineNumber - 1, data.length));
 
-    // Ensure text is a string
-    const textToInsert = p.text ?? '';
+      // Ensure text is a string
+      const textToInsert = insert.text ?? '';
 
-    // Insert the new line, pushing existing content down
-    data.splice(targetLine, 0, textToInsert);
+      // Insert the new line, pushing existing content down
+      data.splice(targetLine, 0, textToInsert);
+    }
 
     fs.writeFileSync(filePath, data.join('\n'));
-    return 'Line inserted successfully';
+    return `${p.inserts.length} Line(s) inserted.`;
   },
 };
 
@@ -306,8 +298,8 @@ export const fileReadAllToolBox: FileReadAllToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'read_full_file_with_line_numbers',
-      description: 'read the full content of a file, return the file content with line numbers',
+      name: 'read_full_file',
+      description: 'read the full content of a file',
       parameters: {
         type: 'object',
         properties: {
@@ -338,8 +330,8 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'read_part_of_file_with_line_numbers',
-      description: 'read part of the content of a file, return the file content with line numbers',
+      name: 'read_part_of_file',
+      description: 'read part of the content of a file',
       parameters: {
         type: 'object',
         properties: {
@@ -376,12 +368,12 @@ export const fileReadPartToolBox: FileReadPartToolBoxType = {
   },
 };
 
-export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType = {
+export const fileReadLastPartToolBox: FileReadLastPartToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'read_last_several_lines_of_file_with_line_numbers',
-      description: 'read the last several lines of a file, return the file content with line numbers',
+      name: 'read_last_part_of_file',
+      description: 'read the last part of the content of a file',
       parameters: {
         type: 'object',
         properties: {
@@ -402,7 +394,7 @@ export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType 
     filePath: z.string().describe('the file path to read'),
     lines: z.number().describe('the number of lines to read from the end of the file'),
   }),
-  exec: (p: FileReadLastServalLinesToolExecParameter) => {
+  exec: (p: FileReadLastPartToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
     return {
@@ -413,69 +405,48 @@ export const fileReadLastServalLinesToolBox: FileReadLastServalLinesToolBoxType 
   },
 };
 
-export const fileInsertMultipleLinesToolBox: FileInsertMultipleLinesToolBoxType = {
+export const fileWriteAllToolBox: FileWriteAllToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'insert_multiple_lines_to_file',
-      description:
-        'insert multiple lines to the file with a specific line number, the original line will be pushed down',
+      name: 'write_full_file',
+      description: 'write the full content to a file',
       parameters: {
         type: 'object',
         properties: {
           filePath: {
             type: 'string',
-            description: 'the file path to insert a line',
+            description: 'the file path to write',
           },
-          lineNumber: {
-            type: 'number',
-            description: 'the line number to insert',
-          },
-          lines: {
+          fullText: {
             type: 'string',
             description:
-              'the text of multiple lines to insert, each line should be separated by a special character "<=*=>"',
+              'the full text to write to the file, if the file contains original content, it will be cleared and replaced',
           },
         },
-        required: ['filePath', 'lineNumber', 'lines'],
+        required: ['filePath', 'fullText'],
       },
     },
   },
   params: z.object({
-    filePath: z.string().describe('the file path to insert a line'),
-    lineNumber: z.number().describe('the line number to insert'),
-    lines: z
-      .string()
-      .describe('the text of multiple lines to insert, each line should be separated by a new line character "<=*=>"'),
+    filePath: z.string().describe('the file path to write'),
+    fullText: z.string().describe('the full text to write to the file'),
   }),
-  exec: (p: FileInsertMultipleLinesToolExecParameter) => {
+  exec: (p: FileWriteAllToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
-    const data = fs.readFileSync(filePath, 'utf8').split('\n');
-
-    // Validate and safely insert the new line
-    if (!Array.isArray(data)) {
-      throw new Error('Data must be an array');
-    }
-
-    // Adjust for 1-based line numbers
-    const targetLine = Math.max(0, Math.min(p.lineNumber - 1, data.length));
-
-    const lines = p.lines.split('<=*=>');
-
-    // Insert the new lines, pushing existing content down
-    data.splice(targetLine, 0, ...lines);
-
-    fs.writeFileSync(filePath, data.join('\n'));
-    return `${lines.length} Lines inserted successfully`;
+    const data = p.fullText.split('\n');
+    const totalLines = data.length;
+    fs.writeFileSync(filePath, p.fullText);
+    return `${totalLines} Line(s) written.`;
   },
 };
 
-export const fileSearchToolBox: FileSearchToolBoxType = {
+export const fileTextSearchToolBox: FileTextSearchToolBoxType = {
   fi: {
     type: 'function',
     function: {
       name: 'search_file_content',
-      description: 'search the content of a file with a query, return the file content with line numbers',
+      description: 'search the content of a file with a query text',
       parameters: {
         type: 'object',
         properties: {
@@ -496,7 +467,7 @@ export const fileSearchToolBox: FileSearchToolBoxType = {
     filePath: z.string().describe('the file path to search'),
     query: z.string().describe('the query to search in the file content'),
   }),
-  exec: (p: FileSearchToolExecParameter) => {
+  exec: (p: FileTextSearchToolExecParameter) => {
     const filePath = sanitizeFullFilePath(p.filePath);
     const data = fs.readFileSync(filePath, 'utf8').split('\n');
     return data
@@ -508,52 +479,12 @@ export const fileSearchToolBox: FileSearchToolBoxType = {
   },
 };
 
-export const writeFileToolBox: WriteFileToolBoxType = {
+export const codebaseTextSearchToolBox: CodebaseTextSearchToolBoxType = {
   fi: {
     type: 'function',
     function: {
-      name: 'write_file',
-      description: 'write full text to a file',
-      parameters: {
-        type: 'object',
-        properties: {
-          filePath: {
-            type: 'string',
-            description: 'the file path to write',
-          },
-          fullText: {
-            type: 'string',
-            description:
-              'the full text to write to the file, must be surrounded by markdown code block, eg: ```js ... ```',
-          },
-        },
-        required: ['filePath', 'fullText'],
-      },
-    },
-  },
-  params: z.object({
-    filePath: z.string().describe('the file path to write'),
-    fullText: z.string().describe('the full text to write to the file'),
-  }),
-  exec: (p: WriteFileToolExecParameter) => {
-    const filePath = sanitizeFullFilePath(p.filePath);
-    const codeBlockRegex = /```(?:\w+)?\n?([\s\S]+?)\n?```/g;
-    const match = codeBlockRegex.exec(p.fullText);
-    if (!match) {
-      throw new Error('Full text must be surrounded by markdown code block, eg: ```js ... ```');
-    }
-    const content = match[1];
-    fs.writeFileSync(filePath, content);
-    return 'File written successfully';
-  },
-};
-
-export const searchCodeInCodebaseToolBox: SearchCodeInCodebaseToolBoxType = {
-  fi: {
-    type: 'function',
-    function: {
-      name: 'search_code_in_codebase',
-      description: 'search for specific code patterns across files in the codebase',
+      name: 'search_text_in_codebase',
+      description: 'search text across files in the codebase',
       parameters: {
         type: 'object',
         properties: {
@@ -567,11 +498,11 @@ export const searchCodeInCodebaseToolBox: SearchCodeInCodebaseToolBoxType = {
           },
           filePatterns: {
             type: 'array',
-            description: 'the file patterns to search within',
+            description: 'the file patterns to search within, eg: ["*.js", "*.ts"]',
           },
           fileExcludePatterns: {
             type: 'array',
-            description: 'the file patterns to exclude from search',
+            description: 'the file patterns to exclude from search, eg: ["*.test.js"]',
           },
         },
         required: ['codeBaseFolder', 'query', 'filePatterns'],
@@ -581,10 +512,13 @@ export const searchCodeInCodebaseToolBox: SearchCodeInCodebaseToolBoxType = {
   params: z.object({
     codeBaseFolder: z.string().describe('the codebase folder to search within'),
     query: z.string().describe('the search query'),
-    filePatterns: z.array(z.string()).describe('the file patterns to search within'),
-    fileExcludePatterns: z.array(z.string()).optional().describe('the file patterns to exclude from search'),
+    filePatterns: z.array(z.string()).describe('the file patterns to search within, eg: ["*.js", "*.ts"]'),
+    fileExcludePatterns: z
+      .array(z.string())
+      .optional()
+      .describe('the file patterns to exclude from search, eg: ["*.test.js"]'),
   }),
-  exec: (p: SearchCodeInCodebaseToolExecParameter) => {
+  exec: (p: CodebaseTextSearchToolExecParameter) => {
     const results: CodebaseTextSearchResult[] = [];
     const fileExcludePatterns = p.fileExcludePatterns ?? [];
     const files = p.filePatterns.flatMap((pattern) => {
@@ -614,17 +548,16 @@ export const searchCodeInCodebaseToolBox: SearchCodeInCodebaseToolBoxType = {
 };
 
 const toolList = [
-  fileInsertMultipleLinesToolBox,
-  fileSearchToolBox,
-  fileEditToolBox,
+  fileReplaceLineToolBox,
   fileDeleteLineToolBox,
   fileInsertLineToolBox,
   fileReadAllToolBox,
   fileReadPartToolBox,
-  fileReadLastServalLinesToolBox,
-  fileEditMultiplePatchesToolBox,
-  writeFileToolBox,
-  searchCodeInCodebaseToolBox,
+  fileReadLastPartToolBox,
+  fileEditPatchesToolBox,
+  fileWriteAllToolBox,
+  fileTextSearchToolBox,
+  codebaseTextSearchToolBox,
 ];
 
 const tool: Tool = {
