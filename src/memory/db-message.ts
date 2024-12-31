@@ -2,7 +2,7 @@ import type { Message, ToolCall } from 'ollama';
 import { db } from './database';
 import type { MemoId } from './type';
 
-export class AMessage {
+export class DBMessage {
   public memoId: MemoId;
   public dbId: number | undefined;
   public msg: Message;
