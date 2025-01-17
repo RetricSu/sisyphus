@@ -1,6 +1,6 @@
 {
   "name": "@sisyphus-ai/cli",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Sisyphus is a project that explores the idea of Web5 Crypto AI Agent. It is ported as a CLI tool that can be run in the terminal.",
   "main": "dist/cli.js",
   "bin": {
